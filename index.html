@@ -1380,15 +1380,23 @@
       gap: 6px;
     }
 
-    /* Top 3-Way View Mode Switcher (3D CUBE / 3D PLANE / 3 LAYERS) */
-    .view3d-tabs {
+    /* Top 3-Way View Mode Switcher + Hold-to-Peek Solved Reference Button */
+    .view3d-topbar {
       flex-shrink: 0;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      height: 32px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       width: 100%;
       max-width: 460px;
       margin: 0 auto;
+    }
+
+    .view3d-tabs {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      height: 32px;
       background: var(--bg-surface);
       border: 1px solid var(--border-hairline);
       border-radius: var(--r-btn);
@@ -1404,12 +1412,14 @@
       background: transparent;
       color: var(--text-secondary);
       font-family: var(--font-mono);
-      font-size: 0.69rem;
+      font-size: 0.68rem;
       font-weight: 600;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
       cursor: pointer;
       transition: background 80ms ease, color 80ms ease;
+      white-space: nowrap;
+      padding: 0 4px;
     }
 
     .view3d-tab:last-child {
@@ -1420,6 +1430,37 @@
       background: var(--btn-stark-bg);
       color: var(--btn-stark-ink);
       font-weight: 700;
+    }
+
+    .peek3d-btn {
+      flex-shrink: 0;
+      height: 32px;
+      padding: 0 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      transition: background 60ms ease, color 60ms ease, border-color 60ms ease;
+    }
+
+    .peek3d-btn.active {
+      background: var(--sig-amber-bg);
+      border-color: var(--sig-amber);
+      color: var(--sig-amber);
     }
 
     /* Main 3D / 3-Layer Viewport Area */
@@ -1450,6 +1491,7 @@
     .cube3d-frame.st-pb     { border-color: var(--sig-amber); }
     .cube3d-frame.st-dnf    { border-color: var(--sig-red); }
     .cube3d-frame.st-memo   { border-color: var(--sig-amber); }
+    .cube3d-frame.is-peek-solved { border-color: var(--sig-amber); }
 
     #cube3dCanvas {
       display: block;
@@ -1716,17 +1758,37 @@
       pointer-events: none;
     }
 
-    /* Contextual 3D Sub-Toolbar (Bottom of Stage, 36px, Thumb-Friendly) */
+    .cube3d-chip.is-peek-tag {
+      color: var(--sig-amber);
+      border-color: var(--sig-amber);
+      background: var(--sig-amber-bg);
+    }
+
+    .layers3d-wrap.is-peek-solved .layer-frame {
+      border-color: var(--sig-amber);
+    }
+
+    .layers3d-wrap.is-peek-solved .tile-slot {
+      transition: none !important;
+    }
+
+    .layers-peek-tag {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      z-index: 6;
+      pointer-events: none;
+    }
+
+    /* Contextual 3D Sub-Toolbar (Bottom of Stage, Thumb-Friendly) */
     .subbar-3d {
       flex-shrink: 0;
       width: 100%;
       max-width: 460px;
       margin: 0 auto;
-      min-height: 36px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
+      flex-direction: column;
+      gap: 5px;
     }
 
     .subbar-group {
@@ -1734,6 +1796,41 @@
       align-items: center;
       gap: 6px;
       width: 100%;
+    }
+
+    .subbar-persp {
+      height: 30px;
+      padding: 0 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      gap: 8px;
+    }
+
+    .persp-end-btn {
+      height: 20px;
+      padding: 0 6px;
+      border: 1px solid var(--border-hairline);
+      border-radius: 3px;
+      background: transparent;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .persp-end-btn.active {
+      border-color: var(--sig-green);
+      background: var(--sig-green-bg);
+      color: var(--sig-green);
+    }
+
+    .persp-end-btn:active {
+      background: var(--bg-control-active);
     }
 
     .seg3d {
@@ -2009,11 +2106,20 @@
 
       <!-- 3D N×N×N STAGE (CUBE / PLANE / N LAYERS) -->
       <div id="stage3d" class="stage-3d hidden-view" aria-label="3D Sliding Cube Stage">
-        <!-- 3-Way View Mode Switcher -->
-        <div id="view3dTabs" class="view3d-tabs" role="tablist" aria-label="3D View Mode">
-          <button class="view3d-tab active" type="button" role="tab" data-view3d="cube">3D Cube</button>
-          <button class="view3d-tab" type="button" role="tab" data-view3d="plane">Plane</button>
-          <button id="tabLayers3d" class="view3d-tab" type="button" role="tab" data-view3d="layers">3 Layers</button>
+        <!-- 3-Way View Mode Switcher + Hold-to-Peek Solved Reference -->
+        <div class="view3d-topbar">
+          <div id="view3dTabs" class="view3d-tabs" role="tablist" aria-label="3D View Mode">
+            <button class="view3d-tab active" type="button" role="tab" data-view3d="cube">3D Cube</button>
+            <button class="view3d-tab" type="button" role="tab" data-view3d="plane">Plane</button>
+            <button id="tabLayers3d" class="view3d-tab" type="button" role="tab" data-view3d="layers">3 Layers</button>
+          </div>
+          <button id="btnPeekSolved3d" class="peek3d-btn" type="button" aria-pressed="false" title="Hold to preview solved reference (Keyboard: Hold V)" aria-label="Hold to show solved reference">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span>SOLVED</span>
+          </button>
         </div>
 
         <!-- Active Viewport -->
@@ -2026,7 +2132,10 @@
                 <span id="cube3dPlaneDot" class="cube3d-chip-dot hidden-view"></span>
                 <span id="cube3dPlaneText">Z1 · BACK</span>
               </span>
-              <button id="btnJumpEmptyPlane" class="cube3d-chip is-interactive hidden-view" type="button" aria-label="Jump to plane containing empty slot">HOLE: Z3</button>
+              <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+                <span id="cube3dPeekTag" class="cube3d-chip is-peek-tag hidden-view">SOLVED REF</span>
+                <button id="btnJumpEmptyPlane" class="cube3d-chip is-interactive hidden-view" type="button" aria-label="Jump to plane containing empty slot">HOLE: Z3</button>
+              </div>
             </div>
             <div id="cube3dLegend" class="cube3d-legend"></div>
             <div id="bldOverlay3d" class="bld-overlay" aria-hidden="true">
@@ -2038,6 +2147,7 @@
 
           <!-- Dynamic N-Layer N×N Boards Viewport -->
           <div id="layers3dWrap" class="layers3d-wrap hidden-view" role="application" aria-label="Layer Boards">
+            <span id="layersPeekTag" class="cube3d-chip is-peek-tag layers-peek-tag hidden-view">SOLVED REF</span>
             <div id="bldOverlayLayers" class="bld-overlay" aria-hidden="true">
               <span id="bldOverlayLayersMode" class="bld-overlay-mode">BLD &middot; SUBMIT</span>
               <span class="bld-overlay-cta">TAP TO REVEAL &amp; START</span>
@@ -2077,6 +2187,14 @@
             <button id="btnPlaneAuto" class="tog3d-btn amber active" type="button" aria-pressed="true" title="Auto-follow empty slot across planes">
               <span class="t-dot"></span><span>AUTO</span>
             </button>
+          </div>
+
+          <!-- Subbar: Perspective / Orthographic Slider (Cube & Plane Views) -->
+          <div id="subPerspRow" class="subbar-group subbar-persp">
+            <span class="spread3d-lbl">PERSP</span>
+            <button id="btnOrthoQuick" class="persp-end-btn" type="button" title="Snap to Orthographic (equal cube size)">ORTHO</button>
+            <input id="persp3dRange" class="spread3d-range" type="range" min="0" max="100" step="5" value="45" aria-label="3D perspective distortion" />
+            <span id="persp3dVal" class="spread3d-val">45%</span>
           </div>
 
           <!-- Subbar: N LAYERS -->
@@ -2320,6 +2438,37 @@
         </div>
       </div>
 
+      <!-- 3D Numbering Order Presets -->
+      <div id="order3dBlock" class="sec-block hidden-view">
+        <span class="sec-label">3D Numbering Order (Axis Priority)</span>
+        <div id="order3dSelector" class="num-grid">
+          <button class="opt-btn" type="button" data-order3d="zyx">
+            <span>Z → Y → X</span>
+            <span class="opt-sub">Back → Front</span>
+          </button>
+          <button class="opt-btn" type="button" data-order3d="yzx">
+            <span>Y → Z → X</span>
+            <span class="opt-sub">Top Floors</span>
+          </button>
+          <button class="opt-btn" type="button" data-order3d="xyz">
+            <span>X → Y → Z</span>
+            <span class="opt-sub">Left → Right</span>
+          </button>
+          <button class="opt-btn" type="button" data-order3d="zxy">
+            <span>Z → X → Y</span>
+            <span class="opt-sub">Back · Cols</span>
+          </button>
+          <button class="opt-btn" type="button" data-order3d="yxz">
+            <span>Y → X → Z</span>
+            <span class="opt-sub">Top · Cols</span>
+          </button>
+          <button class="opt-btn" type="button" data-order3d="xzy">
+            <span>X → Z → Y</span>
+            <span class="opt-sub">Left · Depth</span>
+          </button>
+        </div>
+      </div>
+
       <div class="sec-block">
         <span class="sec-label">Hardware &amp; Input</span>
         <div class="cfg-list">
@@ -2459,6 +2608,7 @@
       const MODES = ['std', 'bld_auto', 'bld_sub'];
       const SCHEMES_3D = ['layers_z', 'layers_y', 'layers_x', 'fringe_3d', 'prism', 'octants', 'checker_3d', 'mono'];
       const NUM_MODES_3D = ['seq', 'per_layer', 'layer_code', 'coords', 'letters', 'none'];
+      const ORDERS_3D = ['zyx', 'yzx', 'xyz', 'zxy', 'yxz', 'xzy'];
 
       const MODE_META = {
         std:      { short: 'STD',      full: 'STANDARD',     overlay: '' },
@@ -2487,6 +2637,7 @@
         scheme: 'fringe_split', // 2D color scheme
         scheme3d: 'layers_z',   // 3D color scheme
         numMode3d: 'seq',       // 3D numbering option ('seq' starts at Top-Left-Back)
+        order3d: 'zyx',         // 3D numbering axis traversal order ('zyx', 'yzx', 'xyz', 'zxy', 'yxz', 'xzy')
         animMs: 0,              // 0 | 50
         kbDir: 'tile',          // 'tile' | 'blank'
         glide: true,
@@ -2496,6 +2647,7 @@
         // 3D view preferences
         view3d: 'cube',         // 'cube' | 'plane' | 'layers'
         spread3d: 1.24,         // 1.06 .. 1.65
+        persp3d: 45,            // 0 (Orthographic) .. 100 (Strong Perspective)
         xray3d: false,
         planeAxis: 'z',         // 'z' | 'y' | 'x'
         planeIndex: 2,          // 0 .. size3d-1
@@ -2529,6 +2681,24 @@
       let board3d = [];
       let currentSeed = 0;
       let isPractice = false;
+      let peekSolved3d = false;
+      let peekPointerId = null;
+      const solvedBoard3dCache = {};
+
+      function getSolvedBoard3D(N) {
+        if (!solvedBoard3dCache[N]) {
+          const total = N * N * N;
+          const arr = new Array(total);
+          for (let i = 0; i < total - 1; i++) arr[i] = i + 1;
+          arr[total - 1] = 0;
+          solvedBoard3dCache[N] = arr;
+        }
+        return solvedBoard3dCache[N];
+      }
+
+      function getDisplayBoard3D(N = cfg.size3d) {
+        return peekSolved3d ? getSolvedBoard3D(N) : board3d;
+      }
 
       // State Machine:
       // STD: 'STD_READY' | 'STD_SOLVING' | 'DONE'
@@ -2617,23 +2787,30 @@
       const stage3d = document.getElementById('stage3d');
       const view3dTabs = document.getElementById('view3dTabs');
       const tabLayers3d = document.getElementById('tabLayers3d');
+      const btnPeekSolved3d = document.getElementById('btnPeekSolved3d');
       const viewport3d = document.getElementById('viewport3d');
       const cube3dFrame = document.getElementById('cube3dFrame');
       const cube3dCanvas = document.getElementById('cube3dCanvas');
       const cube3dPlaneTag = document.getElementById('cube3dPlaneTag');
       const cube3dPlaneDot = document.getElementById('cube3dPlaneDot');
       const cube3dPlaneText = document.getElementById('cube3dPlaneText');
+      const cube3dPeekTag = document.getElementById('cube3dPeekTag');
       const btnJumpEmptyPlane = document.getElementById('btnJumpEmptyPlane');
       const cube3dLegend = document.getElementById('cube3dLegend');
       const bldOverlay3d = document.getElementById('bldOverlay3d');
       const bldOverlay3dMode = document.getElementById('bldOverlay3dMode');
 
       const layers3dWrap = document.getElementById('layers3dWrap');
+      const layersPeekTag = document.getElementById('layersPeekTag');
       const bldOverlayLayers = document.getElementById('bldOverlayLayers');
       const bldOverlayLayersMode = document.getElementById('bldOverlayLayersMode');
 
       const subCube = document.getElementById('subCube');
       const subPlane = document.getElementById('subPlane');
+      const subPerspRow = document.getElementById('subPerspRow');
+      const btnOrthoQuick = document.getElementById('btnOrthoQuick');
+      const persp3dRange = document.getElementById('persp3dRange');
+      const persp3dVal = document.getElementById('persp3dVal');
       const subLayers = document.getElementById('subLayers');
       const btnXray3d = document.getElementById('btnXray3d');
       const spread3dRange = document.getElementById('spread3dRange');
@@ -2662,6 +2839,8 @@
       const scheme3dSelector = document.getElementById('scheme3dSelector');
       const numMode3dBlock = document.getElementById('numMode3dBlock');
       const numMode3dSelector = document.getElementById('numMode3dSelector');
+      const order3dBlock = document.getElementById('order3dBlock');
+      const order3dSelector = document.getElementById('order3dSelector');
       const themeSelector = document.getElementById('themeSelector');
       const animSelector = document.getElementById('animSelector');
       const kbDirSelector = document.getElementById('kbDirSelector');
@@ -3150,25 +3329,39 @@
 
       const BLD_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+';
 
-      function formatTileLabel3D(val, N = cfg.size3d, mode = cfg.numMode3d) {
-        if (mode === 'none') return '';
-        if (mode === 'seq') return String(val);
+      function getOrderedRank3D(home, N, order = cfg.order3d) {
+        const n2 = N * N;
+        switch (order) {
+          case 'yzx': return home.y * n2 + home.z * N + home.x; // Top floors first (2x2x2 swaps 3<->5 & 4<->6)
+          case 'xyz': return home.x * n2 + home.y * N + home.z; // Left -> Right walls
+          case 'zxy': return home.z * n2 + home.x * N + home.y; // Back -> Front, column-major
+          case 'yxz': return home.y * n2 + home.x * N + home.z; // Top floors, column-major
+          case 'xzy': return home.x * n2 + home.z * N + home.y; // Left -> Right, depth-first
+          case 'zyx':
+          default:    return home.z * n2 + home.y * N + home.x; // Back -> Front, row-major (default)
+        }
+      }
 
+      function formatTileLabel3D(val, N = cfg.size3d, mode = cfg.numMode3d, order = cfg.order3d) {
+        if (mode === 'none') return '';
         const home = coords3d(val - 1, N);
-        if (mode === 'per_layer') {
-          return String(home.y * N + home.x + 1);
-        }
-        if (mode === 'layer_code') {
-          const letter = ['A', 'B', 'C', 'D'][home.z] || 'Z';
-          return `${letter}${home.y * N + home.x + 1}`;
-        }
         if (mode === 'coords') {
           return `${home.x + 1}${home.y + 1}${home.z + 1}`;
         }
-        if (mode === 'letters') {
-          return BLD_ALPHABET[(val - 1) % BLD_ALPHABET.length];
+        const rank = getOrderedRank3D(home, N, order);
+        const n2 = N * N;
+        if (mode === 'seq') return String(rank + 1);
+        if (mode === 'per_layer') {
+          return String((rank % n2) + 1);
         }
-        return String(val);
+        if (mode === 'layer_code') {
+          const letter = ['A', 'B', 'C', 'D'][Math.floor(rank / n2)] || 'Z';
+          return `${letter}${(rank % n2) + 1}`;
+        }
+        if (mode === 'letters') {
+          return BLD_ALPHABET[rank % BLD_ALPHABET.length];
+        }
+        return String(rank + 1);
       }
 
       /* =======================================================================
@@ -3347,6 +3540,7 @@
           if (!raw) return { ...DEFAULT_CFG };
           const p = JSON.parse(raw);
           const sp = Number(p.spread3d);
+          const pr = Number(p.persp3d);
           const s3d = SIZES_3D.includes(p.size3d) ? p.size3d : DEFAULT_CFG.size3d;
           const pIdx = Number(p.planeIndex);
           return {
@@ -3358,6 +3552,7 @@
             scheme: ['fringe_split', 'fringe', 'rows', 'cols', 'mono'].includes(p.scheme) ? p.scheme : DEFAULT_CFG.scheme,
             scheme3d: SCHEMES_3D.includes(p.scheme3d) ? p.scheme3d : DEFAULT_CFG.scheme3d,
             numMode3d: NUM_MODES_3D.includes(p.numMode3d) ? p.numMode3d : DEFAULT_CFG.numMode3d,
+            order3d: ORDERS_3D.includes(p.order3d) ? p.order3d : DEFAULT_CFG.order3d,
             animMs: p.animMs === 50 ? 50 : 0,
             kbDir: p.kbDir === 'blank' ? 'blank' : 'tile',
             glide: typeof p.glide === 'boolean' ? p.glide : DEFAULT_CFG.glide,
@@ -3366,6 +3561,7 @@
             dots: typeof p.dots === 'boolean' ? p.dots : DEFAULT_CFG.dots,
             view3d: ['cube', 'plane', 'layers'].includes(p.view3d) ? p.view3d : DEFAULT_CFG.view3d,
             spread3d: Number.isFinite(sp) ? Math.max(1.06, Math.min(1.65, sp)) : DEFAULT_CFG.spread3d,
+            persp3d: Number.isFinite(pr) ? Math.max(0, Math.min(100, Math.round(pr))) : DEFAULT_CFG.persp3d,
             xray3d: typeof p.xray3d === 'boolean' ? p.xray3d : DEFAULT_CFG.xray3d,
             planeAxis: ['z', 'y', 'x'].includes(p.planeAxis) ? p.planeAxis : DEFAULT_CFG.planeAxis,
             planeIndex: Number.isInteger(pIdx) && pIdx >= 0 && pIdx < s3d ? pIdx : s3d - 1,
@@ -3705,17 +3901,19 @@
       }
 
       function updateBoardMasking() {
-        const masked = phase === 'BLD_READY' || phase === 'BLD_EXEC';
+        const rawMasked = phase === 'BLD_READY' || phase === 'BLD_EXEC';
+        const masked3d = !peekSolved3d && rawMasked;
         const hideBlank = phase === 'BLD_EXEC' && cfg.hideBlankBld;
+        const hideBlank3d = !peekSolved3d && hideBlank;
         const overlayText = MODE_META[cfg.mode].overlay;
 
-        boardGrid.classList.toggle('is-masked', masked);
+        boardGrid.classList.toggle('is-masked', rawMasked);
         boardGrid.classList.toggle('bld-hide-blank', hideBlank);
 
-        layers3dWrap.classList.toggle('is-masked', masked);
-        layers3dWrap.classList.toggle('bld-hide-blank', hideBlank);
+        layers3dWrap.classList.toggle('is-masked', masked3d);
+        layers3dWrap.classList.toggle('bld-hide-blank', hideBlank3d);
 
-        cube3dLegend.classList.toggle('hidden-view', masked);
+        cube3dLegend.classList.toggle('hidden-view', masked3d);
 
         if (phase === 'BLD_READY') {
           bldOverlayMode.textContent = overlayText;
@@ -3723,12 +3921,12 @@
           bldOverlay.setAttribute('aria-hidden', 'false');
 
           bldOverlay3dMode.textContent = overlayText;
-          bldOverlay3d.classList.add('visible');
-          bldOverlay3d.setAttribute('aria-hidden', 'false');
+          bldOverlay3d.classList.toggle('visible', !peekSolved3d);
+          bldOverlay3d.setAttribute('aria-hidden', String(peekSolved3d));
 
           bldOverlayLayersMode.textContent = overlayText;
-          bldOverlayLayers.classList.add('visible');
-          bldOverlayLayers.setAttribute('aria-hidden', 'false');
+          bldOverlayLayers.classList.toggle('visible', !peekSolved3d);
+          bldOverlayLayers.setAttribute('aria-hidden', String(peekSolved3d));
         } else {
           bldOverlay.classList.remove('visible');
           bldOverlay.setAttribute('aria-hidden', 'true');
@@ -3752,9 +3950,9 @@
         if (layerPoolN === N) return;
         layerPoolN = N;
 
-        // Clear previous layer columns while preserving #bldOverlayLayers
+        // Clear previous layer columns while preserving overlays/chips
         Array.from(layers3dWrap.children).forEach((ch) => {
-          if (ch !== bldOverlayLayers) ch.remove();
+          if (ch !== bldOverlayLayers && ch !== layersPeekTag) ch.remove();
         });
 
         layerCols = [];
@@ -3907,13 +4105,15 @@
         const ax = cfg.layersAxis;
         const n2 = N * N;
         const total = N * N * N - 1;
+        const primaryAxis = cfg.order3d[0];
+        const axUpper = ax.toUpperCase();
 
         for (let L = 0; L < N; L++) {
-          if (ax === 'z') {
+          if (ax === primaryAxis && cfg.numMode3d === 'seq') {
             const lo = L * n2 + 1;
             const hi = Math.min(total, (L + 1) * n2);
-            const tag = L === 0 ? 'B' : (L === N - 1 ? 'F' : '');
-            layerLbls[L].textContent = N === 4 ? `Z${L + 1}${tag ? '·' + tag : ''} (${lo}-${hi})` : `Z${L + 1} · ${lo}-${hi}`;
+            const tag = ax === 'z' ? (L === 0 ? 'B' : (L === N - 1 ? 'F' : '')) : '';
+            layerLbls[L].textContent = N === 4 ? `${axUpper}${L + 1}${tag ? '·' + tag : ''} (${lo}-${hi})` : `${axUpper}${L + 1} · ${lo}-${hi}`;
           } else {
             layerLbls[L].textContent = getPlaneShortLabel(ax, L, N);
           }
@@ -4022,10 +4222,11 @@
         const N = cfg.size3d;
         if (layerPoolN !== N) buildLayers3DDOM(N);
         const ax = cfg.layersAxis;
-        const empty = getEmpty3D();
+        const dispBoard = getDisplayBoard3D(N);
+        const empty = peekSolved3d ? { x: N - 1, y: N - 1, z: N - 1 } : getEmpty3D();
         const emptyLC = coords3DToLayerCell(ax, empty.x, empty.y, empty.z);
-        const showMisplaced = phase === 'DONE' && finalDnf;
-        const hideBlank = phase === 'BLD_EXEC' && cfg.hideBlankBld;
+        const showMisplaced = !peekSolved3d && phase === 'DONE' && finalDnf;
+        const hideBlank = !peekSolved3d && phase === 'BLD_EXEC' && cfg.hideBlankBld;
         const n2 = N * N;
         const total = N * N * N;
 
@@ -4041,7 +4242,7 @@
         }
 
         for (let i = 0; i < total; i++) {
-          const val = board3d[i];
+          const val = dispBoard[i];
           if (val === 0) continue;
           const pos = coords3d(i, N);
           const lc = coords3DToLayerCell(ax, pos.x, pos.y, pos.z);
@@ -4056,7 +4257,7 @@
           slot.style.transform = `translate3d(${lc.c * layerCellPx}px, ${lc.r * layerCellPx}px, 0)`;
 
           const correct = i === val - 1;
-          const isZLink = lc.layer !== emptyLC.layer && lc.r === emptyLC.r && lc.c === emptyLC.c;
+          const isZLink = !peekSolved3d && lc.layer !== emptyLC.layer && lc.r === emptyLC.r && lc.c === emptyLC.c;
           slot.classList.toggle('in-place', correct);
           slot.classList.toggle('is-misplaced', showMisplaced && !correct);
           slot.classList.toggle('is-z-link', isZLink);
@@ -4346,8 +4547,15 @@
           const uz = rx * fy - ry * fx;
 
           const focal = (Math.min(width, height) * 0.5) / Math.tan((36 * Math.PI) / 360);
+          const pFactor = (cfg.persp3d / 100) * 1.15;
+          const sortDist = radius / Math.max(pFactor, 0.015);
+          const sortCam = [-fx * sortDist, -fy * sortDist, -fz * sortDist];
+
           return {
             cam: [camX, camY, camZ],
+            sortCam,
+            radius,
+            pFactor,
             fwd: [fx, fy, fz],
             right: [rx, ry, rz],
             up: [ux, uy, uz],
@@ -4358,15 +4566,13 @@
         }
 
         function projectPt(wx, wy, wz, b) {
-          const dx = wx - b.cam[0];
-          const dy = wy - b.cam[1];
-          const dz = wz - b.cam[2];
-          const vz = dx * b.fwd[0] + dy * b.fwd[1] + dz * b.fwd[2];
-          if (vz <= 0.1) return null;
-          const vx = dx * b.right[0] + dy * b.right[1] + dz * b.right[2];
-          const vy = dx * b.up[0] + dy * b.up[1] + dz * b.up[2];
-          const k = b.focal / vz;
-          return { x: b.cx + vx * k, y: b.cy - vy * k, z: vz };
+          const dFwd = wx * b.fwd[0] + wy * b.fwd[1] + wz * b.fwd[2];
+          const vzEff = b.radius + b.pFactor * dFwd;
+          if (vzEff <= 0.15) return null;
+          const vx = wx * b.right[0] + wy * b.right[1] + wz * b.right[2];
+          const vy = wx * b.up[0] + wy * b.up[1] + wz * b.up[2];
+          const k = b.focal / vzEff;
+          return { x: b.cx + vx * k, y: b.cy - vy * k, z: vzEff };
         }
 
         function drawWireBox(cx, cy, cz, hx, hy, hz, b, strokeStyle, lineWidth, fillStyle) {
@@ -4430,12 +4636,14 @@
           radius += (targetRadius - radius) * damp;
 
           const isPlaneMode = cfg.view3d === 'plane';
-          const masked = phase === 'BLD_READY' || phase === 'BLD_EXEC';
-          const hideBlank = phase === 'BLD_EXEC' && cfg.hideBlankBld;
-          const showMisplaced = phase === 'DONE' && finalDnf;
+          const isPeek = peekSolved3d;
+          const dispBoard = getDisplayBoard3D(N);
+          const masked = !isPeek && (phase === 'BLD_READY' || phase === 'BLD_EXEC');
+          const hideBlank = !isPeek && phase === 'BLD_EXEC' && cfg.hideBlankBld;
+          const showMisplaced = !isPeek && phase === 'DONE' && finalDnf;
           const pal = getThemePalette(masked);
           const b = computeCameraBasis();
-          const empty = getEmpty3D();
+          const empty = isPeek ? { x: N - 1, y: N - 1, z: N - 1 } : getEmpty3D();
 
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
           ctx.fillStyle = pal.bg;
@@ -4462,7 +4670,7 @@
           const activeAnimDone = [];
 
           for (let i = 0; i < total; i++) {
-            const val = board3d[i];
+            const val = dispBoard[i];
             const pos = coords3d(i, N);
 
             if (val === 0) {
@@ -4470,7 +4678,7 @@
               if (isPlaneMode && !isInActivePlane(pos.x, pos.y, pos.z) && !cfg.planeDepth) continue;
 
               let wx, wy, wz;
-              if (emptyAnim) {
+              if (!isPeek && emptyAnim) {
                 const t = Math.min(1, (now - emptyAnim.start) / emptyAnim.dur);
                 const ease = 1 - Math.pow(1 - t, 3);
                 const f = gridToWorld(emptyAnim.from.x, emptyAnim.from.y, emptyAnim.from.z);
@@ -4483,15 +4691,15 @@
                 [wx, wy, wz] = gridToWorld(pos.x, pos.y, pos.z);
               }
 
-              const l1 = Math.abs(wx - b.cam[0]) + Math.abs(wy - b.cam[1]) + Math.abs(wz - b.cam[2]);
+              const l1 = Math.abs(wx - b.sortCam[0]) + Math.abs(wy - b.sortCam[1]) + Math.abs(wz - b.sortCam[2]);
               const onPlane = !isPlaneMode || isInActivePlane(pos.x, pos.y, pos.z);
               items.push({ type: 'empty', wx, wy, wz, l1, alpha: onPlane ? 1.0 : 0.45 });
               continue;
             }
 
-            const movable = isAlignedWithEmpty3D(pos.x, pos.y, pos.z, empty);
+            const movable = !isPeek && isAlignedWithEmpty3D(pos.x, pos.y, pos.z, empty);
             let alpha = 1.0;
-            let interactive = true;
+            let interactive = !isPeek;
             let isPerpPeek = false;
 
             if (isPlaneMode) {
@@ -4499,19 +4707,19 @@
               if (!inPlane) {
                 if (cfg.planeDepth && movable) {
                   alpha = 0.86;
-                  interactive = true;
+                  interactive = !isPeek;
                   isPerpPeek = true;
                 } else {
                   continue;
                 }
               }
-            } else if (cfg.xray3d && !movable) {
+            } else if (!isPeek && cfg.xray3d && !movable) {
               alpha = 0.14;
               interactive = false;
             }
 
             let wx, wy, wz;
-            const anim = tileAnims.get(val);
+            const anim = isPeek ? null : tileAnims.get(val);
             if (anim) {
               const t = Math.min(1, (now - anim.start) / anim.dur);
               const ease = 1 - Math.pow(1 - t, 3);
@@ -4525,7 +4733,7 @@
               [wx, wy, wz] = gridToWorld(pos.x, pos.y, pos.z);
             }
 
-            const l1 = Math.abs(wx - b.cam[0]) + Math.abs(wy - b.cam[1]) + Math.abs(wz - b.cam[2]);
+            const l1 = Math.abs(wx - b.sortCam[0]) + Math.abs(wy - b.sortCam[1]) + Math.abs(wz - b.sortCam[2]);
             items.push({
               type: 'cube',
               val,
@@ -4546,7 +4754,7 @@
             tileAnims.delete(activeAnimDone[i]);
           }
 
-          // Exact L1 Manhattan back-to-front painter's sort
+          // Exact L1 Manhattan back-to-front painter's sort (valid from true Ortho to Wide Perspective)
           items.sort((a, c) => c.l1 - a.l1);
 
           const nextHitQuads = [];
@@ -4570,14 +4778,14 @@
             const inkColor = masked
               ? 'transparent'
               : (pigment ? pigment.ink : pal.monoInk);
-            const isHovered = it.movable && it.val === hoveredTileId;
+            const isHovered = !isPeek && it.movable && it.val === hoveredTileId;
             const isMisplaced = showMisplaced && it.idx !== it.val - 1;
             const inPlace = it.idx === it.val - 1;
 
-            const showMovableEdge = !masked && (isHovered || (it.movable && (cfg.xray3d || it.isPerpPeek || !isPlaneMode)));
+            const showMovableEdge = !masked && !isPeek && (isHovered || (it.movable && (cfg.xray3d || it.isPerpPeek || !isPlaneMode)));
             const movableEdgeCol = isHovered ? pal.hoverEdge : (it.isPerpPeek ? pal.wireEmpty : pal.movableEdge);
             const movableEdgeW = isHovered ? 2.1 : (it.isPerpPeek ? 1.7 : 1.2);
-            const lbl = masked ? '' : formatTileLabel3D(it.val, N, cfg.numMode3d);
+            const lbl = masked ? '' : formatTileLabel3D(it.val, N, cfg.numMode3d, cfg.order3d);
 
             ctx.save();
             ctx.globalAlpha = it.alpha;
@@ -4588,7 +4796,11 @@
               const fcY = it.wy + f.n[1] * HALF;
               const fcZ = it.wz + f.n[2] * HALF;
 
-              const dotView = (fcX - b.cam[0]) * f.n[0] + (fcY - b.cam[1]) * f.n[1] + (fcZ - b.cam[2]) * f.n[2];
+              // Continuous backface culling valid for both Orthographic (pFactor=0) and Perspective (pFactor>0)
+              const dotView =
+                (b.pFactor * fcX + b.radius * b.fwd[0]) * f.n[0] +
+                (b.pFactor * fcY + b.radius * b.fwd[1]) * f.n[1] +
+                (b.pFactor * fcZ + b.radius * b.fwd[2]) * f.n[2];
               if (dotView >= 0) continue;
 
               const p00 = projectPt(fcX - f.u[0] * HALF - f.v[0] * HALF, fcY - f.u[1] * HALF - f.v[1] * HALF, fcZ - f.u[2] * HALF - f.v[2] * HALF, b);
@@ -4901,23 +5113,20 @@
         const n2 = N * N;
         const maxVal = N * N * N - 1;
         const sc = cfg.scheme3d;
+        const primaryAxis = cfg.order3d[0];
 
         const pair = (bg, txt) => `<span class="legend-pair"><span class="legend-dot" style="background:${bg}"></span>${txt}</span>`;
 
-        if (sc === 'layers_z') {
+        if (sc === 'layers_z' || sc === 'layers_y' || sc === 'layers_x') {
+          const ax = sc.slice(-1);
+          const pref = ax.toUpperCase();
+          const showRange = ax === primaryAxis && cfg.numMode3d === 'seq' && N < 4;
           const parts = [];
           for (let L = 0; L < N; L++) {
             const lo = L * n2 + 1;
             const hi = Math.min(maxVal, (L + 1) * n2);
-            const lbl = N === 4 ? `Z${L + 1}` : `${lo}-${hi}`;
+            const lbl = showRange ? `${lo}-${hi}` : `${pref}${L + 1}`;
             parts.push(pair(getSliceColor3D(L, N).bg, lbl));
-          }
-          cube3dLegend.innerHTML = parts.join('');
-        } else if (sc === 'layers_y' || sc === 'layers_x') {
-          const pref = sc === 'layers_y' ? 'Y' : 'X';
-          const parts = [];
-          for (let L = 0; L < N; L++) {
-            parts.push(pair(getSliceColor3D(L, N).bg, `${pref}${L + 1}`));
           }
           cube3dLegend.innerHTML = parts.join('');
         } else if (sc === 'fringe_3d') {
@@ -4931,6 +5140,22 @@
         } else {
           cube3dLegend.innerHTML = `<span>1 = TOP-LEFT-BACK</span>`;
         }
+      }
+
+      function setPeekSolved3d(active) {
+        const next = Boolean(active) && cfg.is3d;
+        if (peekSolved3d === next) return;
+        peekSolved3d = next;
+
+        btnPeekSolved3d.classList.toggle('active', next);
+        btnPeekSolved3d.setAttribute('aria-pressed', String(next));
+        cube3dFrame.classList.toggle('is-peek-solved', next);
+        layers3dWrap.classList.toggle('is-peek-solved', next);
+        cube3dPeekTag.classList.toggle('hidden-view', !next);
+        layersPeekTag.classList.toggle('hidden-view', !next);
+
+        updateBoardMasking();
+        render3DViews();
       }
 
       function updatePlaneOverlayAndDots() {
@@ -5191,7 +5416,7 @@
       }
 
       function executeMove3DAt(tx, ty, tz) {
-        if (phase === 'DONE' || phase === 'BLD_READY') return;
+        if (peekSolved3d || phase === 'DONE' || phase === 'BLD_READY') return;
 
         const res = slide3DAt(tx, ty, tz);
         if (!res) return;
@@ -5400,6 +5625,7 @@
       function apply3DViewUI() {
         const is3d = cfg.is3d;
         const N = cfg.size3d;
+        if (!is3d && peekSolved3d) setPeekSolved3d(false);
         boardFrame.classList.toggle('hidden-view', is3d);
         stage3d.classList.toggle('hidden-view', !is3d);
 
@@ -5412,6 +5638,7 @@
         scheme2dBlock.classList.toggle('hidden-view', is3d);
         scheme3dBlock.classList.toggle('hidden-view', !is3d);
         numMode3dBlock.classList.toggle('hidden-view', !is3d);
+        order3dBlock.classList.toggle('hidden-view', !is3d);
 
         // View mode tabs
         view3dTabs.querySelectorAll('[data-view3d]').forEach((b) => {
@@ -5429,6 +5656,7 @@
 
         subCube.classList.toggle('hidden-view', !isCube);
         subPlane.classList.toggle('hidden-view', !isPlane);
+        subPerspRow.classList.toggle('hidden-view', isLayers);
         subLayers.classList.toggle('hidden-view', !isLayers);
 
         // Cube subbar
@@ -5436,6 +5664,11 @@
         btnXray3d.setAttribute('aria-pressed', String(cfg.xray3d));
         spread3dRange.value = cfg.spread3d.toFixed(2);
         spread3dVal.textContent = cfg.spread3d.toFixed(2);
+
+        // Perspective / Ortho slider (shared by Cube & Plane views)
+        persp3dRange.value = String(cfg.persp3d);
+        persp3dVal.textContent = cfg.persp3d === 0 ? '0%' : `${cfg.persp3d}%`;
+        btnOrthoQuick.classList.toggle('active', cfg.persp3d === 0);
 
         // Plane subbar
         planeAxisSeg.querySelectorAll('[data-paxis]').forEach((b) => {
@@ -5498,6 +5731,9 @@
         });
         numMode3dSelector.querySelectorAll('[data-num3d]').forEach((b) => {
           b.classList.toggle('active', b.dataset.num3d === cfg.numMode3d);
+        });
+        order3dSelector.querySelectorAll('[data-order3d]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.order3d === cfg.order3d);
         });
         themeSelector.querySelectorAll('[data-theme-val]').forEach((b) => {
           b.classList.toggle('active', b.dataset.themeVal === cfg.theme);
@@ -5941,6 +6177,58 @@
         spread3dRange.blur();
       });
 
+      // Live Perspective / Orthographic slider (0 = Orthographic, 100 = Wide Perspective)
+      persp3dRange.addEventListener('input', (e) => {
+        const v = Math.max(0, Math.min(100, Math.round(parseFloat(e.target.value) || 0)));
+        cfg.persp3d = v;
+        persp3dVal.textContent = `${v}%`;
+        btnOrthoQuick.classList.toggle('active', v === 0);
+        cube3d.requestFrame();
+      });
+
+      persp3dRange.addEventListener('change', () => {
+        saveCfg();
+        persp3dRange.blur();
+      });
+
+      btnOrthoQuick.addEventListener('click', () => {
+        cfg.persp3d = 0;
+        saveCfg();
+        apply3DViewUI();
+        cube3d.requestFrame();
+        btnOrthoQuick.blur();
+      });
+
+      // Hold-to-Peek Solved Reference button (active ONLY while pressed and held)
+      btnPeekSolved3d.addEventListener('pointerdown', (e) => {
+        if (!cfg.is3d) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        e.preventDefault();
+        peekPointerId = e.pointerId;
+        try {
+          btnPeekSolved3d.setPointerCapture(e.pointerId);
+        } catch (_) {}
+        setPeekSolved3d(true);
+      });
+
+      function releasePeekPointer(e) {
+        if (peekPointerId !== null && e.pointerId !== peekPointerId) return;
+        peekPointerId = null;
+        if (peekSolved3d) setPeekSolved3d(false);
+        btnPeekSolved3d.blur();
+      }
+
+      btnPeekSolved3d.addEventListener('pointerup', releasePeekPointer);
+      btnPeekSolved3d.addEventListener('pointercancel', releasePeekPointer);
+      btnPeekSolved3d.addEventListener('lostpointercapture', releasePeekPointer);
+      btnPeekSolved3d.addEventListener('contextmenu', (e) => e.preventDefault());
+      window.addEventListener('blur', () => {
+        if (peekSolved3d) {
+          peekPointerId = null;
+          setPeekSolved3d(false);
+        }
+      });
+
       btnResetCam3d.addEventListener('click', () => {
         cube3d.resetCamera(false);
         btnResetCam3d.blur();
@@ -6008,11 +6296,17 @@
       });
 
       /* =======================================================================
-         KEYBOARD SHORTCUTS (ARROWS / WASD + Q/E 3D DEPTH + 1-4 PLANE + X/Y/Z)
+         KEYBOARD SHORTCUTS (ARROWS / WASD + Q/E 3D DEPTH + 1-4 PLANE + X/Y/Z + V PEEK)
          ======================================================================= */
       function anySheetOpen() {
         return configSheet.classList.contains('open') || statsSheet.classList.contains('open');
       }
+
+      window.addEventListener('keyup', (e) => {
+        if ((e.key === 'v' || e.key === 'V') && peekSolved3d && peekPointerId === null) {
+          setPeekSolved3d(false);
+        }
+      });
 
       window.addEventListener('keydown', (e) => {
         const tag = e.target && e.target.tagName;
@@ -6031,6 +6325,12 @@
         if (e.ctrlKey || e.metaKey || e.altKey) return;
 
         const k = e.key;
+
+        if ((k === 'v' || k === 'V') && cfg.is3d) {
+          e.preventDefault();
+          if (!e.repeat) setPeekSolved3d(true);
+          return;
+        }
 
         if (k === 'r' || k === 'R') {
           e.preventDefault();
@@ -6228,6 +6528,19 @@
         applyConfigUI();
         if (cfg.is3d && cfg.view3d === 'layers') {
           layoutLayers3D();
+        }
+      });
+
+      // 3D Numbering order preset
+      order3dSelector.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-order3d]');
+        if (!b) return;
+        cfg.order3d = b.dataset.order3d;
+        saveCfg();
+        applyLayerPigmentsAndLabels();
+        applyConfigUI();
+        if (cfg.is3d && cfg.view3d === 'layers') {
+          renderLayers3D();
         }
       });
 
