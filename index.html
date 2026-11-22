@@ -1316,10 +1316,597 @@
       text-transform: uppercase;
       cursor: pointer;
     }
+
+    /* =========================================================================
+       3D 3×3×3 INTEGRATED MODE — CUBE, PLANE & 3-LAYER VIEWS (MOBILE-FIRST)
+       ========================================================================= */
+    .hidden-view {
+      display: none !important;
+    }
+
+    .hdr-btn.is-3d-active {
+      background: var(--btn-stark-bg);
+      color: var(--btn-stark-ink);
+      border-color: var(--btn-stark-bg);
+      font-weight: 700;
+    }
+
+    .size-3d-btn {
+      margin-top: 6px;
+      width: 100%;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 8px 12px;
+      min-height: 38px;
+    }
+
+    .size-3d-btn .opt-sub {
+      font-size: 0.62rem;
+      letter-spacing: 0.05em;
+    }
+
+    .board-stage.is-3d-mode {
+      flex-direction: column;
+      align-items: center;
+      justify-content: stretch;
+    }
+
+    .board-stage.is-3d-wide {
+      max-width: 780px;
+    }
+
+    .app-shell.compact-side-pad {
+      padding-left: calc(6px + env(safe-area-inset-left));
+      padding-right: calc(6px + env(safe-area-inset-right));
+    }
+
+    .stage-3d {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      gap: 6px;
+    }
+
+    /* Top 3-Way View Mode Switcher (3D CUBE / 3D PLANE / 3 LAYERS) */
+    .view3d-tabs {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      height: 32px;
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      overflow: hidden;
+    }
+
+    .view3d-tab {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-right: 1px solid var(--border-hairline);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.69rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 80ms ease, color 80ms ease;
+    }
+
+    .view3d-tab:last-child {
+      border-right: none;
+    }
+
+    .view3d-tab.active {
+      background: var(--btn-stark-bg);
+      color: var(--btn-stark-ink);
+      font-weight: 700;
+    }
+
+    /* Main 3D / 3-Layer Viewport Area */
+    .viewport-3d {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* 3D Canvas Frame */
+    .cube3d-frame {
+      position: relative;
+      width: 100%;
+      max-width: 460px;
+      height: 100%;
+      background: var(--bg-tray);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--r-frame);
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    .cube3d-frame.st-solved { border-color: var(--sig-green); }
+    .cube3d-frame.st-pb     { border-color: var(--sig-amber); }
+    .cube3d-frame.st-dnf    { border-color: var(--sig-red); }
+    .cube3d-frame.st-memo   { border-color: var(--sig-amber); }
+
+    #cube3dCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    #cube3dCanvas.is-dragging {
+      cursor: grabbing;
+    }
+
+    #cube3dCanvas.is-hover-movable {
+      cursor: pointer;
+    }
+
+    /* Minimal Corner Overlays Inside 3D Frame */
+    .cube3d-hud-top {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .cube3d-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 22px;
+      padding: 0 7px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .cube3d-chip.is-interactive {
+      pointer-events: auto;
+      cursor: pointer;
+      color: var(--sig-amber);
+      border-color: var(--sig-amber);
+      background: var(--bg-surface);
+    }
+
+    .cube3d-chip.is-interactive:active {
+      background: var(--bg-control-active);
+    }
+
+    .cube3d-chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--sig-green);
+      flex-shrink: 0;
+    }
+
+    .cube3d-legend {
+      position: absolute;
+      left: 8px;
+      bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 7px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .legend-pair {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 1px;
+      flex-shrink: 0;
+    }
+
+    /* 3-Layer 3×3 Side-by-Side / Stack Container */
+    .layers3d-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    .layers3d-wrap.is-stack {
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .layer-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .layer-head {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      padding: 0 2px;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .layer-head-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .layer-swatch {
+      width: 7px;
+      height: 7px;
+      border-radius: 1px;
+      flex-shrink: 0;
+    }
+
+    .layer-col.has-empty .layer-head {
+      color: var(--text-primary);
+    }
+
+    .layer-empty-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--sig-amber);
+      opacity: 0;
+      flex-shrink: 0;
+    }
+
+    .layer-col.has-empty .layer-empty-dot {
+      opacity: 1;
+    }
+
+    .layers3d-wrap.is-masked .layer-empty-dot {
+      opacity: 0 !important;
+    }
+
+    .layer-frame {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-tray);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-frame);
+      touch-action: none;
+    }
+
+    .layer-col.has-empty .layer-frame {
+      border-color: var(--border-strong);
+    }
+
+    .layers3d-wrap.st-solved .layer-frame { border-color: var(--sig-green); }
+    .layers3d-wrap.st-pb     .layer-frame { border-color: var(--sig-amber); }
+    .layers3d-wrap.st-dnf    .layer-frame { border-color: var(--sig-red); }
+    .layers3d-wrap.st-memo   .layer-frame { border-color: var(--sig-amber); }
+
+    .layer-grid {
+      position: relative;
+      touch-action: none;
+    }
+
+    .layer-backdrop {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      pointer-events: none;
+    }
+
+    /* Empty slot crisp subtle indicator in 3-layer view */
+    .backdrop-cell.is-empty-cell .backdrop-cell-inner {
+      border-color: var(--sig-amber);
+      border-style: dashed;
+    }
+
+    .layers3d-wrap.bld-hide-blank .backdrop-cell .backdrop-cell-inner {
+      background: var(--tile-masked-bg);
+      border: 1px solid var(--tile-masked-border);
+      border-style: solid;
+      box-shadow: var(--tile-inset);
+    }
+
+    .layers3d-wrap.is-masked .tile-face {
+      background-color: var(--tile-masked-bg) !important;
+      border-color: var(--tile-masked-border) !important;
+      color: transparent !important;
+      box-shadow: var(--tile-inset);
+    }
+
+    .layers3d-wrap.anim-snappy .tile-slot {
+      transition: transform 50ms cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+
+    .layers3d-wrap.show-dots:not(.is-masked) .tile-slot.in-place .tile-dot {
+      opacity: 0.55;
+    }
+
+    /* Cross-layer Z-aligned movable tile highlight (hidden during BLD EXEC) */
+    .layers3d-wrap:not(.is-masked) .tile-slot.is-z-link .tile-face {
+      box-shadow: inset 0 0 0 2px var(--btn-stark-bg), var(--tile-inset);
+    }
+
+    .layers3d-wrap:not(.is-masked) .tile-slot.is-z-link .tile-face::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--btn-stark-bg);
+      pointer-events: none;
+    }
+
+    /* Contextual 3D Sub-Toolbar (Bottom of Stage, 36px, Thumb-Friendly) */
+    .subbar-3d {
+      flex-shrink: 0;
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .subbar-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .seg3d {
+      display: inline-flex;
+      height: 36px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .seg3d-btn {
+      position: relative;
+      min-width: 34px;
+      height: 100%;
+      padding: 0 9px;
+      border: none;
+      border-right: 1px solid var(--border-hairline);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .seg3d-btn:last-child {
+      border-right: none;
+    }
+
+    .seg3d-btn.active {
+      background: var(--btn-stark-bg);
+      color: var(--btn-stark-ink);
+      font-weight: 700;
+    }
+
+    .plane-empty-dot {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--sig-amber);
+      display: none;
+    }
+
+    .seg3d-btn.has-empty .plane-empty-dot {
+      display: block;
+    }
+
+    .tog3d-btn {
+      height: 36px;
+      padding: 0 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .tog3d-btn .t-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+    }
+
+    .tog3d-btn.active {
+      border-color: var(--sig-green);
+      background: var(--sig-green-bg);
+      color: var(--sig-green);
+    }
+
+    .tog3d-btn.active .t-dot {
+      background: var(--sig-green);
+    }
+
+    .tog3d-btn.amber.active {
+      border-color: var(--sig-amber);
+      background: var(--sig-amber-bg);
+      color: var(--sig-amber);
+    }
+
+    .tog3d-btn.amber.active .t-dot {
+      background: var(--sig-amber);
+    }
+
+    .tog3d-btn:active {
+      background: var(--bg-control-active);
+    }
+
+    .spread3d-box {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+    }
+
+    .spread3d-lbl {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .spread3d-range {
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1;
+      min-width: 48px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border-strong);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .spread3d-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      background: var(--btn-stark-bg);
+      border: 1px solid var(--border-strong);
+      cursor: pointer;
+    }
+
+    .spread3d-range::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      background: var(--btn-stark-bg);
+      border: 1px solid var(--border-strong);
+      cursor: pointer;
+    }
+
+    .spread3d-val {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      min-width: 28px;
+      text-align: right;
+    }
+
+    @media (max-width: 390px) {
+      .seg3d-btn {
+        min-width: 28px;
+        padding: 0 7px;
+        font-size: 0.66rem;
+      }
+      .tog3d-btn {
+        padding: 0 7px;
+        font-size: 0.64rem;
+      }
+      .view3d-tab {
+        font-size: 0.64rem;
+        letter-spacing: 0.04em;
+      }
+    }
   </style>
 </head>
 <body>
-  <main class="app-shell">
+  <main id="appShell" class="app-shell">
     <!-- TOP HEADER (44px) -->
     <header class="top-bar col-width">
       <button id="btnSessionTrigger" class="session-trigger" type="button" aria-label="Change board size or mode">
@@ -1334,6 +1921,7 @@
       </button>
 
       <div class="header-actions">
+        <button id="btnToggle3d" class="hdr-btn" type="button" aria-pressed="false" aria-label="Toggle 3D 3x3x3 Cube Mode">3D</button>
         <button id="btnOpenStats" class="hdr-btn" type="button" aria-label="Open Session Stats">
           <span>Stats</span>
           <span id="hdrCount" class="count-tag">0</span>
@@ -1384,8 +1972,9 @@
       </div>
     </section>
 
-    <!-- CENTERED SQUARE BOARD STAGE -->
+    <!-- CENTERED SQUARE BOARD STAGE (2D N×N OR 3D 3×3×3) -->
     <section id="boardStage" class="board-stage" aria-label="Sliding Puzzle Board">
+      <!-- 2D N×N BOARD -->
       <div id="boardFrame" class="board-frame">
         <div id="boardGrid" class="board-grid" role="application" aria-label="Sliding puzzle grid">
           <div id="boardBackdrop" class="board-backdrop" aria-hidden="true"></div>
@@ -1394,6 +1983,140 @@
             <span id="bldOverlayMode" class="bld-overlay-mode">BLD &middot; SUBMIT</span>
             <span class="bld-overlay-cta">TAP TO REVEAL &amp; START</span>
             <span class="bld-overlay-sub">MEMO CLOCK BEGINS ON REVEAL</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D 3×3×3 STAGE (CUBE / PLANE / 3 LAYERS) -->
+      <div id="stage3d" class="stage-3d hidden-view" aria-label="3D 3x3x3 Sliding Cube Stage">
+        <!-- 3-Way View Mode Switcher -->
+        <div id="view3dTabs" class="view3d-tabs" role="tablist" aria-label="3D View Mode">
+          <button class="view3d-tab active" type="button" role="tab" data-view3d="cube">3D Cube</button>
+          <button class="view3d-tab" type="button" role="tab" data-view3d="plane">Plane</button>
+          <button class="view3d-tab" type="button" role="tab" data-view3d="layers">3 Layers</button>
+        </div>
+
+        <!-- Active Viewport -->
+        <div id="viewport3d" class="viewport-3d">
+          <!-- 3D Canvas Viewport (Cube & Plane Modes) -->
+          <div id="cube3dFrame" class="cube3d-frame">
+            <canvas id="cube3dCanvas" aria-label="Interactive 3D 3x3x3 Sliding Cube"></canvas>
+            <div class="cube3d-hud-top">
+              <span id="cube3dPlaneTag" class="cube3d-chip hidden-view">
+                <span id="cube3dPlaneDot" class="cube3d-chip-dot hidden-view"></span>
+                <span id="cube3dPlaneText">Z1 · FRONT</span>
+              </span>
+              <button id="btnJumpEmptyPlane" class="cube3d-chip is-interactive hidden-view" type="button" aria-label="Jump to plane containing empty slot">HOLE: Z3</button>
+            </div>
+            <div id="cube3dLegend" class="cube3d-legend">
+              <span class="legend-pair"><span class="legend-dot" style="background:#C98A2C"></span>1-9</span>
+              <span class="legend-pair"><span class="legend-dot" style="background:#3E8255"></span>10-18</span>
+              <span class="legend-pair"><span class="legend-dot" style="background:#3B74A5"></span>19-26</span>
+            </div>
+            <div id="bldOverlay3d" class="bld-overlay" aria-hidden="true">
+              <span id="bldOverlay3dMode" class="bld-overlay-mode">BLD &middot; SUBMIT</span>
+              <span class="bld-overlay-cta">TAP TO REVEAL &amp; START</span>
+              <span class="bld-overlay-sub">MEMO CLOCK BEGINS ON REVEAL</span>
+            </div>
+          </div>
+
+          <!-- 3-Layer 3×3 Boards Viewport -->
+          <div id="layers3dWrap" class="layers3d-wrap hidden-view" role="application" aria-label="Three 3x3 Layer Boards">
+            <div id="layerCol0" class="layer-col" data-layer="0">
+              <div class="layer-head">
+                <span class="layer-head-left"><span id="layerSwatch0" class="layer-swatch" style="background:#C98A2C"></span><span id="layerLbl0">L1 · 1-9</span></span>
+                <span class="layer-empty-dot" aria-hidden="true"></span>
+              </div>
+              <div id="layerFrame0" class="layer-frame">
+                <div id="layerGrid0" class="layer-grid">
+                  <div id="layerBackdrop0" class="layer-backdrop" aria-hidden="true"></div>
+                  <div id="layerTiles0"></div>
+                </div>
+              </div>
+            </div>
+
+            <div id="layerCol1" class="layer-col" data-layer="1">
+              <div class="layer-head">
+                <span class="layer-head-left"><span id="layerSwatch1" class="layer-swatch" style="background:#3E8255"></span><span id="layerLbl1">L2 · 10-18</span></span>
+                <span class="layer-empty-dot" aria-hidden="true"></span>
+              </div>
+              <div id="layerFrame1" class="layer-frame">
+                <div id="layerGrid1" class="layer-grid">
+                  <div id="layerBackdrop1" class="layer-backdrop" aria-hidden="true"></div>
+                  <div id="layerTiles1"></div>
+                </div>
+              </div>
+            </div>
+
+            <div id="layerCol2" class="layer-col" data-layer="2">
+              <div class="layer-head">
+                <span class="layer-head-left"><span id="layerSwatch2" class="layer-swatch" style="background:#3B74A5"></span><span id="layerLbl2">L3 · 19-26</span></span>
+                <span class="layer-empty-dot" aria-hidden="true"></span>
+              </div>
+              <div id="layerFrame2" class="layer-frame">
+                <div id="layerGrid2" class="layer-grid">
+                  <div id="layerBackdrop2" class="layer-backdrop" aria-hidden="true"></div>
+                  <div id="layerTiles2"></div>
+                </div>
+              </div>
+            </div>
+
+            <div id="bldOverlayLayers" class="bld-overlay" aria-hidden="true">
+              <span id="bldOverlayLayersMode" class="bld-overlay-mode">BLD &middot; SUBMIT</span>
+              <span class="bld-overlay-cta">TAP TO REVEAL &amp; START</span>
+              <span class="bld-overlay-sub">MEMO CLOCK BEGINS ON REVEAL</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contextual Sub-Toolbar -->
+        <div id="subbar3d" class="subbar-3d">
+          <!-- Subbar: 3D CUBE -->
+          <div id="subCube" class="subbar-group">
+            <button id="btnXray3d" class="tog3d-btn" type="button" aria-pressed="false">
+              <span class="t-dot"></span><span>X-RAY</span>
+            </button>
+            <div class="spread3d-box">
+              <span class="spread3d-lbl">GAP</span>
+              <input id="spread3dRange" class="spread3d-range" type="range" min="1.06" max="1.65" step="0.01" value="1.24" aria-label="3D cube spacing" />
+              <span id="spread3dVal" class="spread3d-val">1.24</span>
+            </div>
+            <button id="btnResetCam3d" class="tog3d-btn" type="button" title="Reset camera angle" aria-label="Reset 3D camera angle">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="square"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+            </button>
+          </div>
+
+          <!-- Subbar: 3D PLANE -->
+          <div id="subPlane" class="subbar-group hidden-view">
+            <div id="planeAxisSeg" class="seg3d" aria-label="Plane slice axis">
+              <button class="seg3d-btn active" type="button" data-paxis="z">Z</button>
+              <button class="seg3d-btn" type="button" data-paxis="y">Y</button>
+              <button class="seg3d-btn" type="button" data-paxis="x">X</button>
+            </div>
+            <div id="planeIdxSeg" class="seg3d" aria-label="Plane index">
+              <button class="seg3d-btn" type="button" data-pidx="0">1<span class="plane-empty-dot"></span></button>
+              <button class="seg3d-btn" type="button" data-pidx="1">2<span class="plane-empty-dot"></span></button>
+              <button class="seg3d-btn active" type="button" data-pidx="2">3<span class="plane-empty-dot"></span></button>
+            </div>
+            <button id="btnPlaneDepth" class="tog3d-btn active" type="button" aria-pressed="true" title="Show movable tiles perpendicular to active plane">
+              <span class="t-dot"></span><span>+MOV</span>
+            </button>
+            <button id="btnPlaneAuto" class="tog3d-btn amber active" type="button" aria-pressed="true" title="Auto-follow empty slot across planes">
+              <span class="t-dot"></span><span>AUTO</span>
+            </button>
+          </div>
+
+          <!-- Subbar: 3 LAYERS -->
+          <div id="subLayers" class="subbar-group hidden-view" style="justify-content:space-between;">
+            <div id="layersAxisSeg" class="seg3d" aria-label="3-Layer slice axis">
+              <button class="seg3d-btn active" type="button" data-laxis="z">Z · LAYERS</button>
+              <button class="seg3d-btn" type="button" data-laxis="y">Y · ROWS</button>
+              <button class="seg3d-btn" type="button" data-laxis="x">X · COLS</button>
+            </div>
+            <div id="layersLayoutSeg" class="seg3d" aria-label="3-Layer board arrangement">
+              <button class="seg3d-btn active" type="button" data-llayout="row" title="3 boards side-by-side">SIDE</button>
+              <button class="seg3d-btn" type="button" data-llayout="stack" title="3 boards stacked vertically">STACK</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1428,6 +2151,10 @@
           <button class="opt-btn" type="button" data-size="7">7×7</button>
           <button class="opt-btn" type="button" data-size="8">8×8</button>
         </div>
+        <button id="btnSelect3dSize" class="opt-btn size-3d-btn" type="button" data-size-3d="true">
+          <span>3×3×3 &middot; 3D CUBE</span>
+          <span class="opt-sub">CUBE / PLANE / 3-LAYER</span>
+        </button>
       </div>
 
       <div class="sec-block">
@@ -1570,7 +2297,7 @@
       </div>
 
       <p class="kb-legend">
-        KEYS: ARROWS / WASD SLIDE &middot; SPACE SCRAMBLE / REVEAL / SUBMIT &middot; ENTER SUBMIT &middot; R NEW SCRAMBLE
+        KEYS: ARROWS / WASD SLIDE &middot; Q / E DEPTH (3D) &middot; 1-3 PLANE &middot; X/Y/Z AXIS &middot; SPACE SCRAMBLE / REVEAL / SUBMIT &middot; R NEW SCRAMBLE
       </p>
 
       <div class="pwa-status-row" aria-live="polite">
@@ -1656,6 +2383,7 @@
 
       const DEFAULT_CFG = {
         size: 4,
+        is3d: false,            // false (2D N×N) | true (3D 3×3×3)
         mode: 'std',            // 'std' | 'bld_auto' | 'bld_sub'
         theme: 'graphite',      // 'graphite' | 'paper'
         scheme: 'fringe_split', // 'fringe_split' | 'fringe' | 'rows' | 'cols' | 'mono'
@@ -1664,16 +2392,33 @@
         glide: true,
         hideBlankBld: false,
         sound: false,
-        dots: false
+        dots: false,
+        // 3D 3×3×3 view preferences
+        view3d: 'cube',         // 'cube' | 'plane' | 'layers'
+        spread3d: 1.24,         // 1.06 .. 1.65
+        xray3d: false,
+        planeAxis: 'z',         // 'z' | 'y' | 'x'
+        planeIndex: 2,          // 0 | 1 | 2
+        planeDepth: true,       // show perpendicular movable tiles in plane mode
+        planeAuto: true,        // auto-follow empty slot across planes
+        layersAxis: 'z',        // 'z' | 'y' | 'x'
+        layersLayout: 'row'     // 'row' (side-by-side) | 'stack'
       };
+
+      const SLICE_3D_COLORS = [
+        { bg: '#C98A2C', ink: '#FAF9F6' }, // Front / Layer 1 (1-9)
+        { bg: '#3E8255', ink: '#FAF9F6' }, // Middle / Layer 2 (10-18)
+        { bg: '#3B74A5', ink: '#FAF9F6' }  // Back / Layer 3 (19-26)
+      ];
 
       /* =======================================================================
          APPLICATION RUNTIME STATE
          ======================================================================= */
       let cfg = loadCfg();
-      let activeSolves = []; // Loaded lazily for active (size, mode) session only
+      let activeSolves = []; // Loaded lazily for active (size/3d, mode) session only
 
       let board = [];
+      let board3d = new Array(27);
       let currentSeed = 0;
       let isPractice = false;
 
@@ -1698,9 +2443,18 @@
       let tileSlots = [];
       let tileFaces = [];
 
-      // Multi-touch pointer sets
+      // Persistent 3-Layer DOM pool for 3D tiles (1..26)
+      let layerCellPx = 40;
+      let layerTilePad = 2;
+      let layerTileSlots = [];
+      let layerTileFaces = [];
+      let layerBackdropCells = [[], [], []];
+      let layersDomBuilt = false;
+
+      // Multi-touch pointer sets (2D & 3-Layer)
       const activePointers = new Set();
       const ignoredPointers = new Set(); // Prevents BLD_READY reveal tap from moving tiles
+      const layerLastCellKey = new Map();
 
       // History pagination & inline clear confirmation
       let historyLimit = 60;
@@ -1713,11 +2467,13 @@
       /* =======================================================================
          DOM REFERENCES
          ======================================================================= */
+      const appShell = document.getElementById('appShell');
       const metaThemeColor = document.getElementById('metaThemeColor');
       const btnSessionTrigger = document.getElementById('btnSessionTrigger');
       const hdrSize = document.getElementById('hdrSize');
       const hdrMode = document.getElementById('hdrMode');
       const hdrCount = document.getElementById('hdrCount');
+      const btnToggle3d = document.getElementById('btnToggle3d');
       const btnOpenStats = document.getElementById('btnOpenStats');
       const btnOpenConfig = document.getElementById('btnOpenConfig');
 
@@ -1742,12 +2498,52 @@
       const bldOverlay = document.getElementById('bldOverlay');
       const bldOverlayMode = document.getElementById('bldOverlayMode');
 
+      // 3D Stage DOM references
+      const stage3d = document.getElementById('stage3d');
+      const view3dTabs = document.getElementById('view3dTabs');
+      const viewport3d = document.getElementById('viewport3d');
+      const cube3dFrame = document.getElementById('cube3dFrame');
+      const cube3dCanvas = document.getElementById('cube3dCanvas');
+      const cube3dPlaneTag = document.getElementById('cube3dPlaneTag');
+      const cube3dPlaneDot = document.getElementById('cube3dPlaneDot');
+      const cube3dPlaneText = document.getElementById('cube3dPlaneText');
+      const btnJumpEmptyPlane = document.getElementById('btnJumpEmptyPlane');
+      const cube3dLegend = document.getElementById('cube3dLegend');
+      const bldOverlay3d = document.getElementById('bldOverlay3d');
+      const bldOverlay3dMode = document.getElementById('bldOverlay3dMode');
+
+      const layers3dWrap = document.getElementById('layers3dWrap');
+      const layerCols = [0, 1, 2].map((i) => document.getElementById(`layerCol${i}`));
+      const layerSwatches = [0, 1, 2].map((i) => document.getElementById(`layerSwatch${i}`));
+      const layerLbls = [0, 1, 2].map((i) => document.getElementById(`layerLbl${i}`));
+      const layerFrames = [0, 1, 2].map((i) => document.getElementById(`layerFrame${i}`));
+      const layerGrids = [0, 1, 2].map((i) => document.getElementById(`layerGrid${i}`));
+      const layerBackdrops = [0, 1, 2].map((i) => document.getElementById(`layerBackdrop${i}`));
+      const layerTileContainers = [0, 1, 2].map((i) => document.getElementById(`layerTiles${i}`));
+      const bldOverlayLayers = document.getElementById('bldOverlayLayers');
+      const bldOverlayLayersMode = document.getElementById('bldOverlayLayersMode');
+
+      const subCube = document.getElementById('subCube');
+      const subPlane = document.getElementById('subPlane');
+      const subLayers = document.getElementById('subLayers');
+      const btnXray3d = document.getElementById('btnXray3d');
+      const spread3dRange = document.getElementById('spread3dRange');
+      const spread3dVal = document.getElementById('spread3dVal');
+      const btnResetCam3d = document.getElementById('btnResetCam3d');
+      const planeAxisSeg = document.getElementById('planeAxisSeg');
+      const planeIdxSeg = document.getElementById('planeIdxSeg');
+      const btnPlaneDepth = document.getElementById('btnPlaneDepth');
+      const btnPlaneAuto = document.getElementById('btnPlaneAuto');
+      const layersAxisSeg = document.getElementById('layersAxisSeg');
+      const layersLayoutSeg = document.getElementById('layersLayoutSeg');
+
       const controlBar = document.getElementById('controlBar');
       const scrim = document.getElementById('scrim');
       const configSheet = document.getElementById('configSheet');
       const statsSheet = document.getElementById('statsSheet');
 
       const sizeSelector = document.getElementById('sizeSelector');
+      const btnSelect3dSize = document.getElementById('btnSelect3dSize');
       const modeSelector = document.getElementById('modeSelector');
       const schemeSelector = document.getElementById('schemeSelector');
       const themeSelector = document.getElementById('themeSelector');
@@ -2007,6 +2803,163 @@
       }
 
       /* =======================================================================
+         3D 3×3×3 LOGICAL PUZZLE ENGINE (EXACT EVEN-INVERSION PARITY & SLIDES)
+         Coordinates: x in 0..2 (L->R), y in 0..2 (T->B), z in 0..2 (Front->Back)
+         Index: idx = z * 9 + y * 3 + x. Solved: 1..26 at 0..25, 0 at 26.
+         ======================================================================= */
+      function idx3d(x, y, z) {
+        return z * 9 + y * 3 + x;
+      }
+
+      function coords3d(i) {
+        const z = Math.floor(i / 9);
+        const rem = i % 9;
+        return { x: rem % 3, y: Math.floor(rem / 3), z };
+      }
+
+      function isSolvable3D(arr) {
+        let inv = 0;
+        for (let i = 0; i < 27; i++) {
+          const a = arr[i];
+          if (a === 0) continue;
+          for (let j = i + 1; j < 27; j++) {
+            const b = arr[j];
+            if (b !== 0 && a > b) inv++;
+          }
+        }
+        return (inv & 1) === 0;
+      }
+
+      function isSolved3D(arr) {
+        for (let i = 0; i < 26; i++) {
+          if (arr[i] !== i + 1) return false;
+        }
+        return arr[26] === 0;
+      }
+
+      function generateScramble3DFromSeed(seed) {
+        const rng = mulberry32(seed >>> 0);
+        while (true) {
+          const arr = new Array(27);
+          for (let i = 0; i < 27; i++) arr[i] = i;
+
+          for (let i = 26; i > 0; i--) {
+            const j = Math.floor(rng() * (i + 1));
+            const tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+          }
+
+          if (!isSolvable3D(arr)) {
+            let p1 = -1;
+            let p2 = -1;
+            for (let i = 0; i < 27; i++) {
+              if (arr[i] !== 0) {
+                if (p1 === -1) p1 = i;
+                else {
+                  p2 = i;
+                  break;
+                }
+              }
+            }
+            const tmp = arr[p1];
+            arr[p1] = arr[p2];
+            arr[p2] = tmp;
+          }
+
+          if (!isSolved3D(arr)) return arr;
+        }
+      }
+
+      function getEmpty3D() {
+        const i = board3d.indexOf(0);
+        return i >= 0 ? coords3d(i) : { x: 2, y: 2, z: 2 };
+      }
+
+      function isAlignedWithEmpty3D(x, y, z, empty) {
+        const e = empty || getEmpty3D();
+        const same = (x === e.x ? 1 : 0) + (y === e.y ? 1 : 0) + (z === e.z ? 1 : 0);
+        return same === 2;
+      }
+
+      /**
+       * Slides tile at (tx, ty, tz) — and any intermediate tiles along the straight
+       * line — into the empty slot. Returns transition info or null if invalid.
+       */
+      function slide3DAt(tx, ty, tz) {
+        if (tx < 0 || tx > 2 || ty < 0 || ty > 2 || tz < 0 || tz > 2) return null;
+        const empty = getEmpty3D();
+        if (!isAlignedWithEmpty3D(tx, ty, tz, empty)) return null;
+
+        const dx = Math.sign(tx - empty.x);
+        const dy = Math.sign(ty - empty.y);
+        const dz = Math.sign(tz - empty.z);
+        const dist = Math.abs(tx - empty.x) + Math.abs(ty - empty.y) + Math.abs(tz - empty.z);
+
+        const moved = [];
+        let cx = empty.x;
+        let cy = empty.y;
+        let cz = empty.z;
+
+        for (let step = 0; step < dist; step++) {
+          const nx = cx + dx;
+          const ny = cy + dy;
+          const nz = cz + dz;
+          const tileId = board3d[idx3d(nx, ny, nz)];
+          board3d[idx3d(cx, cy, cz)] = tileId;
+          moved.push({
+            tileId,
+            from: { x: nx, y: ny, z: nz },
+            to: { x: cx, y: cy, z: cz }
+          });
+          cx = nx;
+          cy = ny;
+          cz = nz;
+        }
+
+        board3d[idx3d(tx, ty, tz)] = 0;
+        return {
+          moved,
+          dist,
+          prevEmpty: empty,
+          newEmpty: { x: tx, y: ty, z: tz }
+        };
+      }
+
+      // Bijection between 3-Layer (layer, r, c) and 3D (x, y, z) for active slice axis
+      function layerCellTo3D(axis, layer, r, c) {
+        if (axis === 'y') return { x: c, y: layer, z: r };
+        if (axis === 'x') return { x: layer, y: r, z: c };
+        return { x: c, y: r, z: layer }; // default 'z'
+      }
+
+      function coords3DToLayerCell(axis, x, y, z) {
+        if (axis === 'y') return { layer: y, r: z, c: x };
+        if (axis === 'x') return { layer: x, r: y, c: z };
+        return { layer: z, r: y, c: x }; // default 'z'
+      }
+
+      function getTilePigment3D(val, scheme) {
+        if (scheme === 'mono') return null;
+        const home = coords3d(val - 1);
+        if (scheme === 'rows') {
+          return SLICE_3D_COLORS[home.y];
+        }
+        if (scheme === 'cols') {
+          return SLICE_3D_COLORS[home.x];
+        }
+        if (scheme === 'fringe') {
+          const shell = Math.min(home.x, home.y, home.z);
+          if (shell === 0) {
+            return SLICE_3D_COLORS[home.z];
+          }
+          return PIGMENTS[4]; // Inner 2×2×2 core highlight (slate teal)
+        }
+        // Default ('fringe_split'): Classic 3D Z-layer slice colors (1-9, 10-18, 19-26)
+        return SLICE_3D_COLORS[home.z];
+      }
+
+      /* =======================================================================
          DYNAMIC N×N PIGMENT COLOR SCHEMES
          ======================================================================= */
       function getTilePigment(val, N, scheme) {
@@ -2039,8 +2992,13 @@
            std: <timeMs>,<moves>,<tsDeltaSec>,<seed>
            bld: <timeMs>,<memoMs>,<moves>,<flags>,<tsDeltaSec>,<seed>
          ======================================================================= */
-      function sessionKey(size, mode) {
+      function sessionKey(size, mode, is3d = false) {
+        if (is3d) return `${SESSION_PREFIX}3x3x3_${mode}`;
         return `${SESSION_PREFIX}${size}x${size}_${mode}`;
+      }
+
+      function activeSessionKey() {
+        return sessionKey(cfg.size, cfg.mode, cfg.is3d);
       }
 
       function isBldMode(mode) {
@@ -2132,7 +3090,7 @@
 
       function loadActiveSession() {
         try {
-          const key = sessionKey(cfg.size, cfg.mode);
+          const key = activeSessionKey();
           const raw = localStorage.getItem(key);
           activeSolves = raw ? unpackSession(raw, cfg.mode) : [];
         } catch (_) {
@@ -2141,7 +3099,7 @@
       }
 
       function saveActiveSession() {
-        const key = sessionKey(cfg.size, cfg.mode);
+        const key = activeSessionKey();
         try {
           if (activeSolves.length === 0) {
             localStorage.removeItem(key);
@@ -2156,7 +3114,7 @@
       function getStorageFootprint() {
         let activeBytes = 0;
         let totalBytes = 0;
-        const activeK = sessionKey(cfg.size, cfg.mode);
+        const activeK = activeSessionKey();
         try {
           for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
@@ -2176,8 +3134,10 @@
           const raw = localStorage.getItem(CFG_KEY);
           if (!raw) return { ...DEFAULT_CFG };
           const p = JSON.parse(raw);
+          const sp = Number(p.spread3d);
           return {
             size: SIZES.includes(p.size) ? p.size : DEFAULT_CFG.size,
+            is3d: typeof p.is3d === 'boolean' ? p.is3d : DEFAULT_CFG.is3d,
             mode: MODES.includes(p.mode) ? p.mode : DEFAULT_CFG.mode,
             theme: p.theme === 'paper' ? 'paper' : 'graphite',
             scheme: ['fringe_split', 'fringe', 'rows', 'cols', 'mono'].includes(p.scheme) ? p.scheme : DEFAULT_CFG.scheme,
@@ -2186,7 +3146,16 @@
             glide: typeof p.glide === 'boolean' ? p.glide : DEFAULT_CFG.glide,
             hideBlankBld: typeof p.hideBlankBld === 'boolean' ? p.hideBlankBld : DEFAULT_CFG.hideBlankBld,
             sound: typeof p.sound === 'boolean' ? p.sound : DEFAULT_CFG.sound,
-            dots: typeof p.dots === 'boolean' ? p.dots : DEFAULT_CFG.dots
+            dots: typeof p.dots === 'boolean' ? p.dots : DEFAULT_CFG.dots,
+            view3d: ['cube', 'plane', 'layers'].includes(p.view3d) ? p.view3d : DEFAULT_CFG.view3d,
+            spread3d: Number.isFinite(sp) ? Math.max(1.06, Math.min(1.65, sp)) : DEFAULT_CFG.spread3d,
+            xray3d: typeof p.xray3d === 'boolean' ? p.xray3d : DEFAULT_CFG.xray3d,
+            planeAxis: ['z', 'y', 'x'].includes(p.planeAxis) ? p.planeAxis : DEFAULT_CFG.planeAxis,
+            planeIndex: [0, 1, 2].includes(p.planeIndex) ? p.planeIndex : DEFAULT_CFG.planeIndex,
+            planeDepth: typeof p.planeDepth === 'boolean' ? p.planeDepth : DEFAULT_CFG.planeDepth,
+            planeAuto: typeof p.planeAuto === 'boolean' ? p.planeAuto : DEFAULT_CFG.planeAuto,
+            layersAxis: ['z', 'y', 'x'].includes(p.layersAxis) ? p.layersAxis : DEFAULT_CFG.layersAxis,
+            layersLayout: p.layersLayout === 'stack' ? 'stack' : 'row'
           };
         } catch (_) {
           return { ...DEFAULT_CFG };
@@ -2494,6 +3463,10 @@
       }
 
       function renderBoard() {
+        if (cfg.is3d) {
+          render3DViews();
+          return;
+        }
         const N = cfg.size;
         const total = N * N;
         const showMisplaced = phase === 'DONE' && finalDnf;
@@ -2517,17 +3490,1102 @@
       function updateBoardMasking() {
         const masked = phase === 'BLD_READY' || phase === 'BLD_EXEC';
         const hideBlank = phase === 'BLD_EXEC' && cfg.hideBlankBld;
+        const overlayText = MODE_META[cfg.mode].overlay;
 
         boardGrid.classList.toggle('is-masked', masked);
         boardGrid.classList.toggle('bld-hide-blank', hideBlank);
 
+        layers3dWrap.classList.toggle('is-masked', masked);
+        layers3dWrap.classList.toggle('bld-hide-blank', hideBlank);
+
+        cube3dLegend.classList.toggle('hidden-view', masked);
+
         if (phase === 'BLD_READY') {
-          bldOverlayMode.textContent = MODE_META[cfg.mode].overlay;
+          bldOverlayMode.textContent = overlayText;
           bldOverlay.classList.add('visible');
           bldOverlay.setAttribute('aria-hidden', 'false');
+
+          bldOverlay3dMode.textContent = overlayText;
+          bldOverlay3d.classList.add('visible');
+          bldOverlay3d.setAttribute('aria-hidden', 'false');
+
+          bldOverlayLayersMode.textContent = overlayText;
+          bldOverlayLayers.classList.add('visible');
+          bldOverlayLayers.setAttribute('aria-hidden', 'false');
         } else {
           bldOverlay.classList.remove('visible');
           bldOverlay.setAttribute('aria-hidden', 'true');
+
+          bldOverlay3d.classList.remove('visible');
+          bldOverlay3d.setAttribute('aria-hidden', 'true');
+
+          bldOverlayLayers.classList.remove('visible');
+          bldOverlayLayers.setAttribute('aria-hidden', 'true');
+        }
+
+        if (cfg.is3d) {
+          cube3d.requestFrame();
+        }
+      }
+
+      /* =======================================================================
+         3-LAYER 3×3 BOARD ENGINE (SIDE-BY-SIDE OR STACKED + CROSS-BOARD GLIDE)
+         ======================================================================= */
+      function buildLayers3DDOM() {
+        if (layersDomBuilt) return;
+        layersDomBuilt = true;
+
+        layerBackdropCells = [[], [], []];
+        for (let L = 0; L < 3; L++) {
+          const bd = layerBackdrops[L];
+          bd.innerHTML = '';
+          const frag = document.createDocumentFragment();
+          for (let i = 0; i < 9; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'backdrop-cell';
+            const inner = document.createElement('div');
+            inner.className = 'backdrop-cell-inner';
+            cell.appendChild(inner);
+            frag.appendChild(cell);
+            layerBackdropCells[L].push(cell);
+          }
+          bd.appendChild(frag);
+          layerTileContainers[L].innerHTML = '';
+        }
+
+        layerTileSlots = new Array(27);
+        layerTileFaces = new Array(27);
+        for (let val = 1; val <= 26; val++) {
+          const slot = document.createElement('div');
+          slot.className = 'tile-slot';
+
+          const face = document.createElement('div');
+          face.className = 'tile-face';
+          face.textContent = String(val);
+
+          const dot = document.createElement('span');
+          dot.className = 'tile-dot';
+          face.appendChild(dot);
+
+          slot.appendChild(face);
+          layerTileSlots[val] = slot;
+          layerTileFaces[val] = face;
+          layerTileContainers[Math.floor((val - 1) / 9)].appendChild(slot);
+        }
+
+        applyLayerPigments();
+      }
+
+      function applyLayerPigments() {
+        if (!layersDomBuilt) return;
+        for (let val = 1; val <= 26; val++) {
+          const face = layerTileFaces[val];
+          if (!face) continue;
+          const p = getTilePigment3D(val, cfg.scheme);
+          if (!p) {
+            face.classList.add('is-mono');
+            face.style.backgroundColor = '';
+            face.style.color = '';
+          } else {
+            face.classList.remove('is-mono');
+            face.style.backgroundColor = p.bg;
+            face.style.color = p.ink;
+          }
+        }
+      }
+
+      function updateLayerHeaders() {
+        const ax = cfg.layersAxis;
+        const labels = ax === 'z'
+          ? ['L1 · 1-9', 'L2 · 10-18', 'L3 · 19-26']
+          : ax === 'y'
+            ? ['Y1 · TOP', 'Y2 · MID', 'Y3 · BOT']
+            : ['X1 · LEFT', 'X2 · MID', 'X3 · RIGHT'];
+
+        for (let L = 0; L < 3; L++) {
+          layerLbls[L].textContent = labels[L];
+          layerSwatches[L].style.background = cfg.scheme === 'mono' ? 'var(--border-strong)' : SLICE_3D_COLORS[L].bg;
+        }
+      }
+
+      function layoutLayers3D() {
+        if (!cfg.is3d || cfg.view3d !== 'layers') return;
+        buildLayers3DDOM();
+
+        const rect = viewport3d.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return;
+
+        const isStack = cfg.layersLayout === 'stack';
+        layers3dWrap.classList.toggle('is-stack', isStack);
+
+        let maxFrame;
+        if (!isStack) {
+          const gap = rect.width < 420 ? 4 : (rect.width < 580 ? 7 : 12);
+          layers3dWrap.style.gap = `${gap}px`;
+          const maxW = Math.floor((rect.width - gap * 2) / 3);
+          const maxH = Math.floor(rect.height - 22);
+          maxFrame = Math.min(maxW, maxH, 244);
+        } else {
+          const gap = 6;
+          layers3dWrap.style.gap = `${gap}px`;
+          const maxH = Math.floor((rect.height - gap * 2 - 12) / 3) - 18;
+          const maxW = Math.floor(Math.min(rect.width, 244));
+          maxFrame = Math.min(maxW, maxH, 244);
+        }
+
+        const trayPad = maxFrame < 130 ? 3 : 5;
+        const usable = Math.max(66, maxFrame - trayPad * 2 - 2);
+        layerCellPx = Math.max(20, Math.floor(usable / 3));
+        const gridPx = layerCellPx * 3;
+        const framePx = gridPx + trayPad * 2 + 2;
+
+        layerTilePad = layerCellPx < 42 ? 2 : 3;
+        const fontPx = Math.max(12, Math.round(layerCellPx * 0.44));
+        const dotPx = Math.max(3, Math.round(layerCellPx * 0.095));
+
+        for (let L = 0; L < 3; L++) {
+          layerCols[L].style.width = `${framePx}px`;
+          layerFrames[L].style.width = `${framePx}px`;
+          layerFrames[L].style.height = `${framePx}px`;
+          layerGrids[L].style.width = `${gridPx}px`;
+          layerGrids[L].style.height = `${gridPx}px`;
+
+          const bgCells = layerBackdropCells[L];
+          for (let i = 0; i < 9; i++) {
+            bgCells[i].style.padding = `${layerTilePad}px`;
+          }
+        }
+
+        for (let val = 1; val <= 26; val++) {
+          const slot = layerTileSlots[val];
+          const face = layerTileFaces[val];
+          if (!slot || !face) continue;
+          slot.style.width = `${layerCellPx}px`;
+          slot.style.height = `${layerCellPx}px`;
+          slot.style.padding = `${layerTilePad}px`;
+          face.style.fontSize = `${fontPx}px`;
+          const dot = face.firstElementChild;
+          if (dot) {
+            dot.style.width = `${dotPx}px`;
+            dot.style.height = `${dotPx}px`;
+          }
+        }
+
+        renderLayers3D();
+      }
+
+      function renderLayers3D() {
+        if (!layersDomBuilt) return;
+        const ax = cfg.layersAxis;
+        const empty = getEmpty3D();
+        const emptyLC = coords3DToLayerCell(ax, empty.x, empty.y, empty.z);
+        const showMisplaced = phase === 'DONE' && finalDnf;
+        const hideBlank = phase === 'BLD_EXEC' && cfg.hideBlankBld;
+
+        updateLayerHeaders();
+
+        for (let L = 0; L < 3; L++) {
+          layerCols[L].classList.toggle('has-empty', !hideBlank && L === emptyLC.layer);
+          const bgCells = layerBackdropCells[L];
+          for (let i = 0; i < 9; i++) {
+            const isEmptyHere = !hideBlank && L === emptyLC.layer && i === emptyLC.r * 3 + emptyLC.c;
+            bgCells[i].classList.toggle('is-empty-cell', isEmptyHere);
+          }
+        }
+
+        for (let i = 0; i < 27; i++) {
+          const val = board3d[i];
+          if (val === 0) continue;
+          const pos = coords3d(i);
+          const lc = coords3DToLayerCell(ax, pos.x, pos.y, pos.z);
+          const slot = layerTileSlots[val];
+          if (!slot) continue;
+
+          const targetContainer = layerTileContainers[lc.layer];
+          if (slot.parentElement !== targetContainer) {
+            targetContainer.appendChild(slot);
+          }
+
+          slot.style.transform = `translate3d(${lc.c * layerCellPx}px, ${lc.r * layerCellPx}px, 0)`;
+
+          const correct = i === val - 1;
+          const isZLink = lc.layer !== emptyLC.layer && lc.r === emptyLC.r && lc.c === emptyLC.c;
+          slot.classList.toggle('in-place', correct);
+          slot.classList.toggle('is-misplaced', showMisplaced && !correct);
+          slot.classList.toggle('is-z-link', isZLink);
+        }
+      }
+
+      function pointerToLayer3D(e) {
+        for (let L = 0; L < 3; L++) {
+          const rect = layerGrids[L].getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) continue;
+          if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+            const c = Math.min(2, Math.max(0, Math.floor(((e.clientX - rect.left) / rect.width) * 3)));
+            const r = Math.min(2, Math.max(0, Math.floor(((e.clientY - rect.top) / rect.height) * 3)));
+            return { layer: L, r, c };
+          }
+        }
+        return null;
+      }
+
+      layers3dWrap.addEventListener('pointerdown', (e) => {
+        if (!cfg.is3d || cfg.view3d !== 'layers') return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        e.preventDefault();
+
+        if (cfg.sound) unlockAudio();
+
+        if (phase === 'BLD_READY') {
+          ignoredPointers.add(e.pointerId);
+          revealBld();
+          return;
+        }
+
+        activePointers.add(e.pointerId);
+        try {
+          layers3dWrap.setPointerCapture(e.pointerId);
+        } catch (_) {}
+
+        const hit = pointerToLayer3D(e);
+        if (hit) {
+          layerLastCellKey.set(e.pointerId, `${hit.layer},${hit.r},${hit.c}`);
+          const p3 = layerCellTo3D(cfg.layersAxis, hit.layer, hit.r, hit.c);
+          executeMove3DAt(p3.x, p3.y, p3.z);
+        }
+      });
+
+      layers3dWrap.addEventListener('pointermove', (e) => {
+        if (!cfg.is3d || cfg.view3d !== 'layers') return;
+        if (!cfg.glide) return;
+        if (ignoredPointers.has(e.pointerId) || !activePointers.has(e.pointerId)) return;
+
+        const hit = pointerToLayer3D(e);
+        if (!hit) return;
+        const key = `${hit.layer},${hit.r},${hit.c}`;
+        if (layerLastCellKey.get(e.pointerId) === key) return;
+        layerLastCellKey.set(e.pointerId, key);
+
+        const p3 = layerCellTo3D(cfg.layersAxis, hit.layer, hit.r, hit.c);
+        executeMove3DAt(p3.x, p3.y, p3.z);
+      });
+
+      function onLayerPointerEnd(e) {
+        layerLastCellKey.delete(e.pointerId);
+      }
+      layers3dWrap.addEventListener('pointerup', onLayerPointerEnd);
+      layers3dWrap.addEventListener('pointercancel', onLayerPointerEnd);
+      layers3dWrap.addEventListener('lostpointercapture', onLayerPointerEnd);
+
+      /* =======================================================================
+         ZERO-DEPENDENCY HIGH-DPI 3D CANVAS ENGINE (CUBE + PLANE MODE)
+         - Exact L1 Manhattan depth sorting (100% artifact-free for cube grids)
+         - Perspective-projected matte faces + studio lighting + vector numbers
+         - Smooth spherical orbit, 2-finger pinch zoom, scroll zoom, hover & tap
+         ======================================================================= */
+      const CUBE_FACES = [
+        { n: [0, 0, 1],  u: [1, 0, 0],  v: [0, -1, 0] }, // +Z Front
+        { n: [0, 0, -1], u: [-1, 0, 0], v: [0, -1, 0] }, // -Z Back
+        { n: [1, 0, 0],  u: [0, 0, -1], v: [0, -1, 0] }, // +X Right
+        { n: [-1, 0, 0], u: [0, 0, 1],  v: [0, -1, 0] }, // -X Left
+        { n: [0, 1, 0],  u: [1, 0, 0],  v: [0, 0, 1] },  // +Y Top
+        { n: [0, -1, 0], u: [1, 0, 0],  v: [0, 0, -1] }  // -Y Bottom
+      ];
+
+      const CUBE_EDGES = [
+        [0,1],[1,3],[3,2],[2,0],
+        [4,5],[5,7],[7,6],[6,4],
+        [0,4],[1,5],[2,6],[3,7]
+      ];
+
+      const LIGHT_KEY = [0.44, 0.72, 0.54];
+      const LIGHT_FILL = [-0.55, -0.32, -0.46];
+
+      function parseHexRgb(hex) {
+        const h = hex.replace('#', '');
+        return [
+          parseInt(h.slice(0, 2), 16),
+          parseInt(h.slice(2, 4), 16),
+          parseInt(h.slice(4, 6), 16)
+        ];
+      }
+
+      function shadeRgb(rgb, factor) {
+        const r = Math.max(0, Math.min(255, Math.round(rgb[0] * factor)));
+        const g = Math.max(0, Math.min(255, Math.round(rgb[1] * factor)));
+        const b = Math.max(0, Math.min(255, Math.round(rgb[2] * factor)));
+        return `rgb(${r},${g},${b})`;
+      }
+
+      function pointInQuad(px, py, q) {
+        let sign = 0;
+        for (let i = 0; i < 4; i++) {
+          const a = q[i];
+          const b = q[(i + 1) & 3];
+          const cross = (b.x - a.x) * (py - a.y) - (b.y - a.y) * (px - a.x);
+          if (Math.abs(cross) < 1e-6) continue;
+          const s = cross > 0 ? 1 : -1;
+          if (sign === 0) sign = s;
+          else if (sign !== s) return false;
+        }
+        return true;
+      }
+
+      const cube3d = (() => {
+        const ctx = cube3dCanvas.getContext('2d');
+        const CUBE_SIZE = 0.90;
+        const HALF = CUBE_SIZE * 0.5;
+
+        let width = 320;
+        let height = 320;
+        let dpr = 1;
+
+        // Spherical orbit camera
+        let theta = 0.56;
+        let phi = 1.16;
+        let radius = 8.4;
+        let targetTheta = theta;
+        let targetPhi = phi;
+        let targetRadius = radius;
+        const minRadius = 5.0;
+        const maxRadius = 15.0;
+        const minPhi = 0.12;
+        const maxPhi = Math.PI - 0.12;
+
+        // Slide animations & hover
+        let tileAnims = new Map(); // tileId -> { from, to, start, dur }
+        let emptyAnim = null;
+        let hoveredTileId = null;
+        let hitQuads = []; // Front-to-back interactive quads from latest frame
+
+        // RAF management
+        let loopId = null;
+        let lastFrameTime = 0;
+
+        // Pointer orbit/tap/pinch state
+        const ptrs = new Map();
+        let primaryId = null;
+        let downX = 0;
+        let downY = 0;
+        let lastX = 0;
+        let lastY = 0;
+        let maxDrag = 0;
+        let wasMulti = false;
+        let lastPinch = null;
+        let lastBgTapTs = 0;
+
+        function defaultRadiusForViewport() {
+          const aspect = width / Math.max(1, height);
+          return aspect < 0.85 ? 9.2 : 8.2;
+        }
+
+        function resize() {
+          const rect = cube3dFrame.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) return;
+          dpr = Math.min(window.devicePixelRatio || 1, 2);
+          width = Math.round(rect.width);
+          height = Math.round(rect.height);
+          cube3dCanvas.width = Math.round(width * dpr);
+          cube3dCanvas.height = Math.round(height * dpr);
+          requestFrame();
+        }
+
+        function resetCamera(instant = false) {
+          targetTheta = 0.56;
+          targetPhi = 1.16;
+          targetRadius = defaultRadiusForViewport();
+          if (instant) {
+            theta = targetTheta;
+            phi = targetPhi;
+            radius = targetRadius;
+          }
+          requestFrame();
+        }
+
+        function snapCameraForPlane(axis) {
+          if (axis === 'z') {
+            targetTheta = 0.28;
+            targetPhi = 1.38;
+          } else if (axis === 'y') {
+            targetTheta = 0.20;
+            targetPhi = 0.38;
+          } else {
+            targetTheta = 1.28;
+            targetPhi = 1.38;
+          }
+          targetRadius = Math.min(targetRadius, defaultRadiusForViewport() * 0.94);
+          requestFrame();
+        }
+
+        function clearAnimations() {
+          tileAnims.clear();
+          emptyAnim = null;
+          hoveredTileId = null;
+        }
+
+        function animateSlide(res) {
+          clearAnimations();
+          const dur = cfg.animMs === 50 ? 85 : 50;
+          const now = performance.now();
+          for (let i = 0; i < res.moved.length; i++) {
+            const m = res.moved[i];
+            tileAnims.set(m.tileId, { from: m.from, to: m.to, start: now, dur });
+          }
+          emptyAnim = { from: res.prevEmpty, to: res.newEmpty, start: now, dur };
+          requestFrame();
+        }
+
+        function gridToWorld(gx, gy, gz) {
+          const s = cfg.spread3d;
+          return [(gx - 1) * s, (1 - gy) * s, (1 - gz) * s];
+        }
+
+        function getThemePalette() {
+          const isPaper = cfg.theme === 'paper';
+          return {
+            bg: isPaper ? '#E5E2DA' : '#15171A',
+            monoBg: isPaper ? [252, 251, 248] : [42, 46, 54],
+            monoInk: isPaper ? '#141517' : '#EDEDEA',
+            maskedBg: isPaper ? [217, 213, 204] : [35, 39, 46],
+            wireEmpty: isPaper ? '#B87918' : '#38BDF8',
+            wireEmptyFill: isPaper ? 'rgba(184,121,24,0.09)' : 'rgba(56,189,248,0.08)',
+            wireBounds: isPaper ? 'rgba(20,21,23,0.16)' : 'rgba(237,237,234,0.13)',
+            wirePlaneFrame: isPaper ? 'rgba(184,121,24,0.52)' : 'rgba(224,159,62,0.52)',
+            movableEdge: isPaper ? 'rgba(20,21,23,0.55)' : 'rgba(237,237,234,0.48)',
+            hoverEdge: isPaper ? '#141517' : '#38BDF8',
+            dnfRed: isPaper ? '#C23535' : '#D64545',
+            chamferDark: isPaper ? 'rgba(20,21,23,0.18)' : 'rgba(0,0,0,0.34)',
+            chamferLight: isPaper ? 'rgba(255,255,255,0.32)' : 'rgba(255,255,255,0.16)'
+          };
+        }
+
+        function computeCameraBasis() {
+          const sp = Math.sin(phi);
+          const camX = radius * sp * Math.sin(theta);
+          const camY = radius * Math.cos(phi);
+          const camZ = radius * sp * Math.cos(theta);
+
+          const invR = 1 / Math.max(0.0001, radius);
+          const fx = -camX * invR;
+          const fy = -camY * invR;
+          const fz = -camZ * invR;
+
+          // right = normalize(cross(fwd, (0,1,0))) = normalize((-fz, 0, fx))
+          let rx = -fz;
+          let rz = fx;
+          const rLen = Math.hypot(rx, rz) || 1;
+          rx /= rLen;
+          rz /= rLen;
+          const ry = 0;
+
+          // up = cross(right, fwd)
+          const ux = ry * fz - rz * fy;
+          const uy = rz * fx - rx * fz;
+          const uz = rx * fy - ry * fx;
+
+          const focal = (Math.min(width, height) * 0.5) / Math.tan((36 * Math.PI) / 360);
+          return {
+            cam: [camX, camY, camZ],
+            fwd: [fx, fy, fz],
+            right: [rx, ry, rz],
+            up: [ux, uy, uz],
+            focal,
+            cx: width * 0.5,
+            cy: height * 0.5
+          };
+        }
+
+        function projectPt(wx, wy, wz, b) {
+          const dx = wx - b.cam[0];
+          const dy = wy - b.cam[1];
+          const dz = wz - b.cam[2];
+          const vz = dx * b.fwd[0] + dy * b.fwd[1] + dz * b.fwd[2];
+          if (vz <= 0.1) return null;
+          const vx = dx * b.right[0] + dy * b.right[1] + dz * b.right[2];
+          const vy = dx * b.up[0] + dy * b.up[1] + dz * b.up[2];
+          const k = b.focal / vz;
+          return { x: b.cx + vx * k, y: b.cy - vy * k, z: vz };
+        }
+
+        function drawWireBox(cx, cy, cz, hx, hy, hz, b, strokeStyle, lineWidth, fillStyle) {
+          const corners = [
+            projectPt(cx - hx, cy - hy, cz - hz, b),
+            projectPt(cx + hx, cy - hy, cz - hz, b),
+            projectPt(cx - hx, cy + hy, cz - hz, b),
+            projectPt(cx + hx, cy + hy, cz - hz, b),
+            projectPt(cx - hx, cy - hy, cz + hz, b),
+            projectPt(cx + hx, cy - hy, cz + hz, b),
+            projectPt(cx - hx, cy + hy, cz + hz, b),
+            projectPt(cx + hx, cy + hy, cz + hz, b)
+          ];
+          if (corners.some((p) => !p)) return;
+
+          if (fillStyle) {
+            ctx.fillStyle = fillStyle;
+            const faceIdxs = [
+              [4,5,7,6],[0,2,3,1],[1,3,7,5],[0,4,6,2],[2,6,7,3],[0,1,5,4]
+            ];
+            for (let f = 0; f < 6; f++) {
+              const q = faceIdxs[f];
+              ctx.beginPath();
+              ctx.moveTo(corners[q[0]].x, corners[q[0]].y);
+              ctx.lineTo(corners[q[1]].x, corners[q[1]].y);
+              ctx.lineTo(corners[q[2]].x, corners[q[2]].y);
+              ctx.lineTo(corners[q[3]].x, corners[q[3]].y);
+              ctx.closePath();
+              ctx.fill();
+            }
+          }
+
+          ctx.strokeStyle = strokeStyle;
+          ctx.lineWidth = lineWidth;
+          ctx.beginPath();
+          for (let i = 0; i < CUBE_EDGES.length; i++) {
+            const a = corners[CUBE_EDGES[i][0]];
+            const c = corners[CUBE_EDGES[i][1]];
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(c.x, c.y);
+          }
+          ctx.stroke();
+        }
+
+        function isInActivePlane(x, y, z) {
+          if (cfg.planeAxis === 'z') return z === cfg.planeIndex;
+          if (cfg.planeAxis === 'y') return y === cfg.planeIndex;
+          return x === cfg.planeIndex;
+        }
+
+        function drawFrame(now) {
+          if (!ctx || width <= 0 || height <= 0) return;
+
+          // Smooth camera damping
+          const damp = 0.22;
+          theta += (targetTheta - theta) * damp;
+          phi += (targetPhi - phi) * damp;
+          radius += (targetRadius - radius) * damp;
+
+          const pal = getThemePalette();
+          const b = computeCameraBasis();
+          const isPlaneMode = cfg.view3d === 'plane';
+          const masked = phase === 'BLD_READY' || phase === 'BLD_EXEC';
+          const hideBlank = phase === 'BLD_EXEC' && cfg.hideBlankBld;
+          const showMisplaced = phase === 'DONE' && finalDnf;
+          const empty = getEmpty3D();
+
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.fillStyle = pal.bg;
+          ctx.fillRect(0, 0, width, height);
+
+          // In Plane mode, draw subtle outer volume wireframe + active plane frame
+          if (isPlaneMode) {
+            const halfVol = cfg.spread3d + HALF;
+            drawWireBox(0, 0, 0, halfVol, halfVol, halfVol, b, pal.wireBounds, 1, null);
+
+            const s = cfg.spread3d;
+            const pPos = (cfg.planeAxis === 'z' ? (1 - cfg.planeIndex) : (cfg.planeAxis === 'y' ? (1 - cfg.planeIndex) : (cfg.planeIndex - 1))) * s;
+            const pad = HALF + 0.06;
+            if (cfg.planeAxis === 'z') {
+              drawWireBox(0, 0, pPos, halfVol + 0.04, halfVol + 0.04, pad, b, pal.wirePlaneFrame, 1.2, null);
+            } else if (cfg.planeAxis === 'y') {
+              drawWireBox(0, pPos, 0, halfVol + 0.04, pad, halfVol + 0.04, b, pal.wirePlaneFrame, 1.2, null);
+            } else {
+              drawWireBox(pPos, 0, 0, pad, halfVol + 0.04, halfVol + 0.04, b, pal.wirePlaneFrame, 1.2, null);
+            }
+          }
+
+          // Collect renderables (cubes + empty wireframe)
+          const items = [];
+          const activeAnimDone = [];
+
+          for (let i = 0; i < 27; i++) {
+            const val = board3d[i];
+            const pos = coords3d(i);
+
+            if (val === 0) {
+              if (hideBlank) continue;
+              if (isPlaneMode && !isInActivePlane(pos.x, pos.y, pos.z) && !cfg.planeDepth) continue;
+
+              let wx, wy, wz;
+              if (emptyAnim) {
+                const t = Math.min(1, (now - emptyAnim.start) / emptyAnim.dur);
+                const ease = 1 - Math.pow(1 - t, 3);
+                const f = gridToWorld(emptyAnim.from.x, emptyAnim.from.y, emptyAnim.from.z);
+                const to = gridToWorld(emptyAnim.to.x, emptyAnim.to.y, emptyAnim.to.z);
+                wx = f[0] + (to[0] - f[0]) * ease;
+                wy = f[1] + (to[1] - f[1]) * ease;
+                wz = f[2] + (to[2] - f[2]) * ease;
+                if (t >= 1) emptyAnim = null;
+              } else {
+                [wx, wy, wz] = gridToWorld(pos.x, pos.y, pos.z);
+              }
+
+              const l1 = Math.abs(wx - b.cam[0]) + Math.abs(wy - b.cam[1]) + Math.abs(wz - b.cam[2]);
+              const onPlane = !isPlaneMode || isInActivePlane(pos.x, pos.y, pos.z);
+              items.push({ type: 'empty', wx, wy, wz, l1, alpha: onPlane ? 1.0 : 0.45 });
+              continue;
+            }
+
+            const movable = isAlignedWithEmpty3D(pos.x, pos.y, pos.z, empty);
+            let alpha = 1.0;
+            let interactive = true;
+            let isPerpPeek = false;
+
+            if (isPlaneMode) {
+              const inPlane = isInActivePlane(pos.x, pos.y, pos.z);
+              if (!inPlane) {
+                if (cfg.planeDepth && movable) {
+                  // Perpendicular movable cube aligned with empty slot!
+                  alpha = 0.86;
+                  interactive = true;
+                  isPerpPeek = true;
+                } else {
+                  continue; // Completely hidden in plane mode for zero clutter!
+                }
+              }
+            } else if (cfg.xray3d && !movable) {
+              alpha = 0.16;
+              interactive = false;
+            }
+
+            let wx, wy, wz;
+            const anim = tileAnims.get(val);
+            if (anim) {
+              const t = Math.min(1, (now - anim.start) / anim.dur);
+              const ease = 1 - Math.pow(1 - t, 3);
+              const f = gridToWorld(anim.from.x, anim.from.y, anim.from.z);
+              const to = gridToWorld(anim.to.x, anim.to.y, anim.to.z);
+              wx = f[0] + (to[0] - f[0]) * ease;
+              wy = f[1] + (to[1] - f[1]) * ease;
+              wz = f[2] + (to[2] - f[2]) * ease;
+              if (t >= 1) activeAnimDone.push(val);
+            } else {
+              [wx, wy, wz] = gridToWorld(pos.x, pos.y, pos.z);
+            }
+
+            const l1 = Math.abs(wx - b.cam[0]) + Math.abs(wy - b.cam[1]) + Math.abs(wz - b.cam[2]);
+            items.push({
+              type: 'cube',
+              val,
+              idx: i,
+              pos,
+              wx,
+              wy,
+              wz,
+              l1,
+              movable,
+              alpha,
+              interactive,
+              isPerpPeek
+            });
+          }
+
+          for (let i = 0; i < activeAnimDone.length; i++) {
+            tileAnims.delete(activeAnimDone[i]);
+          }
+
+          // Exact L1 Manhattan back-to-front painter's sort
+          items.sort((a, c) => c.l1 - a.l1);
+
+          const nextHitQuads = [];
+
+          for (let k = 0; k < items.length; k++) {
+            const it = items[k];
+
+            if (it.type === 'empty') {
+              const pulse = 0.72 + 0.24 * Math.sin(now * 0.005);
+              ctx.save();
+              ctx.globalAlpha = it.alpha * pulse;
+              drawWireBox(it.wx, it.wy, it.wz, HALF * 0.94, HALF * 0.94, HALF * 0.94, b, pal.wireEmpty, 1.8, pal.wireEmptyFill);
+              ctx.restore();
+              continue;
+            }
+
+            const pigment = getTilePigment3D(it.val, cfg.scheme);
+            const baseRgb = masked
+              ? pal.maskedBg
+              : (pigment ? parseHexRgb(pigment.bg) : pal.monoBg);
+            const inkColor = masked
+              ? 'transparent'
+              : (pigment ? pigment.ink : pal.monoInk);
+            const isHovered = it.movable && it.val === hoveredTileId;
+            const isMisplaced = showMisplaced && it.idx !== it.val - 1;
+            const inPlace = it.idx === it.val - 1;
+
+            const showMovableEdge = !masked && (isHovered || (it.movable && (cfg.xray3d || it.isPerpPeek || !isPlaneMode)));
+            const movableEdgeCol = isHovered ? pal.hoverEdge : (it.isPerpPeek ? pal.wireEmpty : pal.movableEdge);
+            const movableEdgeW = isHovered ? 2.1 : (it.isPerpPeek ? 1.7 : 1.25);
+
+            ctx.save();
+            ctx.globalAlpha = it.alpha;
+
+            for (let fi = 0; fi < 6; fi++) {
+              const f = CUBE_FACES[fi];
+              const fcX = it.wx + f.n[0] * HALF;
+              const fcY = it.wy + f.n[1] * HALF;
+              const fcZ = it.wz + f.n[2] * HALF;
+
+              // Backface culling: face normal must point toward camera
+              const dotView = (fcX - b.cam[0]) * f.n[0] + (fcY - b.cam[1]) * f.n[1] + (fcZ - b.cam[2]) * f.n[2];
+              if (dotView >= 0) continue;
+
+              // 4 corners: top-left, top-right, bottom-right, bottom-left
+              const p00 = projectPt(fcX - f.u[0] * HALF - f.v[0] * HALF, fcY - f.u[1] * HALF - f.v[1] * HALF, fcZ - f.u[2] * HALF - f.v[2] * HALF, b);
+              const p10 = projectPt(fcX + f.u[0] * HALF - f.v[0] * HALF, fcY + f.u[1] * HALF - f.v[1] * HALF, fcZ + f.u[2] * HALF - f.v[2] * HALF, b);
+              const p11 = projectPt(fcX + f.u[0] * HALF + f.v[0] * HALF, fcY + f.u[1] * HALF + f.v[1] * HALF, fcZ + f.u[2] * HALF + f.v[2] * HALF, b);
+              const p01 = projectPt(fcX - f.u[0] * HALF + f.v[0] * HALF, fcY - f.u[1] * HALF + f.v[1] * HALF, fcZ - f.u[2] * HALF + f.v[2] * HALF, b);
+              if (!p00 || !p10 || !p11 || !p01) continue;
+
+              const quad = [p00, p10, p11, p01];
+              if (it.interactive) {
+                nextHitQuads.push({ tileId: it.val, pos: it.pos, movable: it.movable, quad });
+              }
+
+              // Matte directional studio lighting
+              const kDot = Math.max(0, f.n[0] * LIGHT_KEY[0] + f.n[1] * LIGHT_KEY[1] + f.n[2] * LIGHT_KEY[2]);
+              const fDot = Math.max(0, f.n[0] * LIGHT_FILL[0] + f.n[1] * LIGHT_FILL[1] + f.n[2] * LIGHT_FILL[2]);
+              let shade = 0.72 + 0.30 * kDot + 0.10 * fDot;
+              if (isHovered) shade += 0.14;
+              else if (it.movable && (cfg.xray3d || it.isPerpPeek)) shade += 0.06;
+
+              ctx.beginPath();
+              ctx.moveTo(p00.x, p00.y);
+              ctx.lineTo(p10.x, p10.y);
+              ctx.lineTo(p11.x, p11.y);
+              ctx.lineTo(p01.x, p01.y);
+              ctx.closePath();
+
+              ctx.fillStyle = shadeRgb(baseRgb, shade);
+              ctx.fill();
+
+              // Crisp chamfer hairline or movable/hover front-face highlight (zero back-edge bleed!)
+              if (isMisplaced) {
+                ctx.strokeStyle = pal.dnfRed;
+                ctx.lineWidth = 2.0;
+              } else if (showMovableEdge) {
+                ctx.strokeStyle = movableEdgeCol;
+                ctx.lineWidth = movableEdgeW;
+              } else {
+                ctx.strokeStyle = pal.chamferDark;
+                ctx.lineWidth = 1.0;
+              }
+              ctx.stroke();
+
+              // Crisp vector monospace label projected into face tangent plane
+              if (!masked && it.alpha > 0.35) {
+                const cx2 = (p00.x + p10.x + p11.x + p01.x) * 0.25;
+                const cy2 = (p00.y + p10.y + p11.y + p01.y) * 0.25;
+                const ux2 = ((p10.x + p11.x) - (p00.x + p01.x)) * 0.5 / 100;
+                const uy2 = ((p10.y + p11.y) - (p00.y + p01.y)) * 0.5 / 100;
+                const vx2 = ((p01.x + p11.x) - (p00.x + p10.x)) * 0.5 / 100;
+                const vy2 = ((p01.y + p11.y) - (p00.y + p10.y)) * 0.5 / 100;
+
+                // Skip ultra-grazing faces where text collapses to a sliver
+                const det = Math.abs(ux2 * vy2 - uy2 * vx2);
+                if (det > 0.012) {
+                  ctx.save();
+                  ctx.transform(ux2, uy2, vx2, vy2, cx2, cy2);
+
+                  // Delicate inner highlight frame
+                  ctx.strokeStyle = pal.chamferLight;
+                  ctx.lineWidth = 2.4;
+                  ctx.strokeRect(-43, -43, 86, 86);
+
+                  const lbl = String(it.val);
+                  const fSize = lbl.length === 1 ? 56 : 46;
+                  ctx.font = `700 ${fSize}px "IBM Plex Mono", ui-monospace, monospace`;
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+
+                  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+                  ctx.fillText(lbl, 0, 3);
+                  ctx.fillStyle = inkColor;
+                  ctx.fillText(lbl, 0, 0);
+
+                  if (it.val === 6 || it.val === 9) {
+                    ctx.fillStyle = inkColor;
+                    ctx.fillRect(-10, 27, 20, 3.2);
+                  }
+
+                  if (cfg.dots && inPlace) {
+                    ctx.fillStyle = inkColor;
+                    ctx.globalAlpha = it.alpha * 0.72;
+                    ctx.beginPath();
+                    ctx.arc(32, 32, 5.2, 0, Math.PI * 2);
+                    ctx.fill();
+                  }
+
+                  ctx.restore();
+                }
+              }
+            }
+
+            ctx.restore();
+          }
+
+          // Store front-to-back order for exact picking
+          hitQuads = nextHitQuads.reverse();
+        }
+
+        function pickAt(clientX, clientY) {
+          const rect = cube3dCanvas.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) return null;
+          const x = clientX - rect.left;
+          const y = clientY - rect.top;
+
+          for (let i = 0; i < hitQuads.length; i++) {
+            if (pointInQuad(x, y, hitQuads[i].quad)) {
+              return hitQuads[i];
+            }
+          }
+
+          // Forgiving 7px mobile tap margin strictly for movable cubes
+          const offsets = [[0,-7],[0,7],[-7,0],[7,0]];
+          for (let o = 0; o < offsets.length; o++) {
+            const ox = x + offsets[o][0];
+            const oy = y + offsets[o][1];
+            for (let i = 0; i < hitQuads.length; i++) {
+              if (hitQuads[i].movable && pointInQuad(ox, oy, hitQuads[i].quad)) {
+                return hitQuads[i];
+              }
+            }
+          }
+          return null;
+        }
+
+        function tick(now) {
+          if (!cfg.is3d || (cfg.view3d !== 'cube' && cfg.view3d !== 'plane')) {
+            loopId = null;
+            return;
+          }
+          lastFrameTime = now;
+          drawFrame(now);
+          loopId = requestAnimationFrame(tick);
+        }
+
+        function startLoop() {
+          if (loopId === null && cfg.is3d && (cfg.view3d === 'cube' || cfg.view3d === 'plane')) {
+            loopId = requestAnimationFrame(tick);
+          }
+        }
+
+        function stopLoop() {
+          if (loopId !== null) {
+            cancelAnimationFrame(loopId);
+            loopId = null;
+          }
+        }
+
+        function requestFrame() {
+          if (cfg.is3d && (cfg.view3d === 'cube' || cfg.view3d === 'plane')) {
+            startLoop();
+            if (lastFrameTime) drawFrame(performance.now());
+          }
+        }
+
+        function pinchDist() {
+          const arr = Array.from(ptrs.values());
+          if (arr.length < 2) return 0;
+          return Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
+        }
+
+        cube3dCanvas.addEventListener('pointerdown', (e) => {
+          if (!cfg.is3d || (cfg.view3d !== 'cube' && cfg.view3d !== 'plane')) return;
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          e.preventDefault();
+
+          if (cfg.sound) unlockAudio();
+
+          if (phase === 'BLD_READY') {
+            ignoredPointers.add(e.pointerId);
+            revealBld();
+            return;
+          }
+
+          try {
+            cube3dCanvas.setPointerCapture(e.pointerId);
+          } catch (_) {}
+
+          ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+          if (ptrs.size === 1) {
+            primaryId = e.pointerId;
+            downX = lastX = e.clientX;
+            downY = lastY = e.clientY;
+            maxDrag = 0;
+            wasMulti = false;
+            lastPinch = null;
+          } else if (ptrs.size >= 2) {
+            wasMulti = true;
+            lastPinch = pinchDist();
+            cube3dCanvas.classList.remove('is-dragging');
+          }
+        });
+
+        cube3dCanvas.addEventListener('pointermove', (e) => {
+          if (!cfg.is3d || (cfg.view3d !== 'cube' && cfg.view3d !== 'plane')) return;
+          if (ignoredPointers.has(e.pointerId)) return;
+
+          if (ptrs.size === 0) {
+            if (e.pointerType === 'mouse') {
+              const hit = pickAt(e.clientX, e.clientY);
+              const nextHover = hit && hit.movable ? hit.tileId : null;
+              if (nextHover !== hoveredTileId) {
+                hoveredTileId = nextHover;
+                cube3dCanvas.classList.toggle('is-hover-movable', nextHover !== null);
+              }
+            }
+            return;
+          }
+
+          if (!ptrs.has(e.pointerId)) return;
+          ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+          if (ptrs.size >= 2) {
+            const dist = pinchDist();
+            if (lastPinch !== null && dist > 0) {
+              targetRadius = Math.max(minRadius, Math.min(maxRadius, targetRadius + (lastPinch - dist) * 0.022));
+            }
+            lastPinch = dist;
+            return;
+          }
+
+          if (e.pointerId === primaryId && !wasMulti) {
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            lastX = e.clientX;
+            lastY = e.clientY;
+
+            const total = Math.hypot(e.clientX - downX, e.clientY - downY);
+            if (total > maxDrag) maxDrag = total;
+
+            const tapThresh = e.pointerType === 'touch' ? 11 : 8;
+            if (maxDrag >= tapThresh) {
+              cube3dCanvas.classList.add('is-dragging');
+            }
+
+            const rotSpeed = 0.0082;
+            targetTheta -= dx * rotSpeed;
+            targetPhi = Math.max(minPhi, Math.min(maxPhi, targetPhi - dy * rotSpeed));
+          }
+        });
+
+        function onCubePointerEnd(e) {
+          if (!ptrs.has(e.pointerId)) return;
+          ptrs.delete(e.pointerId);
+          if (ptrs.size < 2) lastPinch = null;
+
+          if (e.pointerId === primaryId) {
+            cube3dCanvas.classList.remove('is-dragging');
+            const tapThresh = e.pointerType === 'touch' ? 11 : 8;
+            if (!wasMulti && !ignoredPointers.has(e.pointerId) && maxDrag < tapThresh) {
+              const hit = pickAt(e.clientX, e.clientY);
+              if (hit && hit.movable) {
+                executeMove3DAt(hit.pos.x, hit.pos.y, hit.pos.z);
+              } else if (!hit) {
+                // Double-tap empty background resets camera nicely
+                const nowTs = performance.now();
+                if (nowTs - lastBgTapTs < 320) {
+                  if (cfg.view3d === 'plane') snapCameraForPlane(cfg.planeAxis);
+                  else resetCamera(false);
+                  lastBgTapTs = 0;
+                } else {
+                  lastBgTapTs = nowTs;
+                }
+              }
+            }
+            primaryId = null;
+          }
+        }
+
+        cube3dCanvas.addEventListener('pointerup', onCubePointerEnd);
+        cube3dCanvas.addEventListener('pointercancel', onCubePointerEnd);
+        cube3dCanvas.addEventListener('lostpointercapture', onCubePointerEnd);
+        cube3dCanvas.addEventListener('wheel', (e) => {
+          if (!cfg.is3d || (cfg.view3d !== 'cube' && cfg.view3d !== 'plane')) return;
+          e.preventDefault();
+          targetRadius = Math.max(minRadius, Math.min(maxRadius, targetRadius + e.deltaY * 0.0055));
+        }, { passive: false });
+        cube3dCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
+        cube3dCanvas.addEventListener('gesturestart', (e) => e.preventDefault());
+
+        return {
+          resize,
+          resetCamera,
+          snapCameraForPlane,
+          clearAnimations,
+          animateSlide,
+          startLoop,
+          stopLoop,
+          requestFrame
+        };
+      })();
+
+      function updatePlaneOverlayAndDots() {
+        const empty = getEmpty3D();
+        const emptyIdxOnAxis = cfg.planeAxis === 'z' ? empty.z : (cfg.planeAxis === 'y' ? empty.y : empty.x);
+        const masked = phase === 'BLD_READY' || phase === 'BLD_EXEC';
+        const hideBlank = phase === 'BLD_EXEC' && cfg.hideBlankBld;
+
+        planeIdxSeg.querySelectorAll('[data-pidx]').forEach((b) => {
+          const idx = Number(b.dataset.pidx);
+          b.classList.toggle('active', idx === cfg.planeIndex);
+          b.classList.toggle('has-empty', !hideBlank && idx === emptyIdxOnAxis);
+        });
+
+        const isPlane = cfg.view3d === 'plane';
+        cube3dPlaneTag.classList.toggle('hidden-view', !isPlane);
+
+        if (isPlane) {
+          const axisNames = {
+            z: ['Z1 · FRONT', 'Z2 · MID', 'Z3 · BACK'],
+            y: ['Y1 · TOP', 'Y2 · MID', 'Y3 · BOT'],
+            x: ['X1 · LEFT', 'X2 · MID', 'X3 · RIGHT']
+          };
+          cube3dPlaneText.textContent = axisNames[cfg.planeAxis][cfg.planeIndex];
+
+          const emptyInThisPlane = emptyIdxOnAxis === cfg.planeIndex;
+          cube3dPlaneDot.classList.toggle('hidden-view', hideBlank || !emptyInThisPlane);
+
+          if (!hideBlank && !masked && !emptyInThisPlane) {
+            btnJumpEmptyPlane.textContent = `HOLE: ${cfg.planeAxis.toUpperCase()}${emptyIdxOnAxis + 1}`;
+            btnJumpEmptyPlane.classList.remove('hidden-view');
+          } else {
+            btnJumpEmptyPlane.classList.add('hidden-view');
+          }
+        } else {
+          btnJumpEmptyPlane.classList.add('hidden-view');
+        }
+      }
+
+      function render3DViews() {
+        if (!cfg.is3d) return;
+        updatePlaneOverlayAndDots();
+        if (cfg.view3d === 'layers') {
+          buildLayers3DDOM();
+          renderLayers3D();
+        } else {
+          cube3d.requestFrame();
+        }
+      }
+
+      function layoutActiveStage() {
+        if (cfg.is3d) {
+          const wideLayers = cfg.view3d === 'layers' && cfg.layersLayout === 'row';
+          boardStage.classList.add('is-3d-mode');
+          boardStage.classList.toggle('is-3d-wide', wideLayers);
+          appShell.classList.toggle('compact-side-pad', wideLayers && window.innerWidth < 460);
+
+          if (cfg.view3d === 'layers') {
+            cube3d.stopLoop();
+            layoutLayers3D();
+          } else {
+            cube3d.resize();
+            cube3d.startLoop();
+          }
+        } else {
+          cube3d.stopLoop();
+          boardStage.classList.remove('is-3d-mode', 'is-3d-wide');
+          appShell.classList.remove('compact-side-pad');
+          layoutBoardExact();
         }
       }
 
@@ -2602,8 +4660,16 @@
       }
 
       function setVisualState(panelClass, badgeText, badgeSignal) {
+        const stateClasses = ['st-solved', 'st-pb', 'st-dnf', 'st-memo', 'st-exec'];
         stopwatchPanel.className = `stopwatch-panel${panelClass ? ' ' + panelClass : ''}`;
-        boardFrame.className = `board-frame${panelClass ? ' ' + panelClass : ''}`;
+        boardFrame.classList.remove(...stateClasses);
+        cube3dFrame.classList.remove(...stateClasses);
+        layers3dWrap.classList.remove(...stateClasses);
+        if (panelClass) {
+          boardFrame.classList.add(panelClass);
+          cube3dFrame.classList.add(panelClass);
+          layers3dWrap.classList.add(panelClass);
+        }
         statusTag.textContent = badgeText;
         statusTag.className = `status-tag${badgeSignal ? ' ' + badgeSignal : ''}`;
         practiceTag.classList.toggle('hidden', !isPractice);
@@ -2654,6 +4720,7 @@
         phase = 'BLD_MEMO';
         setVisualState('st-memo', 'MEMO', 'sig-amber');
         updateBoardMasking();
+        renderBoard();
         renderControls();
         rafId = requestAnimationFrame(timerTick);
       }
@@ -2664,6 +4731,7 @@
         phase = 'BLD_EXEC';
         setVisualState('st-exec', 'EXEC', 'sig-green');
         updateBoardMasking();
+        renderBoard();
         renderControls();
       }
 
@@ -2704,10 +4772,59 @@
         renderLiveTelemetry(now - startTime);
       }
 
+      function executeMove3DAt(tx, ty, tz) {
+        if (phase === 'DONE' || phase === 'BLD_READY') return;
+
+        const res = slide3DAt(tx, ty, tz);
+        if (!res) return;
+
+        const now = performance.now();
+
+        if (phase === 'STD_READY') {
+          startTime = now;
+          phase = 'STD_SOLVING';
+          setVisualState('', 'SOLVING', '');
+          rafId = requestAnimationFrame(timerTick);
+        } else if (phase === 'BLD_MEMO') {
+          memoMs = Math.max(0, now - startTime);
+          phase = 'BLD_EXEC';
+          setVisualState('st-exec', 'EXEC', 'sig-green');
+          updateBoardMasking();
+          renderControls();
+        }
+
+        moves += res.dist;
+
+        // Auto-follow empty slot in Plane Mode if enabled
+        if (cfg.view3d === 'plane' && cfg.planeAuto) {
+          const e = res.newEmpty;
+          const nextIdx = cfg.planeAxis === 'z' ? e.z : (cfg.planeAxis === 'y' ? e.y : e.x);
+          if (nextIdx !== cfg.planeIndex) {
+            cfg.planeIndex = nextIdx;
+            saveCfg();
+          }
+        }
+
+        if (cfg.view3d !== 'layers') {
+          cube3d.animateSlide(res);
+        }
+        render3DViews();
+
+        if (phase === 'STD_SOLVING' || (phase === 'BLD_EXEC' && cfg.mode === 'bld_auto')) {
+          if (isSolved3D(board3d)) {
+            finishAttempt(now, false);
+            return;
+          }
+        }
+
+        playClick();
+        renderLiveTelemetry(now - startTime);
+      }
+
       function submitBld() {
         if (phase !== 'BLD_EXEC' || cfg.mode !== 'bld_sub') return;
         const now = performance.now();
-        const solved = isSolved(board, cfg.size);
+        const solved = cfg.is3d ? isSolved3D(board3d) : isSolved(board, cfg.size);
         finishAttempt(now, !solved);
       }
 
@@ -2720,6 +4837,7 @@
         stopRaf();
         activePointers.clear();
         ignoredPointers.clear();
+        layerLastCellKey.clear();
 
         const rawTotal = Math.max(1, Math.round(nowTs - startTime));
         finalTotalMs = rawTotal;
@@ -2778,10 +4896,21 @@
         stopRaf();
         activePointers.clear();
         ignoredPointers.clear();
+        layerLastCellKey.clear();
+        cube3d.clearAnimations();
 
         currentSeed = seed >>> 0;
         isPractice = practiceFlag;
-        board = generateScrambleFromSeed(cfg.size, currentSeed);
+
+        if (cfg.is3d) {
+          board3d = generateScramble3DFromSeed(currentSeed);
+          if (cfg.planeAuto) {
+            const e = getEmpty3D();
+            cfg.planeIndex = cfg.planeAxis === 'z' ? e.z : (cfg.planeAxis === 'y' ? e.y : e.x);
+          }
+        } else {
+          board = generateScrambleFromSeed(cfg.size, currentSeed);
+        }
 
         startTime = 0;
         memoMs = 0;
@@ -2807,32 +4936,99 @@
         loadScrambleState(currentSeed, true);
       }
 
-      function switchSession(nextSize, nextMode) {
+      function switchSession(nextSize, nextMode, nextIs3d = cfg.is3d) {
         const sizeChanged = nextSize !== cfg.size;
         const modeChanged = nextMode !== cfg.mode;
-        if (!sizeChanged && !modeChanged) return;
+        const dimChanged = nextIs3d !== cfg.is3d;
+        if (!sizeChanged && !modeChanged && !dimChanged) return;
 
         cfg.size = nextSize;
         cfg.mode = nextMode;
+        cfg.is3d = nextIs3d;
         saveCfg();
 
         historyLimit = 60;
         loadActiveSession();
 
-        if (sizeChanged || tilePoolSize !== cfg.size) {
-          rebuildBoardDOM(cfg.size);
+        if (!cfg.is3d) {
+          if (sizeChanged || tilePoolSize !== cfg.size) {
+            rebuildBoardDOM(cfg.size);
+          } else {
+            applyTilePigments();
+          }
         } else {
-          applyTilePigments();
+          buildLayers3DDOM();
+          applyLayerPigments();
         }
 
         applyConfigUI();
         updateHeaderAndStatsBar();
         startNewScramble();
+        layoutActiveStage();
       }
 
       /* =======================================================================
          UI SYNC: HEADER, STATS BAR, CONFIG SHEET, STATS SHEET
          ======================================================================= */
+      function apply3DViewUI() {
+        const is3d = cfg.is3d;
+        boardFrame.classList.toggle('hidden-view', is3d);
+        stage3d.classList.toggle('hidden-view', !is3d);
+
+        btnToggle3d.classList.toggle('is-3d-active', is3d);
+        btnToggle3d.setAttribute('aria-pressed', String(is3d));
+        btnSelect3dSize.classList.toggle('active', is3d);
+
+        // View mode tabs
+        view3dTabs.querySelectorAll('[data-view3d]').forEach((b) => {
+          const active = b.dataset.view3d === cfg.view3d;
+          b.classList.toggle('active', active);
+          b.setAttribute('aria-selected', String(active));
+        });
+
+        const isLayers = cfg.view3d === 'layers';
+        const isPlane = cfg.view3d === 'plane';
+        const isCube = cfg.view3d === 'cube';
+
+        cube3dFrame.classList.toggle('hidden-view', isLayers);
+        layers3dWrap.classList.toggle('hidden-view', !isLayers);
+
+        subCube.classList.toggle('hidden-view', !isCube);
+        subPlane.classList.toggle('hidden-view', !isPlane);
+        subLayers.classList.toggle('hidden-view', !isLayers);
+
+        // Cube subbar
+        btnXray3d.classList.toggle('active', cfg.xray3d);
+        btnXray3d.setAttribute('aria-pressed', String(cfg.xray3d));
+        spread3dRange.value = cfg.spread3d.toFixed(2);
+        spread3dVal.textContent = cfg.spread3d.toFixed(2);
+
+        // Plane subbar
+        planeAxisSeg.querySelectorAll('[data-paxis]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.paxis === cfg.planeAxis);
+        });
+        btnPlaneDepth.classList.toggle('active', cfg.planeDepth);
+        btnPlaneDepth.setAttribute('aria-pressed', String(cfg.planeDepth));
+        btnPlaneAuto.classList.toggle('active', cfg.planeAuto);
+        btnPlaneAuto.setAttribute('aria-pressed', String(cfg.planeAuto));
+
+        // 3-Layers subbar
+        layersAxisSeg.querySelectorAll('[data-laxis]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.laxis === cfg.layersAxis);
+        });
+        layersLayoutSeg.querySelectorAll('[data-llayout]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.llayout === cfg.layersLayout);
+        });
+
+        // 3-Layer board animation & dots classes
+        layers3dWrap.classList.toggle('anim-snappy', cfg.animMs === 50);
+        layers3dWrap.classList.toggle('show-dots', cfg.dots);
+
+        if (is3d) {
+          updatePlaneOverlayAndDots();
+        }
+      }
+
       function applyConfigUI() {
         // Theme
         document.documentElement.setAttribute('data-theme', cfg.theme);
@@ -2841,16 +5037,17 @@
         // Board motion & dots
         boardGrid.classList.toggle('anim-snappy', cfg.animMs === 50);
         boardGrid.classList.toggle('show-dots', cfg.dots);
+        apply3DViewUI();
         updateBoardMasking();
 
         // Header badge
-        hdrSize.textContent = `${cfg.size}×${cfg.size}`;
+        hdrSize.textContent = cfg.is3d ? '3×3×3' : `${cfg.size}×${cfg.size}`;
         hdrMode.textContent = MODE_META[cfg.mode].short;
         hdrMode.classList.toggle('is-bld', isBldMode(cfg.mode));
 
         // Config sheet controls
         sizeSelector.querySelectorAll('[data-size]').forEach((b) => {
-          b.classList.toggle('active', Number(b.dataset.size) === cfg.size);
+          b.classList.toggle('active', !cfg.is3d && Number(b.dataset.size) === cfg.size);
         });
         modeSelector.querySelectorAll('[data-mode]').forEach((b) => {
           b.classList.toggle('active', b.dataset.mode === cfg.mode);
@@ -2872,6 +5069,11 @@
         togHideBlank.setAttribute('aria-checked', String(cfg.hideBlankBld));
         togSound.setAttribute('aria-checked', String(cfg.sound));
         togDots.setAttribute('aria-checked', String(cfg.dots));
+
+        if (cfg.is3d) {
+          applyLayerPigments();
+          render3DViews();
+        }
       }
 
       function updateHeaderAndStatsBar() {
@@ -2902,7 +5104,7 @@
         const bld = isBldMode(cfg.mode);
         const fp = getStorageFootprint();
 
-        stSessionName.textContent = `${cfg.size}×${cfg.size} · ${MODE_META[cfg.mode].full}`;
+        stSessionName.textContent = `${cfg.is3d ? '3×3×3' : `${cfg.size}×${cfg.size}`} · ${MODE_META[cfg.mode].full}`;
         stStorageInfo.textContent =
           `Active: ${st.total} solves · ${(fp.activeBytes / 1024).toFixed(2)} KB | All sessions: ${(fp.totalBytes / 1024).toFixed(2)} KB`;
 
@@ -3035,7 +5237,7 @@
       }
 
       /* =======================================================================
-         COMPACT TEXT BACKUP (EXPORT & IMPORT ALL SESSIONS)
+         COMPACT TEXT BACKUP (EXPORT & IMPORT ALL SESSIONS INCLUDING 3×3×3)
          ======================================================================= */
       function buildBackupString() {
         const lines = ['SP2_BACKUP_V1'];
@@ -3043,7 +5245,7 @@
           for (let mi = 0; mi < MODES.length; mi++) {
             const sz = SIZES[si];
             const md = MODES[mi];
-            const key = sessionKey(sz, md);
+            const key = sessionKey(sz, md, false);
             try {
               const raw = localStorage.getItem(key);
               if (raw && raw.startsWith('1|')) {
@@ -3052,6 +5254,18 @@
             } catch (_) {
               // Ignore
             }
+          }
+        }
+        for (let mi = 0; mi < MODES.length; mi++) {
+          const md = MODES[mi];
+          const key = sessionKey(3, md, true);
+          try {
+            const raw = localStorage.getItem(key);
+            if (raw && raw.startsWith('1|')) {
+              lines.push(`3x3x3_${md}=${raw}`);
+            }
+          } catch (_) {
+            // Ignore
           }
         }
         return lines.join('\n');
@@ -3092,6 +5306,21 @@
           const id = line.slice(0, eq);
           const payload = line.slice(eq + 1);
 
+          const m3d = id.match(/^3x3x3_(std|bld_auto|bld_sub)$/);
+          if (m3d) {
+            const md = m3d[1];
+            const parsed = unpackSession(payload, md);
+            if (parsed.length === 0) continue;
+            try {
+              localStorage.setItem(sessionKey(3, md, true), packSession(parsed, md));
+              importedSessions++;
+              importedSolves += parsed.length;
+            } catch (_) {
+              return { ok: false, msg: 'STORAGE QUOTA ERROR' };
+            }
+            continue;
+          }
+
           const m = id.match(/^([3-8])x([3-8])_(std|bld_auto|bld_sub)$/);
           if (!m || m[1] !== m[2]) continue;
 
@@ -3101,7 +5330,7 @@
           if (parsed.length === 0) continue;
 
           try {
-            localStorage.setItem(sessionKey(sz, md), packSession(parsed, md));
+            localStorage.setItem(sessionKey(sz, md, false), packSession(parsed, md));
             importedSessions++;
             importedSolves += parsed.length;
           } catch (_) {
@@ -3120,7 +5349,7 @@
       }
 
       /* =======================================================================
-         ZERO-LATENCY POINTER INPUT (TAP + MULTI-TILE + GLIDE + MULTI-TOUCH)
+         ZERO-LATENCY POINTER INPUT (2D TAP + MULTI-TILE + GLIDE + MULTI-TOUCH)
          ======================================================================= */
       function pointerToCell(e) {
         const rect = boardGrid.getBoundingClientRect();
@@ -3133,6 +5362,7 @@
       }
 
       boardGrid.addEventListener('pointerdown', (e) => {
+        if (cfg.is3d) return;
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         e.preventDefault();
 
@@ -3159,6 +5389,7 @@
       });
 
       boardGrid.addEventListener('pointermove', (e) => {
+        if (cfg.is3d) return;
         if (!cfg.glide) return;
         if (ignoredPointers.has(e.pointerId)) return;
         if (!activePointers.has(e.pointerId)) return;
@@ -3170,6 +5401,7 @@
       function onPointerEnd(e) {
         activePointers.delete(e.pointerId);
         ignoredPointers.delete(e.pointerId);
+        layerLastCellKey.delete(e.pointerId);
       }
 
       boardGrid.addEventListener('pointerup', onPointerEnd);
@@ -3180,9 +5412,153 @@
 
       boardFrame.addEventListener('contextmenu', (e) => e.preventDefault());
       boardFrame.addEventListener('dragstart', (e) => e.preventDefault());
+      layers3dWrap.addEventListener('contextmenu', (e) => e.preventDefault());
+      layers3dWrap.addEventListener('dragstart', (e) => e.preventDefault());
 
       /* =======================================================================
-         KEYBOARD SHORTCUTS (ARROWS / WASD + SPACE + ENTER + R)
+         3D VIEW MODE & CONTEXTUAL SUBBAR CONTROLS
+         ======================================================================= */
+      function set3DViewMode(nextView) {
+        if (!['cube', 'plane', 'layers'].includes(nextView)) return;
+        cfg.view3d = nextView;
+        if (nextView === 'plane') {
+          const e = getEmpty3D();
+          if (cfg.planeAuto) {
+            cfg.planeIndex = cfg.planeAxis === 'z' ? e.z : (cfg.planeAxis === 'y' ? e.y : e.x);
+          }
+          cube3d.snapCameraForPlane(cfg.planeAxis);
+        } else if (nextView === 'cube') {
+          cube3d.resetCamera(false);
+        }
+        saveCfg();
+        apply3DViewUI();
+        layoutActiveStage();
+        render3DViews();
+      }
+
+      function setPlaneAxis(axis) {
+        if (!['z', 'y', 'x'].includes(axis)) return;
+        cfg.planeAxis = axis;
+        // Jump straight to the empty slot's plane on the chosen axis for instant playability
+        const e = getEmpty3D();
+        cfg.planeIndex = axis === 'z' ? e.z : (axis === 'y' ? e.y : e.x);
+        saveCfg();
+        cube3d.snapCameraForPlane(axis);
+        apply3DViewUI();
+        render3DViews();
+      }
+
+      function setPlaneIndex(idx) {
+        if (![0, 1, 2].includes(idx)) return;
+        cfg.planeIndex = idx;
+        saveCfg();
+        apply3DViewUI();
+        render3DViews();
+      }
+
+      btnToggle3d.addEventListener('click', () => {
+        switchSession(cfg.size, cfg.mode, !cfg.is3d);
+        btnToggle3d.blur();
+      });
+
+      btnSelect3dSize.addEventListener('click', () => {
+        switchSession(cfg.size, cfg.mode, true);
+      });
+
+      view3dTabs.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-view3d]');
+        if (!b) return;
+        set3DViewMode(b.dataset.view3d);
+        b.blur();
+      });
+
+      btnXray3d.addEventListener('click', () => {
+        cfg.xray3d = !cfg.xray3d;
+        saveCfg();
+        apply3DViewUI();
+        cube3d.requestFrame();
+        btnXray3d.blur();
+      });
+
+      spread3dRange.addEventListener('input', (e) => {
+        cfg.spread3d = Math.max(1.06, Math.min(1.65, parseFloat(e.target.value) || 1.24));
+        spread3dVal.textContent = cfg.spread3d.toFixed(2);
+        cube3d.requestFrame();
+      });
+
+      spread3dRange.addEventListener('change', () => {
+        saveCfg();
+        spread3dRange.blur();
+      });
+
+      btnResetCam3d.addEventListener('click', () => {
+        cube3d.resetCamera(false);
+        btnResetCam3d.blur();
+      });
+
+      planeAxisSeg.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-paxis]');
+        if (!b) return;
+        setPlaneAxis(b.dataset.paxis);
+        b.blur();
+      });
+
+      planeIdxSeg.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-pidx]');
+        if (!b) return;
+        setPlaneIndex(Number(b.dataset.pidx));
+        b.blur();
+      });
+
+      btnJumpEmptyPlane.addEventListener('click', () => {
+        const e = getEmpty3D();
+        const idx = cfg.planeAxis === 'z' ? e.z : (cfg.planeAxis === 'y' ? e.y : e.x);
+        setPlaneIndex(idx);
+        btnJumpEmptyPlane.blur();
+      });
+
+      btnPlaneDepth.addEventListener('click', () => {
+        cfg.planeDepth = !cfg.planeDepth;
+        saveCfg();
+        apply3DViewUI();
+        cube3d.requestFrame();
+        btnPlaneDepth.blur();
+      });
+
+      btnPlaneAuto.addEventListener('click', () => {
+        cfg.planeAuto = !cfg.planeAuto;
+        if (cfg.planeAuto) {
+          const e = getEmpty3D();
+          cfg.planeIndex = cfg.planeAxis === 'z' ? e.z : (cfg.planeAxis === 'y' ? e.y : e.x);
+        }
+        saveCfg();
+        apply3DViewUI();
+        render3DViews();
+        btnPlaneAuto.blur();
+      });
+
+      layersAxisSeg.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-laxis]');
+        if (!b) return;
+        cfg.layersAxis = b.dataset.laxis;
+        saveCfg();
+        apply3DViewUI();
+        render3DViews();
+        b.blur();
+      });
+
+      layersLayoutSeg.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-llayout]');
+        if (!b) return;
+        cfg.layersLayout = b.dataset.llayout;
+        saveCfg();
+        apply3DViewUI();
+        layoutActiveStage();
+        b.blur();
+      });
+
+      /* =======================================================================
+         KEYBOARD SHORTCUTS (ARROWS / WASD + Q/E 3D DEPTH + 1-3 PLANE + X/Y/Z)
          ======================================================================= */
       function anySheetOpen() {
         return configSheet.classList.contains('open') || statsSheet.classList.contains('open');
@@ -3232,13 +5608,60 @@
           return;
         }
 
+        // 3D quick plane & axis shortcuts
+        if (cfg.is3d) {
+          const kl = k.toLowerCase();
+          if (cfg.view3d === 'plane' && (kl === '1' || kl === '2' || kl === '3')) {
+            e.preventDefault();
+            setPlaneIndex(Number(kl) - 1);
+            return;
+          }
+          if ((cfg.view3d === 'plane' || cfg.view3d === 'layers') && (kl === 'x' || kl === 'y' || kl === 'z')) {
+            e.preventDefault();
+            if (cfg.view3d === 'plane') {
+              setPlaneAxis(kl);
+            } else {
+              cfg.layersAxis = kl;
+              saveCfg();
+              apply3DViewUI();
+              render3DViews();
+            }
+            return;
+          }
+        }
+
         if (phase === 'BLD_READY' || phase === 'DONE') return;
+
+        const dir = cfg.kbDir === 'blank' ? -1 : 1;
+
+        if (cfg.is3d) {
+          const empty = getEmpty3D();
+          if (k === 'ArrowUp' || k === 'w' || k === 'W') {
+            e.preventDefault();
+            executeMove3DAt(empty.x, empty.y + dir, empty.z);
+          } else if (k === 'ArrowDown' || k === 's' || k === 'S') {
+            e.preventDefault();
+            executeMove3DAt(empty.x, empty.y - dir, empty.z);
+          } else if (k === 'ArrowLeft' || k === 'a' || k === 'A') {
+            e.preventDefault();
+            executeMove3DAt(empty.x + dir, empty.y, empty.z);
+          } else if (k === 'ArrowRight' || k === 'd' || k === 'D') {
+            e.preventDefault();
+            executeMove3DAt(empty.x - dir, empty.y, empty.z);
+          } else if (k === 'e' || k === 'E') {
+            e.preventDefault();
+            executeMove3DAt(empty.x, empty.y, empty.z + dir);
+          } else if (k === 'q' || k === 'Q') {
+            e.preventDefault();
+            executeMove3DAt(empty.x, empty.y, empty.z - dir);
+          }
+          return;
+        }
 
         const N = cfg.size;
         const blankIdx = board.indexOf(0);
         const br = Math.floor(blankIdx / N);
         const bc = blankIdx % N;
-        const dir = cfg.kbDir === 'blank' ? -1 : 1;
 
         if (k === 'ArrowUp' || k === 'w' || k === 'W') {
           e.preventDefault();
@@ -3314,13 +5737,13 @@
       sizeSelector.addEventListener('click', (e) => {
         const b = e.target.closest('[data-size]');
         if (!b) return;
-        switchSession(Number(b.dataset.size), cfg.mode);
+        switchSession(Number(b.dataset.size), cfg.mode, false);
       });
 
       modeSelector.addEventListener('click', (e) => {
         const b = e.target.closest('[data-mode]');
         if (!b) return;
-        switchSession(cfg.size, b.dataset.mode);
+        switchSession(cfg.size, b.dataset.mode, cfg.is3d);
       });
 
       // Pigment scheme
@@ -3330,6 +5753,7 @@
         cfg.scheme = b.dataset.scheme;
         saveCfg();
         applyTilePigments();
+        applyLayerPigments();
         applyConfigUI();
       });
 
@@ -3459,27 +5883,23 @@
          RESPONSIVE EXACT-PIXEL OBSERVER & BOOTSTRAP
          ======================================================================= */
       if (typeof ResizeObserver !== 'undefined') {
-        const ro = new ResizeObserver(() => layoutBoardExact());
+        const ro = new ResizeObserver(() => layoutActiveStage());
         ro.observe(boardStage);
+        ro.observe(viewport3d);
       } else {
-        window.addEventListener('resize', layoutBoardExact);
+        window.addEventListener('resize', layoutActiveStage);
       }
 
       loadActiveSession();
       rebuildBoardDOM(cfg.size);
+      buildLayers3DDOM();
       applyConfigUI();
       updateHeaderAndStatsBar();
       startNewScramble();
+      layoutActiveStage();
       initPwaAssets();
       initServiceWorker();
     })();
   </script>
 </body>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js');
-    });
-  }
-</script>
 </html>
