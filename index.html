@@ -1,0 +1,3478 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="graphite">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0E0F11" id="metaThemeColor" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="15 Puzzle" />
+  <title>SLIDY // Precision N×N Speedsolver &amp; BLD Trainer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%230E0F11'/%3E%3Crect x='5' y='5' width='54' height='54' rx='6' fill='%2315171A' stroke='%23363B44' stroke-width='1.5'/%3E%3Crect x='9' y='9' width='10' height='10' rx='2' fill='%23C44932'/%3E%3Crect x='21' y='9' width='10' height='10' rx='2' fill='%23C44932'/%3E%3Crect x='33' y='9' width='10' height='10' rx='2' fill='%23C44932'/%3E%3Crect x='45' y='9' width='10' height='10' rx='2' fill='%23C44932'/%3E%3Crect x='9' y='21' width='10' height='10' rx='2' fill='%23CF8A2A'/%3E%3Crect x='21' y='21' width='10' height='10' rx='2' fill='%23448558'/%3E%3Crect x='33' y='21' width='10' height='10' rx='2' fill='%23448558'/%3E%3Crect x='45' y='21' width='10' height='10' rx='2' fill='%23448558'/%3E%3Crect x='9' y='33' width='10' height='10' rx='2' fill='%23CF8A2A'/%3E%3Crect x='21' y='33' width='10' height='10' rx='2' fill='%23326696'/%3E%3Crect x='33' y='33' width='10' height='10' rx='2' fill='%232B8282'/%3E%3Crect x='45' y='33' width='10' height='10' rx='2' fill='%232B8282'/%3E%3Crect x='9' y='45' width='10' height='10' rx='2' fill='%23CF8A2A'/%3E%3Crect x='21' y='45' width='10' height='10' rx='2' fill='%23326696'/%3E%3Crect x='33' y='45' width='10' height='10' rx='2' fill='%232B8282'/%3E%3Crect x='45' y='45' width='10' height='10' rx='2' fill='%23111316' stroke='%23262A30' stroke-width='1'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" id="appleTouchIcon" sizes="180x180" />
+  <link rel="manifest" id="pwaManifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" /></noscript>
+  <style>
+    /* =========================================================================
+       DESIGN TOKENS — SWISS PRECISION HARDWARE (GRAPHITE / PAPER)
+       Strictly flat matte surfaces, 1px hairline borders, zero neon/blur/glow.
+       ========================================================================= */
+    :root,
+    [data-theme="graphite"] {
+      --bg-canvas: #0E0F11;
+      --bg-tray: #15171A;
+      --bg-surface: #181A1E;
+      --bg-surface-alt: #1F2228;
+      --bg-control: #23262C;
+      --bg-control-active: #2B2F37;
+
+      --border-hairline: #262A30;
+      --border-strong: #363B44;
+
+      --text-primary: #EDEDEA;
+      --text-secondary: #828791;
+      --text-tertiary: #555A64;
+
+      /* Functional signal accents */
+      --sig-amber: #E09F3E;
+      --sig-amber-bg: rgba(224, 159, 62, 0.12);
+      --sig-green: #2F9E66;
+      --sig-green-bg: rgba(47, 158, 102, 0.12);
+      --sig-red: #D64545;
+      --sig-red-bg: rgba(214, 69, 69, 0.13);
+
+      /* High-contrast primary action (stark matte hardware key) */
+      --btn-stark-bg: #EDEDEA;
+      --btn-stark-ink: #0E0F11;
+      --btn-stark-active: #D5D5D0;
+
+      /* Tile physical details */
+      --tile-inset: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+      --tile-border: rgba(0, 0, 0, 0.28);
+      --tile-mono-bg: #23262C;
+      --tile-mono-border: #32363E;
+      --tile-mono-ink: #EDEDEA;
+
+      /* Blindfolded masked slate */
+      --tile-masked-bg: #1F2228;
+      --tile-masked-border: #2C3038;
+      --slot-recess: #111316;
+      --slot-recess-border: #1E2127;
+
+      /* Sheet scrim (flat matte, NO blur) */
+      --scrim: rgba(8, 9, 11, 0.78);
+    }
+
+    [data-theme="paper"] {
+      --bg-canvas: #F2F0EB;
+      --bg-tray: #E5E2DA;
+      --bg-surface: #FAF9F6;
+      --bg-surface-alt: #EFECE5;
+      --bg-control: #ECEAE3;
+      --bg-control-active: #E1DED5;
+
+      --border-hairline: #D2CEC4;
+      --border-strong: #B8B3A7;
+
+      --text-primary: #141517;
+      --text-secondary: #666970;
+      --text-tertiary: #8B8E95;
+
+      --sig-amber: #B87918;
+      --sig-amber-bg: rgba(184, 121, 24, 0.11);
+      --sig-green: #217F50;
+      --sig-green-bg: rgba(33, 127, 80, 0.11);
+      --sig-red: #C23535;
+      --sig-red-bg: rgba(194, 53, 53, 0.11);
+
+      --btn-stark-bg: #141517;
+      --btn-stark-ink: #FAF9F6;
+      --btn-stark-active: #2B2D31;
+
+      --tile-inset: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+      --tile-border: rgba(20, 21, 23, 0.14);
+      --tile-mono-bg: #FFFFFF;
+      --tile-mono-border: #C9C5BB;
+      --tile-mono-ink: #141517;
+
+      --tile-masked-bg: #D9D5CC;
+      --tile-masked-border: #C4BFB4;
+      --slot-recess: #DDD9D0;
+      --slot-recess-border: #CECAC0;
+
+      --scrim: rgba(20, 21, 23, 0.56);
+    }
+
+    :root {
+      --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --r-btn: 4px;
+      --r-tile: 4px;
+      --r-frame: 6px;
+      --r-sheet: 8px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    button, textarea, input {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    button {
+      touch-action: manipulation;
+    }
+
+    textarea, input {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* =========================================================================
+       ROOT APP SHELL — FIXED 100dvh, ZERO SCROLL, ZERO LAYOUT SHIFT
+       ========================================================================= */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      height: 100dvh;
+      padding-top: calc(6px + env(safe-area-inset-top));
+      padding-bottom: calc(8px + env(safe-area-inset-bottom));
+      padding-left: calc(12px + env(safe-area-inset-left));
+      padding-right: calc(12px + env(safe-area-inset-right));
+      gap: 8px;
+    }
+
+    .col-width {
+      width: 100%;
+      max-width: 460px;
+    }
+
+    /* =========================================================================
+       TOP HEADER BAR (COMPACT 44px)
+       ========================================================================= */
+    .top-bar {
+      height: 44px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-hairline);
+      padding-bottom: 6px;
+    }
+
+    .session-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 34px;
+      padding: 0 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      cursor: pointer;
+      transition: background 90ms ease, border-color 90ms ease;
+    }
+
+    .session-trigger:active {
+      background: var(--bg-control-active);
+      border-color: var(--border-strong);
+    }
+
+    .session-trigger-text {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .session-trigger-sep {
+      color: var(--text-tertiary);
+    }
+
+    .session-trigger-mode {
+      color: var(--text-secondary);
+    }
+
+    .session-trigger-mode.is-bld {
+      color: var(--sig-amber);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hdr-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 34px;
+      padding: 0 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 90ms ease, color 90ms ease, border-color 90ms ease;
+    }
+
+    .hdr-btn.icon-only {
+      width: 34px;
+      padding: 0;
+    }
+
+    .hdr-btn:active {
+      background: var(--bg-control-active);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    @media (hover: hover) {
+      .session-trigger:hover,
+      .hdr-btn:hover {
+        background: var(--bg-surface-alt);
+        color: var(--text-primary);
+        border-color: var(--border-strong);
+      }
+    }
+
+    .count-tag {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: var(--bg-control);
+      border: 1px solid var(--border-hairline);
+    }
+
+    /* =========================================================================
+       TELEMETRY ZONE (FIXED HEIGHT — BOARD NEVER JUMPS)
+       ========================================================================= */
+    .telemetry-zone {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stopwatch-panel {
+      height: 76px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+    }
+
+    .stopwatch-panel.st-solved { border-color: var(--sig-green); }
+    .stopwatch-panel.st-pb     { border-color: var(--sig-amber); }
+    .stopwatch-panel.st-dnf    { border-color: var(--sig-red); }
+    .stopwatch-panel.st-memo   { border-color: var(--sig-amber); }
+    .stopwatch-panel.st-exec   { border-color: var(--sig-green); }
+
+    .stopwatch-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .timer-readout {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 2.15rem;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+    }
+
+    .stopwatch-panel.st-solved .timer-readout { color: var(--sig-green); }
+    .stopwatch-panel.st-pb .timer-readout     { color: var(--sig-amber); }
+    .stopwatch-panel.st-dnf .timer-readout    { color: var(--sig-red); }
+
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--bg-control);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-hairline);
+    }
+
+    .status-tag.sig-amber {
+      background: var(--sig-amber-bg);
+      color: var(--sig-amber);
+      border-color: var(--sig-amber);
+    }
+
+    .status-tag.sig-green {
+      background: var(--sig-green-bg);
+      color: var(--sig-green);
+      border-color: var(--sig-green);
+    }
+
+    .status-tag.sig-red {
+      background: var(--sig-red-bg);
+      color: var(--sig-red);
+      border-color: var(--sig-red);
+    }
+
+    .status-tag.hidden {
+      display: none;
+    }
+
+    .telemetry-line {
+      margin-top: 6px;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .telemetry-line strong {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .telemetry-line .sep {
+      margin: 0 6px;
+      color: var(--text-tertiary);
+    }
+
+    /* 4-Cell Hairline-Divided Compact Stats Strip */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      height: 44px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .stats-bar:active {
+      background: var(--bg-surface-alt);
+    }
+
+    .stat-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--border-hairline);
+      padding: 0 4px;
+      min-width: 0;
+    }
+
+    .stat-cell:last-child {
+      border-right: none;
+    }
+
+    .stat-k {
+      font-family: var(--font-mono);
+      font-size: 0.625rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      line-height: 1.1;
+    }
+
+    .stat-v {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 2px;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .stat-v.is-pb {
+      color: var(--sig-amber);
+    }
+
+    .stat-v.is-dnf {
+      color: var(--sig-red);
+    }
+
+    /* =========================================================================
+       CENTERED SQUARE BOARD STAGE (EXACT INTEGER PIXEL SIZING VIA RESIZEOBSERVER)
+       ========================================================================= */
+    .board-stage {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .board-frame {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-tray);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--r-frame);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    .board-frame.st-solved { border-color: var(--sig-green); }
+    .board-frame.st-pb     { border-color: var(--sig-amber); }
+    .board-frame.st-dnf    { border-color: var(--sig-red); }
+    .board-frame.st-memo   { border-color: var(--sig-amber); }
+
+    .board-grid {
+      position: relative;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    .board-backdrop {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      pointer-events: none;
+    }
+
+    .backdrop-cell {
+      width: 100%;
+      height: 100%;
+    }
+
+    .backdrop-cell-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--r-tile);
+      background: var(--slot-recess);
+      border: 1px solid var(--slot-recess-border);
+    }
+
+    /* When Hide Blank in BLD is enabled during BLD_EXEC, every backdrop slot
+       visually matches the masked tiles so the blank position is completely hidden. */
+    .board-grid.bld-hide-blank .backdrop-cell-inner {
+      background: var(--tile-masked-bg);
+      border: 1px solid var(--tile-masked-border);
+      box-shadow: var(--tile-inset);
+    }
+
+    .tile-slot {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      will-change: transform;
+      transition: none;
+    }
+
+    .board-grid.anim-snappy .tile-slot {
+      transition: transform 50ms cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+
+    .tile-face {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--r-tile);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      border: 1px solid var(--tile-border);
+      box-shadow: var(--tile-inset);
+    }
+
+    .tile-face.is-mono {
+      background-color: var(--tile-mono-bg);
+      border-color: var(--tile-mono-border);
+      color: var(--tile-mono-ink);
+    }
+
+    /* Blindfolded masked tile surface: uniform matte slate, zero visual leakage */
+    .board-grid.is-masked .tile-face {
+      background-color: var(--tile-masked-bg) !important;
+      border-color: var(--tile-masked-border) !important;
+      color: transparent !important;
+      box-shadow: var(--tile-inset);
+    }
+
+    /* Optional subtle solved-tile indicator dot (strictly hidden when masked) */
+    .tile-dot {
+      position: absolute;
+      bottom: 10%;
+      right: 10%;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .board-grid.show-dots:not(.is-masked) .tile-slot.in-place .tile-dot {
+      opacity: 0.55;
+    }
+
+    /* DNF misplaced tile highlight (matte vermilion border + corner mark) */
+    .tile-slot.is-misplaced .tile-face {
+      border: 2px solid var(--sig-red) !important;
+      box-shadow: inset 0 0 0 1px rgba(214, 69, 69, 0.35);
+    }
+
+    .tile-slot.is-misplaced .tile-face::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 5px;
+      height: 5px;
+      border-radius: 1px;
+      background: var(--sig-red);
+    }
+
+    /* Minimalist BLD_READY Board Overlay */
+    .bld-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      text-align: center;
+      background: rgba(14, 15, 17, 0.72);
+      border-radius: var(--r-tile);
+      pointer-events: none;
+    }
+
+    [data-theme="paper"] .bld-overlay {
+      background: rgba(242, 240, 235, 0.78);
+    }
+
+    .bld-overlay.visible {
+      display: flex;
+    }
+
+    .bld-overlay-mode {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sig-amber);
+      padding: 3px 8px;
+      border: 1px solid var(--sig-amber);
+      background: var(--bg-surface);
+      border-radius: 3px;
+    }
+
+    .bld-overlay-cta {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+    }
+
+    .bld-overlay-sub {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    /* =========================================================================
+       BOTTOM HARDWARE CONTROL BAR (FIXED HEIGHT)
+       ========================================================================= */
+    .control-bar {
+      height: 48px;
+      flex-shrink: 0;
+      display: flex;
+      gap: 8px;
+    }
+
+    .act-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      height: 48px;
+      padding: 0 14px;
+      border-radius: var(--r-btn);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid var(--border-hairline);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: background 80ms ease, border-color 80ms ease, color 80ms ease;
+    }
+
+    .act-btn:active {
+      background: var(--bg-control-active);
+      border-color: var(--border-strong);
+    }
+
+    .act-btn.flex-1 { flex: 1 1 0; }
+    .act-btn.flex-2 { flex: 2 1 0; }
+
+    .act-btn.stark {
+      background: var(--btn-stark-bg);
+      color: var(--btn-stark-ink);
+      border-color: var(--btn-stark-bg);
+      font-weight: 700;
+    }
+
+    .act-btn.stark:active {
+      background: var(--btn-stark-active);
+      border-color: var(--btn-stark-active);
+    }
+
+    .act-btn.signal-amber {
+      background: var(--sig-amber-bg);
+      color: var(--sig-amber);
+      border-color: var(--sig-amber);
+    }
+
+    .act-btn.signal-red {
+      background: var(--sig-red-bg);
+      color: var(--sig-red);
+      border-color: var(--sig-red);
+    }
+
+    .act-btn.muted {
+      color: var(--text-secondary);
+    }
+
+    @media (hover: hover) {
+      .act-btn:not(.stark):not(.signal-amber):not(.signal-red):hover {
+        background: var(--bg-surface-alt);
+        border-color: var(--border-strong);
+      }
+    }
+
+    /* =========================================================================
+       SLIDE-UP SHEETS (FLAT MATTE, 1px HAIRLINE, ZERO BACKDROP BLUR)
+       ========================================================================= */
+    .scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: var(--scrim);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 150ms ease;
+    }
+
+    .scrim.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sheet {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      z-index: 50;
+      width: min(100vw, 480px);
+      max-height: 85dvh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-strong);
+      border-left: 1px solid var(--border-hairline);
+      border-right: 1px solid var(--border-hairline);
+      border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      transform: translate(-50%, 100%);
+      transition: transform 190ms cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+
+    .sheet.open {
+      transform: translate(-50%, 0);
+    }
+
+    .sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border-hairline);
+      flex-shrink: 0;
+    }
+
+    .sheet-title {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+    }
+
+    .sheet-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: var(--r-btn);
+      background: var(--bg-control);
+      border: 1px solid var(--border-hairline);
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .sheet-close:active {
+      background: var(--bg-control-active);
+      color: var(--text-primary);
+    }
+
+    .sheet-body {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 14px 16px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sec-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sec-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    /* Segmented & Grid Selectors */
+    .size-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 5px;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .scheme-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .opt-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 36px;
+      padding: 6px 8px;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 80ms ease, border-color 80ms ease, color 80ms ease;
+    }
+
+    .opt-btn.active {
+      background: var(--btn-stark-bg);
+      border-color: var(--btn-stark-bg);
+      color: var(--btn-stark-ink);
+    }
+
+    .opt-sub {
+      font-size: 0.6rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      opacity: 0.72;
+    }
+
+    .scheme-btn {
+      align-items: flex-start;
+      padding: 8px 10px;
+      gap: 6px;
+    }
+
+    .scheme-swatches {
+      display: flex;
+      gap: 3px;
+    }
+
+    .sw {
+      width: 12px;
+      height: 6px;
+      border-radius: 1px;
+    }
+
+    /* Config Rows */
+    .cfg-list {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      overflow: hidden;
+      background: var(--bg-canvas);
+    }
+
+    .cfg-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-hairline);
+    }
+
+    .cfg-row:last-child {
+      border-bottom: none;
+    }
+
+    .cfg-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .cfg-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .cfg-desc {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    .seg-pair {
+      display: inline-flex;
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .seg-item {
+      height: 28px;
+      padding: 0 10px;
+      border: none;
+      border-right: 1px solid var(--border-hairline);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .seg-item:last-child {
+      border-right: none;
+    }
+
+    .seg-item.active {
+      background: var(--btn-stark-bg);
+      color: var(--btn-stark-ink);
+    }
+
+    /* Hardware Rocker Toggle */
+    .rocker {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      border-radius: 3px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-surface);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .rocker::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 2px;
+      background: var(--text-tertiary);
+      transition: transform 110ms ease, background 110ms ease;
+    }
+
+    .rocker[aria-checked="true"] {
+      border-color: var(--sig-green);
+      background: var(--sig-green-bg);
+    }
+
+    .rocker[aria-checked="true"]::after {
+      transform: translateX(18px);
+      background: var(--sig-green);
+    }
+
+    .kb-legend {
+      font-family: var(--font-mono);
+      font-size: 0.67rem;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+      padding-top: 2px;
+    }
+
+    .pwa-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      font-family: var(--font-mono);
+      font-size: 0.67rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .pwa-status-label {
+      color: var(--text-tertiary);
+      font-weight: 600;
+    }
+
+    .pwa-status-val {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .pwa-status-val.is-active {
+      color: var(--sig-green);
+    }
+
+    .pwa-status-val.is-warn {
+      color: var(--sig-amber);
+    }
+
+    /* =========================================================================
+       STATS & HISTORY SHEET ELEMENTS
+       ========================================================================= */
+    .session-banner {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px 12px;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+    }
+
+    .session-banner-name {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+    }
+
+    .storage-line {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+    }
+
+    .stats-matrix {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      overflow: hidden;
+      background: var(--bg-canvas);
+    }
+
+    .matrix-cell {
+      padding: 9px 10px;
+      border-right: 1px solid var(--border-hairline);
+      border-bottom: 1px solid var(--border-hairline);
+    }
+
+    .matrix-cell:nth-child(3n) {
+      border-right: none;
+    }
+
+    .matrix-cell.no-bottom {
+      border-bottom: none;
+    }
+
+    .matrix-k {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .matrix-v {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 3px;
+    }
+
+    .matrix-v.amber { color: var(--sig-amber); }
+    .matrix-v.green { color: var(--sig-green); }
+    .matrix-v.red   { color: var(--sig-red); }
+
+    .tools-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .mini-btn {
+      height: 28px;
+      padding: 0 9px;
+      border-radius: var(--r-btn);
+      border: 1px solid var(--border-hairline);
+      background: var(--bg-canvas);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .mini-btn:active {
+      background: var(--bg-control-active);
+      color: var(--text-primary);
+    }
+
+    .mini-btn.danger {
+      border-color: var(--sig-red);
+      color: var(--sig-red);
+      background: var(--sig-red-bg);
+    }
+
+    .mini-btn.danger.confirming {
+      background: var(--sig-red);
+      color: #FAF9F6;
+    }
+
+    .mini-btn:disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    /* Inline Compact Backup Drawer */
+    .backup-box {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--r-btn);
+    }
+
+    .backup-box.open {
+      display: flex;
+    }
+
+    .backup-textarea {
+      width: 100%;
+      height: 88px;
+      padding: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-primary);
+      resize: none;
+    }
+
+    .backup-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .backup-msg {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--sig-green);
+    }
+
+    .backup-msg.err {
+      color: var(--sig-red);
+    }
+
+    /* Compact Tabular Solve History */
+    .history-wrap {
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--r-btn);
+      background: var(--bg-canvas);
+      overflow: hidden;
+    }
+
+    .history-empty {
+      padding: 20px 12px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--text-tertiary);
+    }
+
+    .solve-row {
+      display: grid;
+      grid-template-columns: 34px 1fr auto auto 58px;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--border-hairline);
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.74rem;
+    }
+
+    .solve-row:last-child {
+      border-bottom: none;
+    }
+
+    .sr-idx {
+      color: var(--text-tertiary);
+      font-size: 0.68rem;
+    }
+
+    .sr-time {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .solve-row.is-pb .sr-time  { color: var(--sig-amber); }
+    .solve-row.is-dnf .sr-time { color: var(--sig-red); }
+
+    .sr-sub {
+      font-size: 0.66rem;
+      color: var(--text-secondary);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .sr-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+
+    .row-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 3px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .row-icon-btn:active {
+      background: var(--bg-control-active);
+      border-color: var(--border-hairline);
+      color: var(--text-primary);
+    }
+
+    .row-icon-btn.del:active {
+      color: var(--sig-red);
+      border-color: var(--sig-red);
+    }
+
+    .load-more-btn {
+      width: 100%;
+      height: 34px;
+      border: none;
+      border-top: 1px solid var(--border-hairline);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <!-- TOP HEADER (44px) -->
+    <header class="top-bar col-width">
+      <button id="btnSessionTrigger" class="session-trigger" type="button" aria-label="Change board size or mode">
+        <span class="session-trigger-text">
+          <span id="hdrSize">4×4</span>
+          <span class="session-trigger-sep">&middot;</span>
+          <span id="hdrMode" class="session-trigger-mode">STD</span>
+        </span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square" stroke-linejoin="miter">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <div class="header-actions">
+        <button id="btnOpenStats" class="hdr-btn" type="button" aria-label="Open Session Stats">
+          <span>Stats</span>
+          <span id="hdrCount" class="count-tag">0</span>
+        </button>
+        <button id="btnOpenConfig" class="hdr-btn icon-only" type="button" aria-label="Open Configuration">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+            <rect x="7" y="4" width="4" height="4" fill="var(--bg-surface)"></rect>
+            <rect x="13" y="10" width="4" height="4" fill="var(--bg-surface)"></rect>
+            <rect x="9" y="16" width="4" height="4" fill="var(--bg-surface)"></rect>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- TELEMETRY ZONE (FIXED HEIGHT) -->
+    <section class="telemetry-zone col-width" aria-label="Stopwatch and Session Telemetry">
+      <div id="stopwatchPanel" class="stopwatch-panel">
+        <div class="stopwatch-top">
+          <div id="timerReadout" class="timer-readout">0.000</div>
+          <div class="status-group">
+            <span id="practiceTag" class="status-tag hidden">PRACTICE</span>
+            <span id="statusTag" class="status-tag">READY</span>
+          </div>
+        </div>
+        <div id="telemetryLine" class="telemetry-line">STM <strong>0</strong><span class="sep">&middot;</span><strong>0.00</strong> TPS</div>
+      </div>
+
+      <div id="statsBar" class="stats-bar" role="button" tabindex="0" aria-label="Open detailed session statistics">
+        <div class="stat-cell">
+          <span class="stat-k">PB</span>
+          <span id="barPb" class="stat-v is-pb">--</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-k">Ao5</span>
+          <span id="barAo5" class="stat-v">--</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-k">Ao12</span>
+          <span id="barAo12" class="stat-v">--</span>
+        </div>
+        <div class="stat-cell">
+          <span id="barFourthLabel" class="stat-k">MEAN</span>
+          <span id="barFourthVal" class="stat-v">--</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTERED SQUARE BOARD STAGE -->
+    <section id="boardStage" class="board-stage" aria-label="Sliding Puzzle Board">
+      <div id="boardFrame" class="board-frame">
+        <div id="boardGrid" class="board-grid" role="application" aria-label="Sliding puzzle grid">
+          <div id="boardBackdrop" class="board-backdrop" aria-hidden="true"></div>
+          <div id="tileLayer" aria-hidden="false"></div>
+          <div id="bldOverlay" class="bld-overlay" aria-hidden="true">
+            <span id="bldOverlayMode" class="bld-overlay-mode">BLD &middot; SUBMIT</span>
+            <span class="bld-overlay-cta">TAP TO REVEAL &amp; START</span>
+            <span class="bld-overlay-sub">MEMO CLOCK BEGINS ON REVEAL</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTEXTUAL BOTTOM CONTROL BAR -->
+    <footer id="controlBar" class="control-bar col-width"></footer>
+  </main>
+
+  <!-- FLAT MATTE SCRIM -->
+  <div id="scrim" class="scrim" aria-hidden="true"></div>
+
+  <!-- SESSION & CONFIG SHEET -->
+  <aside id="configSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="configTitle" aria-hidden="true">
+    <div class="sheet-head">
+      <h2 id="configTitle" class="sheet-title">Session &amp; Instrument Config</h2>
+      <button class="sheet-close" type="button" data-close-sheet aria-label="Close config">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <div class="sec-block">
+        <span class="sec-label">Board Size (Separate Sessions)</span>
+        <div id="sizeSelector" class="size-grid">
+          <button class="opt-btn" type="button" data-size="3">3×3</button>
+          <button class="opt-btn" type="button" data-size="4">4×4</button>
+          <button class="opt-btn" type="button" data-size="5">5×5</button>
+          <button class="opt-btn" type="button" data-size="6">6×6</button>
+          <button class="opt-btn" type="button" data-size="7">7×7</button>
+          <button class="opt-btn" type="button" data-size="8">8×8</button>
+        </div>
+      </div>
+
+      <div class="sec-block">
+        <span class="sec-label">Play Mode (Separate Sessions)</span>
+        <div id="modeSelector" class="mode-grid">
+          <button class="opt-btn" type="button" data-mode="std">
+            <span>STANDARD</span>
+            <span class="opt-sub">Sighted</span>
+          </button>
+          <button class="opt-btn" type="button" data-mode="bld_auto">
+            <span>BLD AUTO</span>
+            <span class="opt-sub">Auto-Finish</span>
+          </button>
+          <button class="opt-btn" type="button" data-mode="bld_sub">
+            <span>BLD SUB</span>
+            <span class="opt-sub">Submit Key</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sec-block">
+        <span class="sec-label">Pigment Color Scheme</span>
+        <div id="schemeSelector" class="scheme-grid">
+          <button class="opt-btn scheme-btn" type="button" data-scheme="fringe_split">
+            <span>FRINGE SPLIT</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#C44932"></span>
+              <span class="sw" style="background:#CF8A2A"></span>
+              <span class="sw" style="background:#448558"></span>
+              <span class="sw" style="background:#326696"></span>
+              <span class="sw" style="background:#2B8282"></span>
+            </span>
+          </button>
+          <button class="opt-btn scheme-btn" type="button" data-scheme="fringe">
+            <span>FRINGE RINGS</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#C44932"></span>
+              <span class="sw" style="background:#CF8A2A"></span>
+              <span class="sw" style="background:#448558"></span>
+              <span class="sw" style="background:#326696"></span>
+            </span>
+          </button>
+          <button class="opt-btn scheme-btn" type="button" data-scheme="rows">
+            <span>ROWS</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#C44932"></span>
+              <span class="sw" style="background:#CF8A2A"></span>
+              <span class="sw" style="background:#448558"></span>
+              <span class="sw" style="background:#326696"></span>
+            </span>
+          </button>
+          <button class="opt-btn scheme-btn" type="button" data-scheme="cols">
+            <span>COLUMNS</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#C44932"></span>
+              <span class="sw" style="background:#CF8A2A"></span>
+              <span class="sw" style="background:#448558"></span>
+              <span class="sw" style="background:#326696"></span>
+            </span>
+          </button>
+          <button class="opt-btn scheme-btn" type="button" data-scheme="mono">
+            <span>MATTE MONO</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#23262C;border:1px solid #444"></span>
+              <span class="sw" style="background:#363B44"></span>
+              <span class="sw" style="background:#666D78"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sec-block">
+        <span class="sec-label">Hardware &amp; Input</span>
+        <div class="cfg-list">
+          <div class="cfg-row">
+            <div class="cfg-meta">
+              <span class="cfg-name">Surface Theme</span>
+              <span class="cfg-desc">Matte Graphite or Architectural Paper</span>
+            </div>
+            <div class="seg-pair" id="themeSelector">
+              <button class="seg-item" type="button" data-theme-val="graphite">Graphite</button>
+              <button class="seg-item" type="button" data-theme-val="paper">Paper</button>
+            </div>
+          </div>
+
+          <div class="cfg-row">
+            <div class="cfg-meta">
+              <span class="cfg-name">Slide Motion</span>
+              <span class="cfg-desc">0ms instant vs 50ms snappy slide</span>
+            </div>
+            <div class="seg-pair" id="animSelector">
+              <button class="seg-item" type="button" data-anim="0">0ms</button>
+              <button class="seg-item" type="button" data-anim="50">50ms</button>
+            </div>
+          </div>
+
+          <div class="cfg-row">
+            <div class="cfg-meta">
+              <span class="cfg-name">Keyboard Axis</span>
+              <span class="cfg-desc">Arrow / WASD moves Tile or Blank</span>
+            </div>
+            <div class="seg-pair" id="kbDirSelector">
+              <button class="seg-item" type="button" data-kb="tile">Tile</button>
+              <button class="seg-item" type="button" data-kb="blank">Blank</button>
+            </div>
+          </div>
+
+          <div class="cfg-row">
+            <div class="cfg-meta">
+              <span class="cfg-name">Touch Glide</span>
+              <span class="cfg-desc">Continuous sliding without lifting finger</span>
+            </div>
+            <button id="togGlide" class="rocker" type="button" role="switch" aria-checked="true" aria-label="Toggle Touch Glide"></button>
+          </div>
+
+          <div class="cfg-row">
+            <div class="cfg-meta">
+              <span class="cfg-name">Hide Empty Slot in BLD</span>
+              <span class="cfg-desc">Pure mental blank tracking during EXEC</span>
+            </div>
+            <button id="togHideBlank" class="rocker" type="button" role="switch" aria-checked="false" aria-label="Toggle Hide Empty Slot in BLD"></button>
+          </div>
+
+          <div class="cfg-row">
+            <div class="cfg-meta">
+              <span class="cfg-name">Mechanical Click</span>
+              <span class="cfg-desc">Synthesized Web Audio tick on slide</span>
+            </div>
+            <button id="togSound" class="rocker" type="button" role="switch" aria-checked="false" aria-label="Toggle Mechanical Click"></button>
+          </div>
+
+          <div class="cfg-row">
+            <div class="cfg-meta">
+              <span class="cfg-name">Solved Position Dot</span>
+              <span class="cfg-desc">Subtle corner dot (hidden in BLD EXEC)</span>
+            </div>
+            <button id="togDots" class="rocker" type="button" role="switch" aria-checked="false" aria-label="Toggle Solved Position Dot"></button>
+          </div>
+        </div>
+      </div>
+
+      <p class="kb-legend">
+        KEYS: ARROWS / WASD SLIDE &middot; SPACE SCRAMBLE / REVEAL / SUBMIT &middot; ENTER SUBMIT &middot; R NEW SCRAMBLE
+      </p>
+
+      <div class="pwa-status-row" aria-live="polite">
+        <span class="pwa-status-label">Offline Cache</span>
+        <span id="offlineCacheStatus" class="pwa-status-val">Checking...</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- STATS & HISTORY SHEET -->
+  <aside id="statsSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="statsTitle" aria-hidden="true">
+    <div class="sheet-head">
+      <h2 id="statsTitle" class="sheet-title">Session Telemetry &amp; Log</h2>
+      <button class="sheet-close" type="button" data-close-sheet aria-label="Close stats">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <div class="session-banner">
+        <div id="stSessionName" class="session-banner-name">4×4 &middot; STANDARD</div>
+        <div id="stStorageInfo" class="storage-line">Active: 0 solves &middot; 0.00 KB | All sessions: 0.00 KB</div>
+      </div>
+
+      <div id="statsMatrix" class="stats-matrix"></div>
+
+      <div class="tools-row">
+        <span id="historyLabel" class="sec-label">Solve Log (0)</span>
+        <div style="display:flex;gap:6px;">
+          <button id="btnToggleBackup" class="mini-btn" type="button">Backup</button>
+          <button id="btnClearSession" class="mini-btn danger" type="button">Clear</button>
+        </div>
+      </div>
+
+      <!-- Compact Base36 Export / Import Panel -->
+      <div id="backupBox" class="backup-box">
+        <span class="sec-label">Compact Text Backup (All Sessions)</span>
+        <textarea id="backupText" class="backup-textarea" spellcheck="false" placeholder="Paste SP2_BACKUP_V1 text here to restore..."></textarea>
+        <div class="backup-actions">
+          <span id="backupMsg" class="backup-msg"></span>
+          <div style="display:flex;gap:6px;">
+            <button id="btnCopyBackup" class="mini-btn" type="button">Copy All</button>
+            <button id="btnImportBackup" class="mini-btn" type="button">Import</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="historyWrap" class="history-wrap"></div>
+    </div>
+  </aside>
+
+  <script>
+    (() => {
+      'use strict';
+
+      /* =======================================================================
+         CONSTANTS, PALETTE & CONFIGURATION DEFAULTS
+         ======================================================================= */
+      const CFG_KEY = 'sp2_cfg_v1';
+      const SESSION_PREFIX = 'sp2_s_';
+      const SIZES = [3, 4, 5, 6, 7, 8];
+      const MODES = ['std', 'bld_auto', 'bld_sub'];
+
+      const MODE_META = {
+        std:      { short: 'STD',      full: 'STANDARD',     overlay: '' },
+        bld_auto: { short: 'BLD AUTO', full: 'BLD · AUTO',   overlay: 'BLD · AUTO-FINISH' },
+        bld_sub:  { short: 'BLD SUB',  full: 'BLD · SUBMIT', overlay: 'BLD · SUBMIT' }
+      };
+
+      // Calibrated 8-pigment matte industrial palette (WCAG AAA legibility)
+      const PIGMENTS = [
+        { bg: '#C44932', ink: '#FAF9F6' }, // 0 terracotta vermilion
+        { bg: '#CF8A2A', ink: '#121315' }, // 1 ochre amber
+        { bg: '#448558', ink: '#FAF9F6' }, // 2 sage olive
+        { bg: '#326696', ink: '#FAF9F6' }, // 3 steel cobalt
+        { bg: '#2B8282', ink: '#FAF9F6' }, // 4 slate teal
+        { bg: '#B59B56', ink: '#121315' }, // 5 warm brass
+        { bg: '#7A4D78', ink: '#FAF9F6' }, // 6 plum oxide
+        { bg: '#666D78', ink: '#FAF9F6' }  // 7 slate stone
+      ];
+
+      const DEFAULT_CFG = {
+        size: 4,
+        mode: 'std',            // 'std' | 'bld_auto' | 'bld_sub'
+        theme: 'graphite',      // 'graphite' | 'paper'
+        scheme: 'fringe_split', // 'fringe_split' | 'fringe' | 'rows' | 'cols' | 'mono'
+        animMs: 0,              // 0 | 50
+        kbDir: 'tile',          // 'tile' | 'blank'
+        glide: true,
+        hideBlankBld: false,
+        sound: false,
+        dots: false
+      };
+
+      /* =======================================================================
+         APPLICATION RUNTIME STATE
+         ======================================================================= */
+      let cfg = loadCfg();
+      let activeSolves = []; // Loaded lazily for active (size, mode) session only
+
+      let board = [];
+      let currentSeed = 0;
+      let isPractice = false;
+
+      // State Machine:
+      // STD: 'STD_READY' | 'STD_SOLVING' | 'DONE'
+      // BLD: 'BLD_READY' | 'BLD_MEMO' | 'BLD_EXEC' | 'DONE'
+      let phase = 'STD_READY';
+
+      let startTime = 0;
+      let memoMs = 0;
+      let finalTotalMs = 0;
+      let finalDnf = false;
+      let moves = 0;      // Exact Single-Tile Moves (STM)
+      let rafId = null;
+
+      // Exact integer pixel layout state managed by ResizeObserver
+      let cellPx = 80;
+      let tilePad = 3;
+
+      // Persistent tile DOM pool for current N (1..N*N-1)
+      let tilePoolSize = 0;
+      let tileSlots = [];
+      let tileFaces = [];
+
+      // Multi-touch pointer sets
+      const activePointers = new Set();
+      const ignoredPointers = new Set(); // Prevents BLD_READY reveal tap from moving tiles
+
+      // History pagination & inline clear confirmation
+      let historyLimit = 60;
+      let clearTimer = null;
+      let confirmingClear = false;
+
+      // Lazily unlocked Web Audio context
+      let audioCtx = null;
+
+      /* =======================================================================
+         DOM REFERENCES
+         ======================================================================= */
+      const metaThemeColor = document.getElementById('metaThemeColor');
+      const btnSessionTrigger = document.getElementById('btnSessionTrigger');
+      const hdrSize = document.getElementById('hdrSize');
+      const hdrMode = document.getElementById('hdrMode');
+      const hdrCount = document.getElementById('hdrCount');
+      const btnOpenStats = document.getElementById('btnOpenStats');
+      const btnOpenConfig = document.getElementById('btnOpenConfig');
+
+      const stopwatchPanel = document.getElementById('stopwatchPanel');
+      const timerReadout = document.getElementById('timerReadout');
+      const practiceTag = document.getElementById('practiceTag');
+      const statusTag = document.getElementById('statusTag');
+      const telemetryLine = document.getElementById('telemetryLine');
+
+      const statsBar = document.getElementById('statsBar');
+      const barPb = document.getElementById('barPb');
+      const barAo5 = document.getElementById('barAo5');
+      const barAo12 = document.getElementById('barAo12');
+      const barFourthLabel = document.getElementById('barFourthLabel');
+      const barFourthVal = document.getElementById('barFourthVal');
+
+      const boardStage = document.getElementById('boardStage');
+      const boardFrame = document.getElementById('boardFrame');
+      const boardGrid = document.getElementById('boardGrid');
+      const boardBackdrop = document.getElementById('boardBackdrop');
+      const tileLayer = document.getElementById('tileLayer');
+      const bldOverlay = document.getElementById('bldOverlay');
+      const bldOverlayMode = document.getElementById('bldOverlayMode');
+
+      const controlBar = document.getElementById('controlBar');
+      const scrim = document.getElementById('scrim');
+      const configSheet = document.getElementById('configSheet');
+      const statsSheet = document.getElementById('statsSheet');
+
+      const sizeSelector = document.getElementById('sizeSelector');
+      const modeSelector = document.getElementById('modeSelector');
+      const schemeSelector = document.getElementById('schemeSelector');
+      const themeSelector = document.getElementById('themeSelector');
+      const animSelector = document.getElementById('animSelector');
+      const kbDirSelector = document.getElementById('kbDirSelector');
+      const togGlide = document.getElementById('togGlide');
+      const togHideBlank = document.getElementById('togHideBlank');
+      const togSound = document.getElementById('togSound');
+      const togDots = document.getElementById('togDots');
+
+      const stSessionName = document.getElementById('stSessionName');
+      const stStorageInfo = document.getElementById('stStorageInfo');
+      const statsMatrix = document.getElementById('statsMatrix');
+      const historyLabel = document.getElementById('historyLabel');
+      const historyWrap = document.getElementById('historyWrap');
+      const btnClearSession = document.getElementById('btnClearSession');
+      const btnToggleBackup = document.getElementById('btnToggleBackup');
+      const backupBox = document.getElementById('backupBox');
+      const backupText = document.getElementById('backupText');
+      const backupMsg = document.getElementById('backupMsg');
+      const btnCopyBackup = document.getElementById('btnCopyBackup');
+      const btnImportBackup = document.getElementById('btnImportBackup');
+      const offlineCacheStatus = document.getElementById('offlineCacheStatus');
+      const appleTouchIcon = document.getElementById('appleTouchIcon');
+      const pwaManifest = document.getElementById('pwaManifest');
+
+      /* =======================================================================
+         PWA ICON, INLINE MANIFEST & OFFLINE SERVICE WORKER REGISTRATION
+         ======================================================================= */
+      function initPwaAssets() {
+        // 1. Draw crisp 180x180 matte Graphite 4x4 hardware icon for iOS Home Screen
+        let pngDataUrl = '';
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = 180;
+          canvas.height = 180;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            // Matte graphite base
+            ctx.fillStyle = '#0E0F11';
+            ctx.fillRect(0, 0, 180, 180);
+
+            // Recessed hardware tray
+            ctx.fillStyle = '#15171A';
+            ctx.fillRect(14, 14, 152, 152);
+            ctx.strokeStyle = '#363B44';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(15, 15, 150, 150);
+
+            // 4x4 Fringe-Split matte industrial tile palette
+            const tileColors = [
+              '#C44932', '#C44932', '#C44932', '#C44932',
+              '#CF8A2A', '#448558', '#448558', '#448558',
+              '#CF8A2A', '#326696', '#2B8282', '#2B8282',
+              '#CF8A2A', '#326696', '#2B8282', null
+            ];
+            const start = 24;
+            const gap = 6;
+            const size = 28;
+            for (let idx = 0; idx < 16; idx++) {
+              const r = Math.floor(idx / 4);
+              const c = idx % 4;
+              const x = start + c * (size + gap);
+              const y = start + r * (size + gap);
+              const col = tileColors[idx];
+
+              if (col) {
+                ctx.fillStyle = col;
+                ctx.fillRect(x, y, size, size);
+                ctx.fillStyle = 'rgba(255,255,255,0.12)';
+                ctx.fillRect(x, y, size, 2);
+              } else {
+                // Empty bottom-right slot
+                ctx.fillStyle = '#111316';
+                ctx.fillRect(x, y, size, size);
+                ctx.strokeStyle = '#262A30';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(x + 0.75, y + 0.75, size - 1.5, size - 1.5);
+              }
+            }
+            pngDataUrl = canvas.toDataURL('image/png');
+            if (appleTouchIcon && pngDataUrl) {
+              appleTouchIcon.href = pngDataUrl;
+            }
+          }
+        } catch (_) {
+          // Non-fatal fallback to SVG favicon
+        }
+
+        // 2. Attach inline Web App Manifest via Blob URL for standalone launch
+        try {
+          if (pwaManifest && window.Blob && window.URL && URL.createObjectURL) {
+            const manifest = {
+              name: 'SLIDY — Precision N×N Speedsolver',
+              short_name: '15 Puzzle',
+              start_url: './',
+              scope: './',
+              display: 'standalone',
+              orientation: 'portrait',
+              background_color: '#0E0F11',
+              theme_color: cfg.theme === 'paper' ? '#F2F0EB' : '#0E0F11',
+              icons: pngDataUrl
+                ? [{ src: pngDataUrl, sizes: '180x180', type: 'image/png', purpose: 'any maskable' }]
+                : []
+            };
+            const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+            pwaManifest.href = URL.createObjectURL(blob);
+          }
+        } catch (_) {
+          // Non-fatal
+        }
+      }
+
+      function setOfflineStatus(text, tone) {
+        if (!offlineCacheStatus) return;
+        offlineCacheStatus.textContent = text;
+        offlineCacheStatus.className = `pwa-status-val${tone ? ' ' + tone : ''}`;
+      }
+
+      function initServiceWorker() {
+        const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
+        if (!isHttp) {
+          setOfflineStatus('Local Preview', '');
+          return;
+        }
+        if (!('serviceWorker' in navigator)) {
+          setOfflineStatus('Unsupported', '');
+          return;
+        }
+
+        if (navigator.serviceWorker.controller) {
+          setOfflineStatus('Active', 'is-active');
+        }
+
+        navigator.serviceWorker
+          .register('./sw.js', { scope: './' })
+          .then((reg) => {
+            if (navigator.serviceWorker.controller || reg.active) {
+              setOfflineStatus('Active', 'is-active');
+            } else {
+              const worker = reg.installing || reg.waiting;
+              if (worker) {
+                setOfflineStatus('Installing...', 'is-warn');
+                worker.addEventListener('statechange', () => {
+                  if (worker.state === 'activated') {
+                    setOfflineStatus('Active', 'is-active');
+                  }
+                });
+              } else {
+                setOfflineStatus('Active', 'is-active');
+              }
+            }
+          })
+          .catch(() => {
+            setOfflineStatus('Needs sw.js', 'is-warn');
+          });
+      }
+
+      /* =======================================================================
+         DETERMINISTIC SEEDED PRNG (MULBERRY32) & EXACT N×N PARITY THEOREM
+         ======================================================================= */
+      function mulberry32(seed) {
+        let a = seed >>> 0;
+        return function () {
+          a = (a + 0x6D2B79F5) >>> 0;
+          let t = Math.imul(a ^ (a >>> 15), 1 | a);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      function randomSeed32() {
+        try {
+          if (window.crypto && window.crypto.getRandomValues) {
+            const buf = new Uint32Array(1);
+            window.crypto.getRandomValues(buf);
+            return buf[0] >>> 0;
+          }
+        } catch (_) {
+          // Fallback below
+        }
+        return (Math.random() * 4294967296) >>> 0;
+      }
+
+      /**
+       * Exact generalized N×N sliding puzzle solvability invariant:
+       *   Odd N:  solvable iff inv % 2 === 0
+       *   Even N: solvable iff (inv + (N - 1 - blankRow)) % 2 === 0
+       */
+      function isSolvable(arr, N) {
+        const len = N * N;
+        let inv = 0;
+        for (let i = 0; i < len; i++) {
+          const a = arr[i];
+          if (a === 0) continue;
+          for (let j = i + 1; j < len; j++) {
+            const b = arr[j];
+            if (b !== 0 && a > b) inv++;
+          }
+        }
+        if (N % 2 === 1) {
+          return (inv & 1) === 0;
+        }
+        const blankRow = Math.floor(arr.indexOf(0) / N);
+        return ((inv + (N - 1 - blankRow)) & 1) === 0;
+      }
+
+      function isSolved(arr, N) {
+        const last = N * N - 1;
+        for (let i = 0; i < last; i++) {
+          if (arr[i] !== i + 1) return false;
+        }
+        return arr[last] === 0;
+      }
+
+      /**
+       * Uniform random-state solvable N×N permutation from 32-bit unsigned seed.
+       */
+      function generateScrambleFromSeed(N, seed) {
+        const len = N * N;
+        const rng = mulberry32(seed >>> 0);
+
+        while (true) {
+          const arr = new Array(len);
+          for (let i = 0; i < len; i++) arr[i] = i;
+
+          // Fisher-Yates shuffle
+          for (let i = len - 1; i > 0; i--) {
+            const j = Math.floor(rng() * (i + 1));
+            const tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+          }
+
+          // Parity bijection: swap first two non-zero tiles if odd parity
+          if (!isSolvable(arr, N)) {
+            let p1 = -1;
+            let p2 = -1;
+            for (let i = 0; i < len; i++) {
+              if (arr[i] !== 0) {
+                if (p1 === -1) p1 = i;
+                else {
+                  p2 = i;
+                  break;
+                }
+              }
+            }
+            const tmp = arr[p1];
+            arr[p1] = arr[p2];
+            arr[p2] = tmp;
+          }
+
+          if (!isSolved(arr, N)) {
+            return arr;
+          }
+        }
+      }
+
+      /* =======================================================================
+         DYNAMIC N×N PIGMENT COLOR SCHEMES
+         ======================================================================= */
+      function getTilePigment(val, N, scheme) {
+        if (scheme === 'mono') return null;
+
+        const hr = Math.floor((val - 1) / N);
+        const hc = (val - 1) % N;
+
+        let idx = 0;
+        if (scheme === 'fringe_split') {
+          const L = Math.min(hr, hc);
+          if (L === N - 2) {
+            idx = (2 * L) % 8;
+          } else {
+            idx = (hr <= hc ? 2 * L : 2 * L + 1) % 8;
+          }
+        } else if (scheme === 'fringe') {
+          idx = Math.min(hr, hc) % 8;
+        } else if (scheme === 'rows') {
+          idx = hr % 8;
+        } else if (scheme === 'cols') {
+          idx = hc % 8;
+        }
+        return PIGMENTS[idx];
+      }
+
+      /* =======================================================================
+         ULTRA-COMPACT BASE36 SESSION STORAGE (~15-22 BYTES PER SOLVE)
+         Format: 1|<baseTs_b36>|<rec1>;<rec2>;...
+           std: <timeMs>,<moves>,<tsDeltaSec>,<seed>
+           bld: <timeMs>,<memoMs>,<moves>,<flags>,<tsDeltaSec>,<seed>
+         ======================================================================= */
+      function sessionKey(size, mode) {
+        return `${SESSION_PREFIX}${size}x${size}_${mode}`;
+      }
+
+      function isBldMode(mode) {
+        return mode === 'bld_auto' || mode === 'bld_sub';
+      }
+
+      function packSession(solves, mode) {
+        if (!solves || solves.length === 0) return '';
+        const bld = isBldMode(mode);
+
+        let baseTs = Infinity;
+        for (let i = 0; i < solves.length; i++) {
+          if (solves[i].ts < baseTs) baseTs = solves[i].ts;
+        }
+        if (!Number.isFinite(baseTs)) baseTs = Math.floor(Date.now() / 1000);
+
+        const parts = new Array(solves.length);
+        for (let i = 0; i < solves.length; i++) {
+          const s = solves[i];
+          const tMs = Math.max(1, Math.round(s.timeMs)).toString(36);
+          const mv = Math.max(0, Math.round(s.moves)).toString(36);
+          const dt = Math.max(0, Math.round(s.ts - baseTs)).toString(36);
+          const sd = (s.seed >>> 0).toString(36);
+
+          if (bld) {
+            const mMs = Math.max(0, Math.round(s.memoMs || 0)).toString(36);
+            const fl = (s.dnf ? 1 : 0).toString(36);
+            parts[i] = `${tMs},${mMs},${mv},${fl},${dt},${sd}`;
+          } else {
+            parts[i] = `${tMs},${mv},${dt},${sd}`;
+          }
+        }
+        return `1|${baseTs.toString(36)}|${parts.join(';')}`;
+      }
+
+      function unpackSession(raw, mode) {
+        if (!raw || typeof raw !== 'string') return [];
+        const chunks = raw.split('|');
+        if (chunks.length < 3 || chunks[0] !== '1') return [];
+        const baseTs = parseInt(chunks[1], 36);
+        if (!Number.isFinite(baseTs)) return [];
+
+        const recStr = chunks.slice(2).join('|');
+        if (!recStr) return [];
+
+        const bld = isBldMode(mode);
+        const rows = recStr.split(';');
+        const out = [];
+
+        for (let i = 0; i < rows.length; i++) {
+          if (!rows[i]) continue;
+          const f = rows[i].split(',');
+          if (bld) {
+            if (f.length < 6) continue;
+            const timeMs = parseInt(f[0], 36);
+            const memoMsVal = parseInt(f[1], 36);
+            const mv = parseInt(f[2], 36);
+            const flags = parseInt(f[3], 36);
+            const dt = parseInt(f[4], 36);
+            const seed = parseInt(f[5], 36) >>> 0;
+            if (!Number.isFinite(timeMs) || !Number.isFinite(mv)) continue;
+            out.push({
+              timeMs,
+              memoMs: Number.isFinite(memoMsVal) ? memoMsVal : 0,
+              moves: mv,
+              dnf: (flags & 1) === 1,
+              ts: baseTs + (Number.isFinite(dt) ? dt : 0),
+              seed
+            });
+          } else {
+            if (f.length < 4) continue;
+            const timeMs = parseInt(f[0], 36);
+            const mv = parseInt(f[1], 36);
+            const dt = parseInt(f[2], 36);
+            const seed = parseInt(f[3], 36) >>> 0;
+            if (!Number.isFinite(timeMs) || !Number.isFinite(mv)) continue;
+            out.push({
+              timeMs,
+              memoMs: 0,
+              moves: mv,
+              dnf: false,
+              ts: baseTs + (Number.isFinite(dt) ? dt : 0),
+              seed
+            });
+          }
+        }
+        return out;
+      }
+
+      function loadActiveSession() {
+        try {
+          const key = sessionKey(cfg.size, cfg.mode);
+          const raw = localStorage.getItem(key);
+          activeSolves = raw ? unpackSession(raw, cfg.mode) : [];
+        } catch (_) {
+          activeSolves = [];
+        }
+      }
+
+      function saveActiveSession() {
+        const key = sessionKey(cfg.size, cfg.mode);
+        try {
+          if (activeSolves.length === 0) {
+            localStorage.removeItem(key);
+          } else {
+            localStorage.setItem(key, packSession(activeSolves, cfg.mode));
+          }
+        } catch (_) {
+          // Non-fatal in private browsing / quota exceeded
+        }
+      }
+
+      function getStorageFootprint() {
+        let activeBytes = 0;
+        let totalBytes = 0;
+        const activeK = sessionKey(cfg.size, cfg.mode);
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (!k || !k.startsWith(SESSION_PREFIX)) continue;
+            const v = localStorage.getItem(k) || '';
+            totalBytes += v.length;
+            if (k === activeK) activeBytes = v.length;
+          }
+        } catch (_) {
+          // Ignore
+        }
+        return { activeBytes, totalBytes };
+      }
+
+      function loadCfg() {
+        try {
+          const raw = localStorage.getItem(CFG_KEY);
+          if (!raw) return { ...DEFAULT_CFG };
+          const p = JSON.parse(raw);
+          return {
+            size: SIZES.includes(p.size) ? p.size : DEFAULT_CFG.size,
+            mode: MODES.includes(p.mode) ? p.mode : DEFAULT_CFG.mode,
+            theme: p.theme === 'paper' ? 'paper' : 'graphite',
+            scheme: ['fringe_split', 'fringe', 'rows', 'cols', 'mono'].includes(p.scheme) ? p.scheme : DEFAULT_CFG.scheme,
+            animMs: p.animMs === 50 ? 50 : 0,
+            kbDir: p.kbDir === 'blank' ? 'blank' : 'tile',
+            glide: typeof p.glide === 'boolean' ? p.glide : DEFAULT_CFG.glide,
+            hideBlankBld: typeof p.hideBlankBld === 'boolean' ? p.hideBlankBld : DEFAULT_CFG.hideBlankBld,
+            sound: typeof p.sound === 'boolean' ? p.sound : DEFAULT_CFG.sound,
+            dots: typeof p.dots === 'boolean' ? p.dots : DEFAULT_CFG.dots
+          };
+        } catch (_) {
+          return { ...DEFAULT_CFG };
+        }
+      }
+
+      function saveCfg() {
+        try {
+          localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+        } catch (_) {
+          // Ignore
+        }
+      }
+
+      /* =======================================================================
+         FORMATTING & EXACT WCA STATISTICS (WITH DNF RULES)
+         ======================================================================= */
+      function formatTime(ms, decimals = 3) {
+        if (ms == null || !Number.isFinite(ms)) return '--';
+        const factor = decimals === 2 ? 10 : 1;
+        const totalUnits = Math.max(0, Math.round(ms / factor));
+        const unitsPerSec = decimals === 2 ? 100 : 1000;
+        const minutes = Math.floor(totalUnits / (60 * unitsPerSec));
+        const seconds = Math.floor((totalUnits % (60 * unitsPerSec)) / unitsPerSec);
+        const frac = String(totalUnits % unitsPerSec).padStart(decimals, '0');
+        if (minutes > 0) {
+          return `${minutes}:${String(seconds).padStart(2, '0')}.${frac}`;
+        }
+        return `${seconds}.${frac}`;
+      }
+
+      function formatAvgResult(res) {
+        if (!res) return '--';
+        if (res.dnf) return 'DNF';
+        return formatTime(res.ms, 3);
+      }
+
+      /**
+       * Official WCA trimmed average of N solves (N = 5 or 12):
+       * - Drop 1 best and 1 worst.
+       * - DNF counts as +Infinity.
+       * - If >= 2 DNFs in window -> DNF.
+       * - If 1 DNF -> dropped as worst, average remaining N - 2 valid times.
+       */
+      function calcWcaAverage(slice) {
+        const len = slice.length;
+        if (len < 3) return null;
+        let dnfCount = 0;
+        const vals = new Array(len);
+        for (let i = 0; i < len; i++) {
+          if (slice[i].dnf) {
+            dnfCount++;
+            vals[i] = Infinity;
+          } else {
+            vals[i] = slice[i].timeMs;
+          }
+        }
+        if (dnfCount >= 2) return { dnf: true, ms: null };
+        vals.sort((a, b) => a - b);
+        let sum = 0;
+        for (let i = 1; i < len - 1; i++) sum += vals[i];
+        return { dnf: false, ms: sum / (len - 2) };
+      }
+
+      function computeSessionStats() {
+        const n = activeSolves.length;
+        let pb = null;
+        let validCount = 0;
+        let sumTime = 0;
+        let sumMemo = 0;
+        let sumExec = 0;
+        let sumMoves = 0;
+
+        for (let i = 0; i < n; i++) {
+          const s = activeSolves[i];
+          if (!s.dnf) {
+            validCount++;
+            sumTime += s.timeMs;
+            sumMemo += s.memoMs || 0;
+            sumExec += Math.max(0, s.timeMs - (s.memoMs || 0));
+            sumMoves += s.moves;
+            if (pb === null || s.timeMs < pb) pb = s.timeMs;
+          }
+        }
+
+        const ao5 = n >= 5 ? calcWcaAverage(activeSolves.slice(-5)) : null;
+        const ao12 = n >= 12 ? calcWcaAverage(activeSolves.slice(-12)) : null;
+
+        let bestAo5 = null;
+        if (n >= 5) {
+          let anyDnfWindow = false;
+          for (let i = 0; i <= n - 5; i++) {
+            const w = calcWcaAverage(activeSolves.slice(i, i + 5));
+            if (w.dnf) {
+              anyDnfWindow = true;
+            } else if (!bestAo5 || bestAo5.dnf || w.ms < bestAo5.ms) {
+              bestAo5 = w;
+            }
+          }
+          if (!bestAo5 && anyDnfWindow) bestAo5 = { dnf: true, ms: null };
+        }
+
+        return {
+          total: n,
+          valid: validCount,
+          pb,
+          ao5,
+          ao12,
+          bestAo5,
+          mean: validCount > 0 ? sumTime / validCount : null,
+          avgMemo: validCount > 0 ? sumMemo / validCount : null,
+          avgExec: validCount > 0 ? sumExec / validCount : null,
+          avgMoves: validCount > 0 ? sumMoves / validCount : null,
+          accuracyPct: n > 0 ? Math.round((validCount / n) * 100) : null
+        };
+      }
+
+      /* =======================================================================
+         WEB AUDIO SYNTHESIZED MECHANICAL CLICK
+         ======================================================================= */
+      function unlockAudio() {
+        try {
+          if (!audioCtx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return null;
+            audioCtx = new AC();
+          }
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          return audioCtx;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function playClick() {
+        if (!cfg.sound) return;
+        const ctx = unlockAudio();
+        if (!ctx) return;
+        try {
+          const t = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(1080, t);
+          osc.frequency.exponentialRampToValueAtTime(210, t + 0.008);
+          gain.gain.setValueAtTime(0.11, t);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.009);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.011);
+        } catch (_) {
+          // Non-fatal
+        }
+      }
+
+      function playFinishTone(isDnf) {
+        if (!cfg.sound) return;
+        const ctx = unlockAudio();
+        if (!ctx) return;
+        try {
+          const t = ctx.currentTime;
+          const freqs = isDnf ? [300, 220] : [740, 1110];
+          freqs.forEach((f, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const start = t + idx * 0.055;
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(f, start);
+            gain.gain.setValueAtTime(0.0001, start);
+            gain.gain.linearRampToValueAtTime(0.1, start + 0.006);
+            gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.11);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(start);
+            osc.stop(start + 0.12);
+          });
+        } catch (_) {
+          // Non-fatal
+        }
+      }
+
+      /* =======================================================================
+         PERSISTENT GPU TILE POOL & EXACT INTEGER PIXEL SIZING (RESIZEOBSERVER)
+         ======================================================================= */
+      function rebuildBoardDOM(N) {
+        tilePoolSize = N;
+        const total = N * N;
+
+        // Backdrop grid cells
+        boardBackdrop.innerHTML = '';
+        boardBackdrop.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
+        boardBackdrop.style.gridTemplateRows = `repeat(${N}, 1fr)`;
+
+        const bgFrag = document.createDocumentFragment();
+        for (let i = 0; i < total; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'backdrop-cell';
+          const inner = document.createElement('div');
+          inner.className = 'backdrop-cell-inner';
+          cell.appendChild(inner);
+          bgFrag.appendChild(cell);
+        }
+        boardBackdrop.appendChild(bgFrag);
+
+        // Persistent 1..(N*N-1) tile DOM pool
+        tileLayer.innerHTML = '';
+        tileSlots = new Array(total);
+        tileFaces = new Array(total);
+
+        const tileFrag = document.createDocumentFragment();
+        for (let val = 1; val < total; val++) {
+          const slot = document.createElement('div');
+          slot.className = 'tile-slot';
+
+          const face = document.createElement('div');
+          face.className = 'tile-face';
+          face.textContent = String(val);
+
+          const dot = document.createElement('span');
+          dot.className = 'tile-dot';
+          face.appendChild(dot);
+
+          slot.appendChild(face);
+          tileFrag.appendChild(slot);
+
+          tileSlots[val] = slot;
+          tileFaces[val] = face;
+        }
+        tileLayer.appendChild(tileFrag);
+
+        applyTilePigments();
+        layoutBoardExact();
+      }
+
+      function applyTilePigments() {
+        const N = cfg.size;
+        const total = N * N;
+        for (let val = 1; val < total; val++) {
+          const face = tileFaces[val];
+          if (!face) continue;
+          const p = getTilePigment(val, N, cfg.scheme);
+          if (!p) {
+            face.classList.add('is-mono');
+            face.style.backgroundColor = '';
+            face.style.color = '';
+          } else {
+            face.classList.remove('is-mono');
+            face.style.backgroundColor = p.bg;
+            face.style.color = p.ink;
+          }
+        }
+      }
+
+      /**
+       * Computes exact integer pixel cell dimensions so every tile lands on
+       * exact physical pixels with zero subpixel seams for 3×3 through 8×8.
+       */
+      function layoutBoardExact() {
+        const N = cfg.size;
+        const rect = boardStage.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return;
+
+        const trayPad = N <= 5 ? 6 : 5;
+        const maxFrame = Math.floor(Math.min(rect.width, rect.height, 460));
+        const usable = Math.max(160, maxFrame - trayPad * 2 - 2);
+
+        cellPx = Math.max(20, Math.floor(usable / N));
+        const gridPx = cellPx * N;
+        const framePx = gridPx + trayPad * 2 + 2;
+
+        tilePad = N <= 4 ? 3 : (N <= 6 ? 2 : 1);
+        const fontPx = Math.max(10, Math.round(cellPx * (N >= 7 ? 0.41 : 0.43)));
+        const dotPx = Math.max(3, Math.round(cellPx * 0.085));
+
+        boardFrame.style.width = `${framePx}px`;
+        boardFrame.style.height = `${framePx}px`;
+        boardGrid.style.width = `${gridPx}px`;
+        boardGrid.style.height = `${gridPx}px`;
+
+        // Update backdrop cell padding
+        const bgCells = boardBackdrop.children;
+        for (let i = 0; i < bgCells.length; i++) {
+          bgCells[i].style.padding = `${tilePad}px`;
+        }
+
+        // Update persistent tile pool dimensions
+        const total = N * N;
+        for (let val = 1; val < total; val++) {
+          const slot = tileSlots[val];
+          const face = tileFaces[val];
+          if (!slot || !face) continue;
+          slot.style.width = `${cellPx}px`;
+          slot.style.height = `${cellPx}px`;
+          slot.style.padding = `${tilePad}px`;
+          face.style.fontSize = `${fontPx}px`;
+          const dot = face.firstElementChild;
+          if (dot) {
+            dot.style.width = `${dotPx}px`;
+            dot.style.height = `${dotPx}px`;
+          }
+        }
+
+        renderBoard();
+      }
+
+      function renderBoard() {
+        const N = cfg.size;
+        const total = N * N;
+        const showMisplaced = phase === 'DONE' && finalDnf;
+
+        for (let idx = 0; idx < total; idx++) {
+          const val = board[idx];
+          if (val === 0) continue;
+          const r = Math.floor(idx / N);
+          const c = idx % N;
+          const slot = tileSlots[val];
+          if (!slot) continue;
+
+          slot.style.transform = `translate3d(${c * cellPx}px, ${r * cellPx}px, 0)`;
+
+          const correct = idx === val - 1;
+          slot.classList.toggle('in-place', correct);
+          slot.classList.toggle('is-misplaced', showMisplaced && !correct);
+        }
+      }
+
+      function updateBoardMasking() {
+        const masked = phase === 'BLD_READY' || phase === 'BLD_EXEC';
+        const hideBlank = phase === 'BLD_EXEC' && cfg.hideBlankBld;
+
+        boardGrid.classList.toggle('is-masked', masked);
+        boardGrid.classList.toggle('bld-hide-blank', hideBlank);
+
+        if (phase === 'BLD_READY') {
+          bldOverlayMode.textContent = MODE_META[cfg.mode].overlay;
+          bldOverlay.classList.add('visible');
+          bldOverlay.setAttribute('aria-hidden', 'false');
+        } else {
+          bldOverlay.classList.remove('visible');
+          bldOverlay.setAttribute('aria-hidden', 'true');
+        }
+      }
+
+      /* =======================================================================
+         CORE MOVE ENGINE (SINGLE-TILE & MULTI-TILE ROW/COLUMN SLIDE)
+         ======================================================================= */
+      function slideAt(r, c) {
+        const N = cfg.size;
+        if (r < 0 || r >= N || c < 0 || c >= N) return 0;
+
+        const blankIdx = board.indexOf(0);
+        const br = Math.floor(blankIdx / N);
+        const bc = blankIdx % N;
+
+        if ((r === br && c === bc) || (r !== br && c !== bc)) return 0;
+
+        let dist = 0;
+        if (r === br) {
+          dist = Math.abs(c - bc);
+          const step = c > bc ? 1 : -1;
+          for (let k = 0; k < dist; k++) {
+            board[r * N + (bc + k * step)] = board[r * N + (bc + (k + 1) * step)];
+          }
+          board[r * N + c] = 0;
+        } else {
+          dist = Math.abs(r - br);
+          const step = r > br ? 1 : -1;
+          for (let k = 0; k < dist; k++) {
+            board[(br + k * step) * N + c] = board[(br + (k + 1) * step) * N + c];
+          }
+          board[r * N + c] = 0;
+        }
+        return dist;
+      }
+
+      /* =======================================================================
+         TIMER LOOP & EXACT STATE MACHINE TRANSITIONS
+         ======================================================================= */
+      function stopRaf() {
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+      }
+
+      function renderLiveTelemetry(elapsedMs) {
+        if (!isBldMode(cfg.mode)) {
+          const tps = elapsedMs >= 20 ? (moves / (elapsedMs / 1000)).toFixed(2) : '0.00';
+          telemetryLine.innerHTML = `STM <strong>${moves}</strong><span class="sep">&middot;</span><strong>${tps}</strong> TPS`;
+        } else {
+          if (phase === 'BLD_READY') {
+            telemetryLine.innerHTML = `MEMO <strong>0.00</strong><span class="sep">&middot;</span>EXEC <strong>0.00</strong><span class="sep">&middot;</span><strong>0</strong> STM`;
+          } else if (phase === 'BLD_MEMO') {
+            telemetryLine.innerHTML = `MEMO <strong>${formatTime(elapsedMs, 2)}</strong><span class="sep">&middot;</span>EXEC <strong>0.00</strong><span class="sep">&middot;</span><strong>0</strong> STM`;
+          } else if (phase === 'BLD_EXEC') {
+            const execNow = Math.max(0, elapsedMs - memoMs);
+            telemetryLine.innerHTML = `MEMO <strong>${formatTime(memoMs, 2)}</strong><span class="sep">&middot;</span>EXEC <strong>${formatTime(execNow, 2)}</strong><span class="sep">&middot;</span><strong>${moves}</strong> STM`;
+          } else if (phase === 'DONE') {
+            const execFinal = Math.max(0, finalTotalMs - memoMs);
+            const tps = execFinal > 0 ? (moves / (execFinal / 1000)).toFixed(2) : '0.00';
+            telemetryLine.innerHTML = `MEMO <strong>${formatTime(memoMs, 2)}</strong><span class="sep">&middot;</span>EXEC <strong>${formatTime(execFinal, 2)}</strong><span class="sep">&middot;</span><strong>${moves}</strong> STM<span class="sep">&middot;</span><strong>${tps}</strong> TPS`;
+          }
+        }
+      }
+
+      function timerTick() {
+        if (phase !== 'STD_SOLVING' && phase !== 'BLD_MEMO' && phase !== 'BLD_EXEC') return;
+        const elapsed = performance.now() - startTime;
+        timerReadout.textContent = formatTime(elapsed, 3);
+        renderLiveTelemetry(elapsed);
+        rafId = requestAnimationFrame(timerTick);
+      }
+
+      function setVisualState(panelClass, badgeText, badgeSignal) {
+        stopwatchPanel.className = `stopwatch-panel${panelClass ? ' ' + panelClass : ''}`;
+        boardFrame.className = `board-frame${panelClass ? ' ' + panelClass : ''}`;
+        statusTag.textContent = badgeText;
+        statusTag.className = `status-tag${badgeSignal ? ' ' + badgeSignal : ''}`;
+        practiceTag.classList.toggle('hidden', !isPractice);
+      }
+
+      function renderControls() {
+        controlBar.innerHTML = '';
+
+        const makeBtn = (label, cls, onClick) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = `act-btn ${cls}`;
+          b.textContent = label;
+          b.addEventListener('click', () => {
+            onClick();
+            b.blur();
+          });
+          return b;
+        };
+
+        if (phase === 'STD_READY' || phase === 'STD_SOLVING') {
+          controlBar.appendChild(makeBtn('Replay', 'flex-1 muted', startReplayCurrent));
+          controlBar.appendChild(makeBtn('Scramble', 'flex-2 stark', startNewScramble));
+        } else if (phase === 'BLD_READY') {
+          controlBar.appendChild(makeBtn('New Seed', 'flex-1 muted', startNewScramble));
+          controlBar.appendChild(makeBtn('Reveal & Start', 'flex-2 stark', revealBld));
+        } else if (phase === 'BLD_MEMO') {
+          controlBar.appendChild(makeBtn('Abort', 'flex-1 muted', startNewScramble));
+          controlBar.appendChild(makeBtn('Hide / Start Exec', 'flex-2 signal-amber', startBldExecManual));
+        } else if (phase === 'BLD_EXEC') {
+          if (cfg.mode === 'bld_sub') {
+            controlBar.appendChild(makeBtn('Abort', 'flex-1 muted', startNewScramble));
+            controlBar.appendChild(makeBtn('Submit', 'flex-2 stark', submitBld));
+          } else {
+            controlBar.appendChild(makeBtn('Abort', 'flex-1 muted', startNewScramble));
+            controlBar.appendChild(makeBtn('Reveal / DNF', 'flex-2 signal-red', abortBldAutoAsDnf));
+          }
+        } else if (phase === 'DONE') {
+          controlBar.appendChild(makeBtn('Replay', 'flex-1 muted', startReplayCurrent));
+          controlBar.appendChild(makeBtn('Next Scramble', 'flex-2 stark', startNewScramble));
+        }
+      }
+
+      function revealBld() {
+        if (phase !== 'BLD_READY') return;
+        startTime = performance.now();
+        memoMs = 0;
+        phase = 'BLD_MEMO';
+        setVisualState('st-memo', 'MEMO', 'sig-amber');
+        updateBoardMasking();
+        renderControls();
+        rafId = requestAnimationFrame(timerTick);
+      }
+
+      function startBldExecManual() {
+        if (phase !== 'BLD_MEMO') return;
+        memoMs = Math.max(0, performance.now() - startTime);
+        phase = 'BLD_EXEC';
+        setVisualState('st-exec', 'EXEC', 'sig-green');
+        updateBoardMasking();
+        renderControls();
+      }
+
+      function executeMoveAt(r, c) {
+        if (phase === 'DONE' || phase === 'BLD_READY') return;
+
+        const dist = slideAt(r, c);
+        if (dist === 0) return;
+
+        const now = performance.now();
+
+        if (phase === 'STD_READY') {
+          startTime = now;
+          phase = 'STD_SOLVING';
+          setVisualState('', 'SOLVING', '');
+          rafId = requestAnimationFrame(timerTick);
+        } else if (phase === 'BLD_MEMO') {
+          // First valid tile move locks memo split and immediately masks tiles
+          memoMs = Math.max(0, now - startTime);
+          phase = 'BLD_EXEC';
+          setVisualState('st-exec', 'EXEC', 'sig-green');
+          updateBoardMasking();
+          renderControls();
+        }
+
+        moves += dist;
+        renderBoard();
+
+        // Check automatic finish conditions
+        if (phase === 'STD_SOLVING' || (phase === 'BLD_EXEC' && cfg.mode === 'bld_auto')) {
+          if (isSolved(board, cfg.size)) {
+            finishAttempt(now, false);
+            return;
+          }
+        }
+
+        playClick();
+        renderLiveTelemetry(now - startTime);
+      }
+
+      function submitBld() {
+        if (phase !== 'BLD_EXEC' || cfg.mode !== 'bld_sub') return;
+        const now = performance.now();
+        const solved = isSolved(board, cfg.size);
+        finishAttempt(now, !solved);
+      }
+
+      function abortBldAutoAsDnf() {
+        if (phase !== 'BLD_EXEC' || cfg.mode !== 'bld_auto') return;
+        finishAttempt(performance.now(), true);
+      }
+
+      function finishAttempt(nowTs, isDnf) {
+        stopRaf();
+        activePointers.clear();
+        ignoredPointers.clear();
+
+        const rawTotal = Math.max(1, Math.round(nowTs - startTime));
+        finalTotalMs = rawTotal;
+        finalDnf = isDnf;
+        phase = 'DONE';
+
+        // Unmask board and highlight any misplaced tiles on DNF
+        updateBoardMasking();
+        renderBoard();
+
+        timerReadout.textContent = formatTime(finalTotalMs, 3);
+        renderLiveTelemetry(finalTotalMs);
+        playFinishTone(isDnf);
+
+        if (isPractice) {
+          if (isDnf) {
+            setVisualState('st-dnf', 'DNF', 'sig-red');
+          } else {
+            setVisualState('st-solved', 'SOLVED', 'sig-green');
+          }
+          renderControls();
+          return;
+        }
+
+        // Official solve: check PB before pushing
+        const prevStats = computeSessionStats();
+        const isNewPb = !isDnf && (prevStats.pb === null || finalTotalMs < prevStats.pb);
+
+        activeSolves.push({
+          timeMs: finalTotalMs,
+          memoMs: isBldMode(cfg.mode) ? Math.round(memoMs) : 0,
+          moves,
+          dnf: isDnf,
+          ts: Math.floor(Date.now() / 1000),
+          seed: currentSeed >>> 0
+        });
+
+        saveActiveSession();
+        updateHeaderAndStatsBar();
+
+        if (isDnf) {
+          setVisualState('st-dnf', 'DNF', 'sig-red');
+        } else if (isNewPb) {
+          setVisualState('st-pb', 'NEW PB', 'sig-amber');
+        } else {
+          setVisualState('st-solved', 'SOLVED', 'sig-green');
+        }
+
+        renderControls();
+      }
+
+      /* =======================================================================
+         SCRAMBLE, REPLAY & SESSION SWITCHING
+         ======================================================================= */
+      function loadScrambleState(seed, practiceFlag) {
+        stopRaf();
+        activePointers.clear();
+        ignoredPointers.clear();
+
+        currentSeed = seed >>> 0;
+        isPractice = practiceFlag;
+        board = generateScrambleFromSeed(cfg.size, currentSeed);
+
+        startTime = 0;
+        memoMs = 0;
+        finalTotalMs = 0;
+        finalDnf = false;
+        moves = 0;
+
+        phase = isBldMode(cfg.mode) ? 'BLD_READY' : 'STD_READY';
+
+        timerReadout.textContent = '0.000';
+        setVisualState('', 'READY', '');
+        renderLiveTelemetry(0);
+        updateBoardMasking();
+        renderBoard();
+        renderControls();
+      }
+
+      function startNewScramble() {
+        loadScrambleState(randomSeed32(), false);
+      }
+
+      function startReplayCurrent() {
+        loadScrambleState(currentSeed, true);
+      }
+
+      function switchSession(nextSize, nextMode) {
+        const sizeChanged = nextSize !== cfg.size;
+        const modeChanged = nextMode !== cfg.mode;
+        if (!sizeChanged && !modeChanged) return;
+
+        cfg.size = nextSize;
+        cfg.mode = nextMode;
+        saveCfg();
+
+        historyLimit = 60;
+        loadActiveSession();
+
+        if (sizeChanged || tilePoolSize !== cfg.size) {
+          rebuildBoardDOM(cfg.size);
+        } else {
+          applyTilePigments();
+        }
+
+        applyConfigUI();
+        updateHeaderAndStatsBar();
+        startNewScramble();
+      }
+
+      /* =======================================================================
+         UI SYNC: HEADER, STATS BAR, CONFIG SHEET, STATS SHEET
+         ======================================================================= */
+      function applyConfigUI() {
+        // Theme
+        document.documentElement.setAttribute('data-theme', cfg.theme);
+        metaThemeColor.setAttribute('content', cfg.theme === 'paper' ? '#F2F0EB' : '#0E0F11');
+
+        // Board motion & dots
+        boardGrid.classList.toggle('anim-snappy', cfg.animMs === 50);
+        boardGrid.classList.toggle('show-dots', cfg.dots);
+        updateBoardMasking();
+
+        // Header badge
+        hdrSize.textContent = `${cfg.size}×${cfg.size}`;
+        hdrMode.textContent = MODE_META[cfg.mode].short;
+        hdrMode.classList.toggle('is-bld', isBldMode(cfg.mode));
+
+        // Config sheet controls
+        sizeSelector.querySelectorAll('[data-size]').forEach((b) => {
+          b.classList.toggle('active', Number(b.dataset.size) === cfg.size);
+        });
+        modeSelector.querySelectorAll('[data-mode]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.mode === cfg.mode);
+        });
+        schemeSelector.querySelectorAll('[data-scheme]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.scheme === cfg.scheme);
+        });
+        themeSelector.querySelectorAll('[data-theme-val]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.themeVal === cfg.theme);
+        });
+        animSelector.querySelectorAll('[data-anim]').forEach((b) => {
+          b.classList.toggle('active', Number(b.dataset.anim) === cfg.animMs);
+        });
+        kbDirSelector.querySelectorAll('[data-kb]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.kb === cfg.kbDir);
+        });
+
+        togGlide.setAttribute('aria-checked', String(cfg.glide));
+        togHideBlank.setAttribute('aria-checked', String(cfg.hideBlankBld));
+        togSound.setAttribute('aria-checked', String(cfg.sound));
+        togDots.setAttribute('aria-checked', String(cfg.dots));
+      }
+
+      function updateHeaderAndStatsBar() {
+        const st = computeSessionStats();
+        const bld = isBldMode(cfg.mode);
+
+        hdrCount.textContent = String(st.total);
+
+        barPb.textContent = formatTime(st.pb, 3);
+
+        barAo5.textContent = formatAvgResult(st.ao5);
+        barAo5.classList.toggle('is-dnf', Boolean(st.ao5 && st.ao5.dnf));
+
+        barAo12.textContent = formatAvgResult(st.ao12);
+        barAo12.classList.toggle('is-dnf', Boolean(st.ao12 && st.ao12.dnf));
+
+        if (bld) {
+          barFourthLabel.textContent = 'ACC';
+          barFourthVal.textContent = st.accuracyPct !== null ? `${st.accuracyPct}%` : '--';
+        } else {
+          barFourthLabel.textContent = 'MEAN';
+          barFourthVal.textContent = formatTime(st.mean, 3);
+        }
+      }
+
+      function renderStatsSheet() {
+        const st = computeSessionStats();
+        const bld = isBldMode(cfg.mode);
+        const fp = getStorageFootprint();
+
+        stSessionName.textContent = `${cfg.size}×${cfg.size} · ${MODE_META[cfg.mode].full}`;
+        stStorageInfo.textContent =
+          `Active: ${st.total} solves · ${(fp.activeBytes / 1024).toFixed(2)} KB | All sessions: ${(fp.totalBytes / 1024).toFixed(2)} KB`;
+
+        // Build stats matrix cells
+        const cells = [
+          { k: 'PB Single', v: formatTime(st.pb, 3), cls: st.pb !== null ? 'amber' : '' },
+          { k: 'Best Ao5', v: formatAvgResult(st.bestAo5), cls: st.bestAo5 && st.bestAo5.dnf ? 'red' : '' },
+          { k: 'Curr Ao5', v: formatAvgResult(st.ao5), cls: st.ao5 && st.ao5.dnf ? 'red' : '' },
+          { k: 'Curr Ao12', v: formatAvgResult(st.ao12), cls: st.ao12 && st.ao12.dnf ? 'red' : '' },
+          { k: 'Valid Mean', v: formatTime(st.mean, 3), cls: '' },
+          { k: 'Avg STM', v: st.avgMoves !== null ? st.avgMoves.toFixed(1) : '--', cls: '' }
+        ];
+
+        if (bld) {
+          cells.push(
+            { k: 'Accuracy', v: st.total > 0 ? `${st.valid}/${st.total} · ${st.accuracyPct}%` : '--', cls: st.accuracyPct >= 75 ? 'green' : '' },
+            { k: 'Avg Memo', v: formatTime(st.avgMemo, 2), cls: '' },
+            { k: 'Avg Exec', v: formatTime(st.avgExec, 2), cls: '' }
+          );
+        }
+
+        statsMatrix.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        const lastRowStart = cells.length - 3;
+        cells.forEach((c, idx) => {
+          const el = document.createElement('div');
+          el.className = idx >= lastRowStart ? 'matrix-cell no-bottom' : 'matrix-cell';
+          el.innerHTML = `<div class="matrix-k">${c.k}</div><div class="matrix-v ${c.cls}">${c.v}</div>`;
+          frag.appendChild(el);
+        });
+        statsMatrix.appendChild(frag);
+
+        historyLabel.textContent = `Solve Log (${st.total})`;
+        btnClearSession.disabled = st.total === 0;
+
+        renderHistoryList(st.pb);
+      }
+
+      function renderHistoryList(pbTime) {
+        historyWrap.innerHTML = '';
+        const total = activeSolves.length;
+        if (total === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'history-empty';
+          empty.textContent = 'NO RECORDED SOLVES IN THIS SESSION';
+          historyWrap.appendChild(empty);
+          return;
+        }
+
+        const bld = isBldMode(cfg.mode);
+        const startIdx = Math.max(0, total - historyLimit);
+        const frag = document.createDocumentFragment();
+
+        for (let i = total - 1; i >= startIdx; i--) {
+          const s = activeSolves[i];
+          const isPb = !s.dnf && pbTime !== null && s.timeMs === pbTime;
+
+          const row = document.createElement('div');
+          row.className = `solve-row${isPb ? ' is-pb' : ''}${s.dnf ? ' is-dnf' : ''}`;
+
+          const idxEl = document.createElement('span');
+          idxEl.className = 'sr-idx';
+          idxEl.textContent = `#${i + 1}`;
+
+          const timeEl = document.createElement('span');
+          timeEl.className = 'sr-time';
+          timeEl.textContent = s.dnf ? `DNF (${formatTime(s.timeMs, 2)})` : formatTime(s.timeMs, 3);
+
+          const col3 = document.createElement('span');
+          col3.className = 'sr-sub';
+
+          const col4 = document.createElement('span');
+          col4.className = 'sr-sub';
+
+          if (bld) {
+            const execMs = Math.max(0, s.timeMs - (s.memoMs || 0));
+            col3.textContent = `M:${formatTime(s.memoMs, 2)} E:${formatTime(execMs, 2)}`;
+            col4.textContent = `${s.moves}m`;
+          } else {
+            const tps = s.timeMs > 0 ? (s.moves / (s.timeMs / 1000)).toFixed(2) : '0.00';
+            col3.textContent = `${s.moves}m`;
+            col4.textContent = `${tps} tps`;
+          }
+
+          const actions = document.createElement('span');
+          actions.className = 'sr-actions';
+
+          const replayBtn = document.createElement('button');
+          replayBtn.type = 'button';
+          replayBtn.className = 'row-icon-btn';
+          replayBtn.dataset.replayIdx = String(i);
+          replayBtn.title = 'Replay exact scramble in Practice Mode';
+          replayBtn.setAttribute('aria-label', `Replay solve #${i + 1}`);
+          replayBtn.innerHTML =
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>';
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'row-icon-btn del';
+          delBtn.dataset.delIdx = String(i);
+          delBtn.title = 'Delete solve';
+          delBtn.setAttribute('aria-label', `Delete solve #${i + 1}`);
+          delBtn.innerHTML =
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+
+          actions.appendChild(replayBtn);
+          actions.appendChild(delBtn);
+
+          row.appendChild(idxEl);
+          row.appendChild(timeEl);
+          row.appendChild(col3);
+          row.appendChild(col4);
+          row.appendChild(actions);
+          frag.appendChild(row);
+        }
+
+        historyWrap.appendChild(frag);
+
+        if (startIdx > 0) {
+          const moreBtn = document.createElement('button');
+          moreBtn.type = 'button';
+          moreBtn.className = 'load-more-btn';
+          moreBtn.textContent = `Load Older (${startIdx} Remaining)`;
+          moreBtn.addEventListener('click', () => {
+            historyLimit += 100;
+            renderHistoryList(pbTime);
+          });
+          historyWrap.appendChild(moreBtn);
+        }
+      }
+
+      /* =======================================================================
+         COMPACT TEXT BACKUP (EXPORT & IMPORT ALL SESSIONS)
+         ======================================================================= */
+      function buildBackupString() {
+        const lines = ['SP2_BACKUP_V1'];
+        for (let si = 0; si < SIZES.length; si++) {
+          for (let mi = 0; mi < MODES.length; mi++) {
+            const sz = SIZES[si];
+            const md = MODES[mi];
+            const key = sessionKey(sz, md);
+            try {
+              const raw = localStorage.getItem(key);
+              if (raw && raw.startsWith('1|')) {
+                lines.push(`${sz}x${sz}_${md}=${raw}`);
+              }
+            } catch (_) {
+              // Ignore
+            }
+          }
+        }
+        return lines.join('\n');
+      }
+
+      function copyTextSafe(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        let ok = false;
+        try {
+          ok = document.execCommand('copy');
+        } catch (_) {
+          ok = false;
+        }
+        document.body.removeChild(ta);
+        return ok;
+      }
+
+      function importBackupString(text) {
+        const lines = text.trim().split(/\r?\n/);
+        if (lines.length === 0 || lines[0].trim() !== 'SP2_BACKUP_V1') {
+          return { ok: false, msg: 'INVALID HEADER (EXPECTED SP2_BACKUP_V1)' };
+        }
+
+        let importedSessions = 0;
+        let importedSolves = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          const eq = line.indexOf('=');
+          if (eq <= 0) continue;
+
+          const id = line.slice(0, eq);
+          const payload = line.slice(eq + 1);
+
+          const m = id.match(/^([3-8])x([3-8])_(std|bld_auto|bld_sub)$/);
+          if (!m || m[1] !== m[2]) continue;
+
+          const sz = Number(m[1]);
+          const md = m[3];
+          const parsed = unpackSession(payload, md);
+          if (parsed.length === 0) continue;
+
+          try {
+            localStorage.setItem(sessionKey(sz, md), packSession(parsed, md));
+            importedSessions++;
+            importedSolves += parsed.length;
+          } catch (_) {
+            return { ok: false, msg: 'STORAGE QUOTA ERROR' };
+          }
+        }
+
+        if (importedSessions === 0) {
+          return { ok: false, msg: 'NO VALID SESSION LINES FOUND' };
+        }
+
+        loadActiveSession();
+        updateHeaderAndStatsBar();
+        renderStatsSheet();
+        return { ok: true, msg: `IMPORTED ${importedSessions} SESSIONS · ${importedSolves} SOLVES` };
+      }
+
+      /* =======================================================================
+         ZERO-LATENCY POINTER INPUT (TAP + MULTI-TILE + GLIDE + MULTI-TOUCH)
+         ======================================================================= */
+      function pointerToCell(e) {
+        const rect = boardGrid.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return null;
+        const N = cfg.size;
+        const c = Math.floor(((e.clientX - rect.left) / rect.width) * N);
+        const r = Math.floor(((e.clientY - rect.top) / rect.height) * N);
+        if (r < 0 || r >= N || c < 0 || c >= N) return null;
+        return { r, c };
+      }
+
+      boardGrid.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        e.preventDefault();
+
+        if (cfg.sound) unlockAudio();
+
+        // CRITICAL BLD RULE: In BLD_READY, tapping reveals & starts MEMO,
+        // and that pointerId MUST be ignored until pointerup so micro-drag
+        // or finger release NEVER triggers an unintended tile move!
+        if (phase === 'BLD_READY') {
+          ignoredPointers.add(e.pointerId);
+          revealBld();
+          return;
+        }
+
+        activePointers.add(e.pointerId);
+        try {
+          boardGrid.setPointerCapture(e.pointerId);
+        } catch (_) {
+          // Synthetic events fallback cleanly
+        }
+
+        const cell = pointerToCell(e);
+        if (cell) executeMoveAt(cell.r, cell.c);
+      });
+
+      boardGrid.addEventListener('pointermove', (e) => {
+        if (!cfg.glide) return;
+        if (ignoredPointers.has(e.pointerId)) return;
+        if (!activePointers.has(e.pointerId)) return;
+
+        const cell = pointerToCell(e);
+        if (cell) executeMoveAt(cell.r, cell.c);
+      });
+
+      function onPointerEnd(e) {
+        activePointers.delete(e.pointerId);
+        ignoredPointers.delete(e.pointerId);
+      }
+
+      boardGrid.addEventListener('pointerup', onPointerEnd);
+      boardGrid.addEventListener('pointercancel', onPointerEnd);
+      boardGrid.addEventListener('lostpointercapture', onPointerEnd);
+      window.addEventListener('pointerup', onPointerEnd);
+      window.addEventListener('pointercancel', onPointerEnd);
+
+      boardFrame.addEventListener('contextmenu', (e) => e.preventDefault());
+      boardFrame.addEventListener('dragstart', (e) => e.preventDefault());
+
+      /* =======================================================================
+         KEYBOARD SHORTCUTS (ARROWS / WASD + SPACE + ENTER + R)
+         ======================================================================= */
+      function anySheetOpen() {
+        return configSheet.classList.contains('open') || statsSheet.classList.contains('open');
+      }
+
+      window.addEventListener('keydown', (e) => {
+        const tag = e.target && e.target.tagName;
+        if (tag === 'TEXTAREA' || tag === 'INPUT') {
+          if (e.key === 'Escape') closeSheets();
+          return;
+        }
+
+        if (e.key === 'Escape' && anySheetOpen()) {
+          e.preventDefault();
+          closeSheets();
+          return;
+        }
+
+        if (anySheetOpen()) return;
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+        const k = e.key;
+
+        if (k === 'r' || k === 'R') {
+          e.preventDefault();
+          startNewScramble();
+          return;
+        }
+
+        if (k === ' ') {
+          e.preventDefault();
+          if (phase === 'BLD_READY') {
+            revealBld();
+          } else if (phase === 'BLD_MEMO') {
+            startBldExecManual();
+          } else if (phase === 'BLD_EXEC' && cfg.mode === 'bld_sub') {
+            submitBld();
+          } else {
+            startNewScramble();
+          }
+          return;
+        }
+
+        if (k === 'Enter' && phase === 'BLD_EXEC' && cfg.mode === 'bld_sub') {
+          e.preventDefault();
+          submitBld();
+          return;
+        }
+
+        if (phase === 'BLD_READY' || phase === 'DONE') return;
+
+        const N = cfg.size;
+        const blankIdx = board.indexOf(0);
+        const br = Math.floor(blankIdx / N);
+        const bc = blankIdx % N;
+        const dir = cfg.kbDir === 'blank' ? -1 : 1;
+
+        if (k === 'ArrowUp' || k === 'w' || k === 'W') {
+          e.preventDefault();
+          executeMoveAt(br + dir, bc);
+        } else if (k === 'ArrowDown' || k === 's' || k === 'S') {
+          e.preventDefault();
+          executeMoveAt(br - dir, bc);
+        } else if (k === 'ArrowLeft' || k === 'a' || k === 'A') {
+          e.preventDefault();
+          executeMoveAt(br, bc + dir);
+        } else if (k === 'ArrowRight' || k === 'd' || k === 'D') {
+          e.preventDefault();
+          executeMoveAt(br, bc - dir);
+        }
+      });
+
+      /* =======================================================================
+         SHEET CONTROLLERS & CONFIG / STATS EVENT HANDLERS
+         ======================================================================= */
+      function resetClearConfirm() {
+        confirmingClear = false;
+        if (clearTimer) {
+          clearTimeout(clearTimer);
+          clearTimer = null;
+        }
+        btnClearSession.classList.remove('confirming');
+        btnClearSession.textContent = 'Clear';
+      }
+
+      function openSheet(el) {
+        closeSheets();
+        scrim.classList.add('open');
+        scrim.setAttribute('aria-hidden', 'false');
+        el.classList.add('open');
+        el.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeSheets() {
+        scrim.classList.remove('open');
+        scrim.setAttribute('aria-hidden', 'true');
+        configSheet.classList.remove('open');
+        configSheet.setAttribute('aria-hidden', 'true');
+        statsSheet.classList.remove('open');
+        statsSheet.setAttribute('aria-hidden', 'true');
+        backupBox.classList.remove('open');
+        backupMsg.textContent = '';
+        resetClearConfirm();
+      }
+
+      btnSessionTrigger.addEventListener('click', () => openSheet(configSheet));
+      btnOpenConfig.addEventListener('click', () => openSheet(configSheet));
+
+      const openStatsAction = () => {
+        renderStatsSheet();
+        openSheet(statsSheet);
+      };
+
+      btnOpenStats.addEventListener('click', openStatsAction);
+      statsBar.addEventListener('click', openStatsAction);
+      statsBar.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openStatsAction();
+        }
+      });
+
+      scrim.addEventListener('click', closeSheets);
+      document.querySelectorAll('[data-close-sheet]').forEach((b) => {
+        b.addEventListener('click', closeSheets);
+      });
+
+      // Session selectors
+      sizeSelector.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-size]');
+        if (!b) return;
+        switchSession(Number(b.dataset.size), cfg.mode);
+      });
+
+      modeSelector.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-mode]');
+        if (!b) return;
+        switchSession(cfg.size, b.dataset.mode);
+      });
+
+      // Pigment scheme
+      schemeSelector.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-scheme]');
+        if (!b) return;
+        cfg.scheme = b.dataset.scheme;
+        saveCfg();
+        applyTilePigments();
+        applyConfigUI();
+      });
+
+      // Theme
+      themeSelector.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-theme-val]');
+        if (!b) return;
+        cfg.theme = b.dataset.themeVal;
+        saveCfg();
+        applyConfigUI();
+      });
+
+      // Slide animation
+      animSelector.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-anim]');
+        if (!b) return;
+        cfg.animMs = Number(b.dataset.anim);
+        saveCfg();
+        applyConfigUI();
+      });
+
+      // Keyboard axis
+      kbDirSelector.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-kb]');
+        if (!b) return;
+        cfg.kbDir = b.dataset.kb;
+        saveCfg();
+        applyConfigUI();
+      });
+
+      // Hardware rockers
+      togGlide.addEventListener('click', () => {
+        cfg.glide = !cfg.glide;
+        saveCfg();
+        applyConfigUI();
+      });
+
+      togHideBlank.addEventListener('click', () => {
+        cfg.hideBlankBld = !cfg.hideBlankBld;
+        saveCfg();
+        applyConfigUI();
+      });
+
+      togSound.addEventListener('click', () => {
+        cfg.sound = !cfg.sound;
+        saveCfg();
+        applyConfigUI();
+        if (cfg.sound) {
+          unlockAudio();
+          playClick();
+        }
+      });
+
+      togDots.addEventListener('click', () => {
+        cfg.dots = !cfg.dots;
+        saveCfg();
+        applyConfigUI();
+      });
+
+      // History row actions (Replay from seed / Delete)
+      historyWrap.addEventListener('click', (e) => {
+        const repBtn = e.target.closest('[data-replay-idx]');
+        if (repBtn) {
+          const idx = Number(repBtn.dataset.replayIdx);
+          const rec = activeSolves[idx];
+          if (rec) {
+            closeSheets();
+            loadScrambleState(rec.seed, true);
+          }
+          return;
+        }
+
+        const delBtn = e.target.closest('[data-del-idx]');
+        if (delBtn) {
+          const idx = Number(delBtn.dataset.delIdx);
+          if (idx >= 0 && idx < activeSolves.length) {
+            activeSolves.splice(idx, 1);
+            saveActiveSession();
+            updateHeaderAndStatsBar();
+            renderStatsSheet();
+          }
+        }
+      });
+
+      // Two-tap inline Clear Session confirmation
+      btnClearSession.addEventListener('click', () => {
+        if (activeSolves.length === 0) return;
+        if (!confirmingClear) {
+          confirmingClear = true;
+          btnClearSession.classList.add('confirming');
+          btnClearSession.textContent = 'Confirm Clear';
+          clearTimer = setTimeout(resetClearConfirm, 3500);
+        } else {
+          activeSolves = [];
+          saveActiveSession();
+          resetClearConfirm();
+          updateHeaderAndStatsBar();
+          renderStatsSheet();
+        }
+      });
+
+      // Compact Backup Export / Import
+      btnToggleBackup.addEventListener('click', () => {
+        const opening = !backupBox.classList.contains('open');
+        backupBox.classList.toggle('open', opening);
+        backupMsg.textContent = '';
+        if (opening) {
+          backupText.value = buildBackupString();
+        }
+      });
+
+      btnCopyBackup.addEventListener('click', () => {
+        const text = buildBackupString();
+        backupText.value = text;
+        const ok = copyTextSafe(text);
+        backupMsg.className = ok ? 'backup-msg' : 'backup-msg err';
+        backupMsg.textContent = ok ? `COPIED ${text.length} BYTES` : 'SELECT TEXT TO COPY';
+      });
+
+      btnImportBackup.addEventListener('click', () => {
+        const res = importBackupString(backupText.value);
+        backupMsg.className = res.ok ? 'backup-msg' : 'backup-msg err';
+        backupMsg.textContent = res.msg;
+      });
+
+      /* =======================================================================
+         RESPONSIVE EXACT-PIXEL OBSERVER & BOOTSTRAP
+         ======================================================================= */
+      if (typeof ResizeObserver !== 'undefined') {
+        const ro = new ResizeObserver(() => layoutBoardExact());
+        ro.observe(boardStage);
+      } else {
+        window.addEventListener('resize', layoutBoardExact);
+      }
+
+      loadActiveSession();
+      rebuildBoardDOM(cfg.size);
+      applyConfigUI();
+      updateHeaderAndStatsBar();
+      startNewScramble();
+      initPwaAssets();
+      initServiceWorker();
+    })();
+  </script>
+</body>
+</html>
