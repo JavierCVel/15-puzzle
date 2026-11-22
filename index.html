@@ -835,6 +835,76 @@
       flex-shrink: 0;
     }
 
+    /* csTimer-style Categorized Config Tabs */
+    .cfg-tabs {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--border-hairline);
+      background: var(--bg-canvas);
+    }
+
+    .cfg-tab {
+      height: 36px;
+      border: none;
+      border-right: 1px solid var(--border-hairline);
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 80ms ease, color 80ms ease, border-color 80ms ease;
+    }
+
+    .cfg-tab:last-child {
+      border-right: none;
+    }
+
+    .cfg-tab.active {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      border-bottom-color: var(--btn-stark-bg);
+    }
+
+    .cfg-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .cfg-pane.hidden-view {
+      display: none !important;
+    }
+
+    .cfg-slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-hairline);
+    }
+
+    .cfg-slider-row:last-child {
+      border-bottom: none;
+    }
+
+    .cfg-slider-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .cfg-slider-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .sec-block {
       display: flex;
       flex-direction: column;
@@ -1505,6 +1575,10 @@
       cursor: grabbing;
     }
 
+    #cube3dCanvas.is-rot-locked {
+      cursor: default;
+    }
+
     #cube3dCanvas.is-hover-movable {
       cursor: pointer;
     }
@@ -1563,18 +1637,12 @@
     .cube3d-legend {
       position: absolute;
       left: 8px;
+      right: 8px;
       bottom: 7px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 3px 7px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-hairline);
-      border-radius: 3px;
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      font-weight: 600;
-      color: var(--text-secondary);
+      flex-wrap: wrap;
+      gap: 4px;
       pointer-events: none;
       z-index: 3;
     }
@@ -1583,6 +1651,31 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      padding: 2px 6px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.59rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      line-height: 1.25;
+    }
+
+    .legend-pair.is-btn {
+      pointer-events: auto;
+      cursor: pointer;
+      transition: border-color 70ms ease, color 70ms ease, background 70ms ease;
+    }
+
+    .legend-pair.is-btn:active {
+      background: var(--bg-control-active);
+    }
+
+    .legend-pair.is-active {
+      border-color: var(--sig-amber);
+      background: var(--sig-amber-bg);
+      color: var(--sig-amber);
     }
 
     .legend-dot {
@@ -1590,6 +1683,70 @@
       height: 7px;
       border-radius: 1px;
       flex-shrink: 0;
+    }
+
+    /* Compact Color / Face Isolation Strip */
+    .focus3d-bar {
+      width: 100%;
+      padding: 7px 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--r-btn);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .focus3d-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .focus3d-lbl {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      min-width: 38px;
+      flex-shrink: 0;
+    }
+
+    .focus-pill {
+      height: 24px;
+      padding: 0 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-hairline);
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .focus-pill.active {
+      background: var(--sig-amber-bg);
+      border-color: var(--sig-amber);
+      color: var(--sig-amber);
+    }
+
+    .focus-pill.is-all.active {
+      background: var(--btn-stark-bg);
+      border-color: var(--btn-stark-bg);
+      color: var(--btn-stark-ink);
+    }
+
+    .tile-slot.is-filter-dim {
+      opacity: 0.16;
     }
 
     /* N-Layer N×N Side-by-Side / Stack / 2×2 Grid Container */
@@ -2158,19 +2315,47 @@
 
         <!-- Contextual Sub-Toolbar -->
         <div id="subbar3d" class="subbar-3d">
+          <!-- Compact Color / Face Isolation Popover Strip -->
+          <div id="focus3dBar" class="focus3d-bar hidden-view" aria-label="Isolate 3D color or face">
+            <div class="focus3d-row">
+              <span class="focus3d-lbl">COLOR</span>
+              <div id="focus3dColorPills" class="focus3d-row" style="flex:1;"></div>
+            </div>
+            <div class="focus3d-row">
+              <span class="focus3d-lbl">FACE</span>
+              <div id="focus3dFacePills" class="focus3d-row" style="flex:1;">
+                <button class="focus-pill" type="button" data-fface="back">BACK</button>
+                <button class="focus-pill" type="button" data-fface="front">FRONT</button>
+                <button class="focus-pill" type="button" data-fface="top">TOP</button>
+                <button class="focus-pill" type="button" data-fface="bot">BOT</button>
+                <button class="focus-pill" type="button" data-fface="left">LEFT</button>
+                <button class="focus-pill" type="button" data-fface="right">RIGHT</button>
+              </div>
+            </div>
+          </div>
+
           <!-- Subbar: 3D CUBE -->
           <div id="subCube" class="subbar-group">
             <button id="btnXray3d" class="tog3d-btn" type="button" aria-pressed="false">
               <span class="t-dot"></span><span>X-RAY</span>
             </button>
-            <div class="spread3d-box">
+            <button id="btnFocus3d" class="tog3d-btn amber" type="button" aria-pressed="false" aria-expanded="false" title="Isolate tiles by color or solved face">
+              <span class="t-dot"></span><span id="focus3dBtnTxt">FOCUS</span>
+            </button>
+            <div id="gapBox3d" class="spread3d-box">
               <span class="spread3d-lbl">GAP</span>
               <input id="spread3dRange" class="spread3d-range" type="range" min="1.06" max="1.65" step="0.01" value="1.24" aria-label="3D cube spacing" />
               <span id="spread3dVal" class="spread3d-val">1.24</span>
             </div>
-            <button id="btnResetCam3d" class="tog3d-btn" type="button" title="Reset camera angle" aria-label="Reset 3D camera angle">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="square"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
-            </button>
+            <div style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;">
+              <button id="btnLockRot3d" class="tog3d-btn amber" type="button" aria-pressed="false" title="Lock rotation (sliding moves tiles instead of rotating cube)" aria-label="Lock 3D camera rotation">
+                <svg id="iconLockOpen" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
+                <svg id="iconLockClosed" class="hidden-view" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </button>
+              <button id="btnResetCam3d" class="tog3d-btn" type="button" title="Reset camera angle" aria-label="Reset 3D camera angle">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="square"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+              </button>
+            </div>
           </div>
 
           <!-- Subbar: 3D PLANE -->
@@ -2220,10 +2405,10 @@
   <!-- FLAT MATTE SCRIM -->
   <div id="scrim" class="scrim" aria-hidden="true"></div>
 
-  <!-- SESSION & CONFIG SHEET -->
+  <!-- SESSION & CONFIG SHEET (csTimer-style Categorized Tabs) -->
   <aside id="configSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="configTitle" aria-hidden="true">
     <div class="sheet-head">
-      <h2 id="configTitle" class="sheet-title">Session &amp; Instrument Config</h2>
+      <h2 id="configTitle" class="sheet-title">Configuration</h2>
       <button class="sheet-close" type="button" data-close-sheet aria-label="Close config">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -2231,321 +2416,398 @@
         </svg>
       </button>
     </div>
+
+    <div id="cfgTabs" class="cfg-tabs" role="tablist" aria-label="Configuration Categories">
+      <button class="cfg-tab active" type="button" role="tab" data-cfgtab="session">Session</button>
+      <button class="cfg-tab" type="button" role="tab" data-cfgtab="style">Style</button>
+      <button class="cfg-tab" type="button" role="tab" data-cfgtab="3d">3D</button>
+      <button class="cfg-tab" type="button" role="tab" data-cfgtab="input">Input</button>
+    </div>
+
     <div class="sheet-body">
-      <div class="sec-block">
-        <span class="sec-label">Board Size (Separate Sessions)</span>
-        <div id="sizeSelector" class="size-grid">
-          <button class="opt-btn" type="button" data-size="3">3×3</button>
-          <button class="opt-btn" type="button" data-size="4">4×4</button>
-          <button class="opt-btn" type="button" data-size="5">5×5</button>
-          <button class="opt-btn" type="button" data-size="6">6×6</button>
-          <button class="opt-btn" type="button" data-size="7">7×7</button>
-          <button class="opt-btn" type="button" data-size="8">8×8</button>
+      <!-- TAB 1: SESSION -->
+      <div class="cfg-pane" data-cfgpane="session">
+        <div class="sec-block">
+          <span class="sec-label">2D Board Size (Separate Sessions)</span>
+          <div id="sizeSelector" class="size-grid">
+            <button class="opt-btn" type="button" data-size="3">3×3</button>
+            <button class="opt-btn" type="button" data-size="4">4×4</button>
+            <button class="opt-btn" type="button" data-size="5">5×5</button>
+            <button class="opt-btn" type="button" data-size="6">6×6</button>
+            <button class="opt-btn" type="button" data-size="7">7×7</button>
+            <button class="opt-btn" type="button" data-size="8">8×8</button>
+          </div>
         </div>
-        <div id="size3dSelector" class="size-3d-grid">
-          <button class="opt-btn" type="button" data-size3d="2">
-            <span>2×2×2</span>
-            <span class="opt-sub">3D · 7 Tiles</span>
-          </button>
-          <button class="opt-btn" type="button" data-size3d="3">
-            <span>3×3×3</span>
-            <span class="opt-sub">3D · 26 Tiles</span>
-          </button>
-          <button class="opt-btn" type="button" data-size3d="4">
-            <span>4×4×4</span>
-            <span class="opt-sub">3D · 63 Tiles</span>
-          </button>
+
+        <div class="sec-block">
+          <span class="sec-label">3D Cube Size (Separate Sessions)</span>
+          <div id="size3dSelector" class="size-3d-grid">
+            <button class="opt-btn" type="button" data-size3d="2">
+              <span>2×2×2</span>
+              <span class="opt-sub">3D · 7 Tiles</span>
+            </button>
+            <button class="opt-btn" type="button" data-size3d="3">
+              <span>3×3×3</span>
+              <span class="opt-sub">3D · 26 Tiles</span>
+            </button>
+            <button class="opt-btn" type="button" data-size3d="4">
+              <span>4×4×4</span>
+              <span class="opt-sub">3D · 63 Tiles</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sec-block">
+          <span class="sec-label">Play Mode (Separate Sessions)</span>
+          <div id="modeSelector" class="mode-grid">
+            <button class="opt-btn" type="button" data-mode="std">
+              <span>STANDARD</span>
+              <span class="opt-sub">Sighted</span>
+            </button>
+            <button class="opt-btn" type="button" data-mode="bld_auto">
+              <span>BLD AUTO</span>
+              <span class="opt-sub">Auto-Finish</span>
+            </button>
+            <button class="opt-btn" type="button" data-mode="bld_sub">
+              <span>BLD SUB</span>
+              <span class="opt-sub">Submit Key</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="pwa-status-row" aria-live="polite">
+          <span class="pwa-status-label">Offline Cache</span>
+          <span id="offlineCacheStatus" class="pwa-status-val">Checking...</span>
         </div>
       </div>
 
-      <div class="sec-block">
-        <span class="sec-label">Play Mode (Separate Sessions)</span>
-        <div id="modeSelector" class="mode-grid">
-          <button class="opt-btn" type="button" data-mode="std">
-            <span>STANDARD</span>
-            <span class="opt-sub">Sighted</span>
-          </button>
-          <button class="opt-btn" type="button" data-mode="bld_auto">
-            <span>BLD AUTO</span>
-            <span class="opt-sub">Auto-Finish</span>
-          </button>
-          <button class="opt-btn" type="button" data-mode="bld_sub">
-            <span>BLD SUB</span>
-            <span class="opt-sub">Submit Key</span>
-          </button>
+      <!-- TAB 2: STYLE (THEME & COLORS) -->
+      <div class="cfg-pane hidden-view" data-cfgpane="style">
+        <div class="sec-block">
+          <span class="sec-label">Appearance</span>
+          <div class="cfg-list">
+            <div class="cfg-row">
+              <div class="cfg-meta">
+                <span class="cfg-name">Surface Theme</span>
+                <span class="cfg-desc">Matte Graphite or Architectural Paper</span>
+              </div>
+              <div class="seg-pair" id="themeSelector">
+                <button class="seg-item" type="button" data-theme-val="graphite">Graphite</button>
+                <button class="seg-item" type="button" data-theme-val="paper">Paper</button>
+              </div>
+            </div>
+
+            <div class="cfg-row">
+              <div class="cfg-meta">
+                <span class="cfg-name">Solved Position Dot</span>
+                <span class="cfg-desc">Subtle corner dot (hidden in BLD EXEC)</span>
+              </div>
+              <button id="togDots" class="rocker" type="button" role="switch" aria-checked="false" aria-label="Toggle Solved Position Dot"></button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <!-- 2D Color Schemes -->
-      <div id="scheme2dBlock" class="sec-block">
-        <span class="sec-label">Pigment Color Scheme</span>
-        <div id="schemeSelector" class="scheme-grid">
-          <button class="opt-btn scheme-btn" type="button" data-scheme="fringe_split">
-            <span>FRINGE SPLIT</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#C44932"></span>
-              <span class="sw" style="background:#CF8A2A"></span>
-              <span class="sw" style="background:#448558"></span>
-              <span class="sw" style="background:#326696"></span>
-              <span class="sw" style="background:#2B8282"></span>
-            </span>
-          </button>
-          <button class="opt-btn scheme-btn" type="button" data-scheme="fringe">
-            <span>FRINGE RINGS</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#C44932"></span>
-              <span class="sw" style="background:#CF8A2A"></span>
-              <span class="sw" style="background:#448558"></span>
-              <span class="sw" style="background:#326696"></span>
-            </span>
-          </button>
-          <button class="opt-btn scheme-btn" type="button" data-scheme="rows">
-            <span>ROWS</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#C44932"></span>
-              <span class="sw" style="background:#CF8A2A"></span>
-              <span class="sw" style="background:#448558"></span>
-              <span class="sw" style="background:#326696"></span>
-            </span>
-          </button>
-          <button class="opt-btn scheme-btn" type="button" data-scheme="cols">
-            <span>COLUMNS</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#C44932"></span>
-              <span class="sw" style="background:#CF8A2A"></span>
-              <span class="sw" style="background:#448558"></span>
-              <span class="sw" style="background:#326696"></span>
-            </span>
-          </button>
-          <button class="opt-btn scheme-btn" type="button" data-scheme="mono">
-            <span>MATTE MONO</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#23262C;border:1px solid #444"></span>
-              <span class="sw" style="background:#363B44"></span>
-              <span class="sw" style="background:#666D78"></span>
-            </span>
-          </button>
+        <!-- 2D Color Schemes -->
+        <div id="scheme2dBlock" class="sec-block">
+          <span class="sec-label">2D Pigment Color Scheme</span>
+          <div id="schemeSelector" class="scheme-grid">
+            <button class="opt-btn scheme-btn" type="button" data-scheme="fringe_split">
+              <span>FRINGE SPLIT</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#C44932"></span>
+                <span class="sw" style="background:#CF8A2A"></span>
+                <span class="sw" style="background:#448558"></span>
+                <span class="sw" style="background:#326696"></span>
+                <span class="sw" style="background:#2B8282"></span>
+              </span>
+            </button>
+            <button class="opt-btn scheme-btn" type="button" data-scheme="fringe">
+              <span>FRINGE RINGS</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#C44932"></span>
+                <span class="sw" style="background:#CF8A2A"></span>
+                <span class="sw" style="background:#448558"></span>
+                <span class="sw" style="background:#326696"></span>
+              </span>
+            </button>
+            <button class="opt-btn scheme-btn" type="button" data-scheme="rows">
+              <span>ROWS</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#C44932"></span>
+                <span class="sw" style="background:#CF8A2A"></span>
+                <span class="sw" style="background:#448558"></span>
+                <span class="sw" style="background:#326696"></span>
+              </span>
+            </button>
+            <button class="opt-btn scheme-btn" type="button" data-scheme="cols">
+              <span>COLUMNS</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#C44932"></span>
+                <span class="sw" style="background:#CF8A2A"></span>
+                <span class="sw" style="background:#448558"></span>
+                <span class="sw" style="background:#326696"></span>
+              </span>
+            </button>
+            <button class="opt-btn scheme-btn" type="button" data-scheme="mono">
+              <span>MATTE MONO</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#23262C;border:1px solid #444"></span>
+                <span class="sw" style="background:#363B44"></span>
+                <span class="sw" style="background:#666D78"></span>
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- 3D Color Schemes -->
-      <div id="scheme3dBlock" class="sec-block hidden-view">
-        <span class="sec-label">3D Pigment Color Scheme</span>
-        <div id="scheme3dSelector" class="scheme-grid">
-          <button class="opt-btn scheme-btn" type="button" data-scheme3d="layers_z">
-            <span>Z LAYERS</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#C44932"></span>
-              <span class="sw" style="background:#C98A2C"></span>
-              <span class="sw" style="background:#3E8255"></span>
-              <span class="sw" style="background:#3B74A5"></span>
-            </span>
-          </button>
-          <button class="opt-btn scheme-btn" type="button" data-scheme3d="layers_y">
-            <span>Y ROWS</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#C44932"></span>
-              <span class="sw" style="background:#C98A2C"></span>
-              <span class="sw" style="background:#3E8255"></span>
-              <span class="sw" style="background:#3B74A5"></span>
-            </span>
-          </button>
-          <button class="opt-btn scheme-btn" type="button" data-scheme3d="layers_x">
-            <span>X COLUMNS</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#C44932"></span>
-              <span class="sw" style="background:#C98A2C"></span>
-              <span class="sw" style="background:#3E8255"></span>
-              <span class="sw" style="background:#3B74A5"></span>
-            </span>
-          </button>
-          <button class="opt-btn scheme-btn" type="button" data-scheme3d="fringe_3d">
-            <span>3D FRINGE</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#C44932"></span>
-              <span class="sw" style="background:#CF8A2A"></span>
-              <span class="sw" style="background:#448558"></span>
-              <span class="sw" style="background:#2B8282"></span>
-            </span>
-          </button>
-          <button class="opt-btn scheme-btn" type="button" data-scheme3d="prism">
-            <span>3D PRISM</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#C85A42"></span>
-              <span class="sw" style="background:#D49B38"></span>
-              <span class="sw" style="background:#3D9A68"></span>
-              <span class="sw" style="background:#2E8A8A"></span>
-              <span class="sw" style="background:#325F9E"></span>
-            </span>
-          </button>
-          <button class="opt-btn scheme-btn" type="button" data-scheme3d="octants">
-            <span>3D OCTANTS</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#C44932"></span>
-              <span class="sw" style="background:#CF8A2A"></span>
-              <span class="sw" style="background:#448558"></span>
-              <span class="sw" style="background:#7A4D78"></span>
-            </span>
-          </button>
-          <button class="opt-btn scheme-btn" type="button" data-scheme3d="checker_3d">
-            <span>3D PARITY</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#C44932"></span>
-              <span class="sw" style="background:#326696"></span>
-              <span class="sw" style="background:#C44932"></span>
-              <span class="sw" style="background:#326696"></span>
-            </span>
-          </button>
-          <button class="opt-btn scheme-btn" type="button" data-scheme3d="mono">
-            <span>MATTE MONO</span>
-            <span class="scheme-swatches">
-              <span class="sw" style="background:#23262C;border:1px solid #444"></span>
-              <span class="sw" style="background:#363B44"></span>
-              <span class="sw" style="background:#666D78"></span>
-            </span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 3D Tile Numbering Options -->
-      <div id="numMode3dBlock" class="sec-block hidden-view">
-        <span class="sec-label">3D Tile Numbering (1 = Top-Left-Back)</span>
-        <div id="numMode3dSelector" class="num-grid">
-          <button class="opt-btn" type="button" data-num3d="seq">
-            <span>1..N³</span>
-            <span class="opt-sub">Sequential</span>
-          </button>
-          <button class="opt-btn" type="button" data-num3d="per_layer">
-            <span>1..N² / L</span>
-            <span class="opt-sub">Per Layer</span>
-          </button>
-          <button class="opt-btn" type="button" data-num3d="layer_code">
-            <span>A1..D15</span>
-            <span class="opt-sub">Layer+Idx</span>
-          </button>
-          <button class="opt-btn" type="button" data-num3d="coords">
-            <span>XYZ</span>
-            <span class="opt-sub">111..444</span>
-          </button>
-          <button class="opt-btn" type="button" data-num3d="letters">
-            <span>A..Z</span>
-            <span class="opt-sub">BLD Letters</span>
-          </button>
-          <button class="opt-btn" type="button" data-num3d="none">
-            <span>BLANK</span>
-            <span class="opt-sub">Color Only</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 3D Numbering Order Presets -->
-      <div id="order3dBlock" class="sec-block hidden-view">
-        <span class="sec-label">3D Numbering Order (Axis Priority)</span>
-        <div id="order3dSelector" class="num-grid">
-          <button class="opt-btn" type="button" data-order3d="zyx">
-            <span>Z → Y → X</span>
-            <span class="opt-sub">Back → Front</span>
-          </button>
-          <button class="opt-btn" type="button" data-order3d="yzx">
-            <span>Y → Z → X</span>
-            <span class="opt-sub">Top Floors</span>
-          </button>
-          <button class="opt-btn" type="button" data-order3d="xyz">
-            <span>X → Y → Z</span>
-            <span class="opt-sub">Left → Right</span>
-          </button>
-          <button class="opt-btn" type="button" data-order3d="zxy">
-            <span>Z → X → Y</span>
-            <span class="opt-sub">Back · Cols</span>
-          </button>
-          <button class="opt-btn" type="button" data-order3d="yxz">
-            <span>Y → X → Z</span>
-            <span class="opt-sub">Top · Cols</span>
-          </button>
-          <button class="opt-btn" type="button" data-order3d="xzy">
-            <span>X → Z → Y</span>
-            <span class="opt-sub">Left · Depth</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="sec-block">
-        <span class="sec-label">Hardware &amp; Input</span>
-        <div class="cfg-list">
-          <div class="cfg-row">
-            <div class="cfg-meta">
-              <span class="cfg-name">Surface Theme</span>
-              <span class="cfg-desc">Matte Graphite or Architectural Paper</span>
-            </div>
-            <div class="seg-pair" id="themeSelector">
-              <button class="seg-item" type="button" data-theme-val="graphite">Graphite</button>
-              <button class="seg-item" type="button" data-theme-val="paper">Paper</button>
-            </div>
-          </div>
-
-          <div class="cfg-row">
-            <div class="cfg-meta">
-              <span class="cfg-name">Slide Motion</span>
-              <span class="cfg-desc">0ms instant vs 50ms snappy slide</span>
-            </div>
-            <div class="seg-pair" id="animSelector">
-              <button class="seg-item" type="button" data-anim="0">0ms</button>
-              <button class="seg-item" type="button" data-anim="50">50ms</button>
-            </div>
-          </div>
-
-          <div class="cfg-row">
-            <div class="cfg-meta">
-              <span class="cfg-name">Keyboard Axis</span>
-              <span class="cfg-desc">Arrow / WASD moves Tile or Blank</span>
-            </div>
-            <div class="seg-pair" id="kbDirSelector">
-              <button class="seg-item" type="button" data-kb="tile">Tile</button>
-              <button class="seg-item" type="button" data-kb="blank">Blank</button>
-            </div>
-          </div>
-
-          <div class="cfg-row">
-            <div class="cfg-meta">
-              <span class="cfg-name">Touch Glide</span>
-              <span class="cfg-desc">Continuous sliding without lifting finger</span>
-            </div>
-            <button id="togGlide" class="rocker" type="button" role="switch" aria-checked="true" aria-label="Toggle Touch Glide"></button>
-          </div>
-
-          <div class="cfg-row">
-            <div class="cfg-meta">
-              <span class="cfg-name">Hide Empty Slot in BLD</span>
-              <span class="cfg-desc">Pure mental blank tracking during EXEC</span>
-            </div>
-            <button id="togHideBlank" class="rocker" type="button" role="switch" aria-checked="false" aria-label="Toggle Hide Empty Slot in BLD"></button>
-          </div>
-
-          <div class="cfg-row">
-            <div class="cfg-meta">
-              <span class="cfg-name">Mechanical Click</span>
-              <span class="cfg-desc">Synthesized Web Audio tick on slide</span>
-            </div>
-            <button id="togSound" class="rocker" type="button" role="switch" aria-checked="false" aria-label="Toggle Mechanical Click"></button>
-          </div>
-
-          <div class="cfg-row">
-            <div class="cfg-meta">
-              <span class="cfg-name">Solved Position Dot</span>
-              <span class="cfg-desc">Subtle corner dot (hidden in BLD EXEC)</span>
-            </div>
-            <button id="togDots" class="rocker" type="button" role="switch" aria-checked="false" aria-label="Toggle Solved Position Dot"></button>
+        <!-- 3D Color Schemes (Order-Aware) -->
+        <div id="scheme3dBlock" class="sec-block hidden-view">
+          <span class="sec-label">3D Pigment Color Scheme</span>
+          <div id="scheme3dSelector" class="scheme-grid">
+            <button class="opt-btn scheme-btn" type="button" data-scheme3d="layers_order">
+              <span>ORDER LAYERS</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#C44932"></span>
+                <span class="sw" style="background:#C98A2C"></span>
+                <span class="sw" style="background:#3E8255"></span>
+                <span class="sw" style="background:#3B74A5"></span>
+              </span>
+            </button>
+            <button class="opt-btn scheme-btn" type="button" data-scheme3d="fringe_3d">
+              <span>3D FRINGE</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#C44932"></span>
+                <span class="sw" style="background:#CF8A2A"></span>
+                <span class="sw" style="background:#448558"></span>
+                <span class="sw" style="background:#2B8282"></span>
+              </span>
+            </button>
+            <button class="opt-btn scheme-btn" type="button" data-scheme3d="prism">
+              <span>3D PRISM</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#C85A42"></span>
+                <span class="sw" style="background:#D49B38"></span>
+                <span class="sw" style="background:#3D9A68"></span>
+                <span class="sw" style="background:#2E8A8A"></span>
+                <span class="sw" style="background:#325F9E"></span>
+              </span>
+            </button>
+            <button class="opt-btn scheme-btn" type="button" data-scheme3d="octants">
+              <span>3D OCTANTS</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#C44932"></span>
+                <span class="sw" style="background:#CF8A2A"></span>
+                <span class="sw" style="background:#448558"></span>
+                <span class="sw" style="background:#7A4D78"></span>
+              </span>
+            </button>
+            <button class="opt-btn scheme-btn" type="button" data-scheme3d="layers_z">
+              <span>Z LAYERS</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#C44932"></span>
+                <span class="sw" style="background:#C98A2C"></span>
+                <span class="sw" style="background:#3E8255"></span>
+                <span class="sw" style="background:#3B74A5"></span>
+              </span>
+            </button>
+            <button class="opt-btn scheme-btn" type="button" data-scheme3d="layers_y">
+              <span>Y ROWS</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#C44932"></span>
+                <span class="sw" style="background:#C98A2C"></span>
+                <span class="sw" style="background:#3E8255"></span>
+                <span class="sw" style="background:#3B74A5"></span>
+              </span>
+            </button>
+            <button class="opt-btn scheme-btn" type="button" data-scheme3d="checker_3d">
+              <span>3D PARITY</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#C44932"></span>
+                <span class="sw" style="background:#326696"></span>
+                <span class="sw" style="background:#C44932"></span>
+                <span class="sw" style="background:#326696"></span>
+              </span>
+            </button>
+            <button class="opt-btn scheme-btn" type="button" data-scheme3d="mono">
+              <span>MATTE MONO</span>
+              <span class="scheme-swatches">
+                <span class="sw" style="background:#23262C;border:1px solid #444"></span>
+                <span class="sw" style="background:#363B44"></span>
+                <span class="sw" style="background:#666D78"></span>
+              </span>
+            </button>
           </div>
         </div>
       </div>
 
-      <p class="kb-legend">
-        KEYS: ARROWS / WASD SLIDE &middot; Q / E DEPTH (3D) &middot; 1-3 PLANE &middot; X/Y/Z AXIS &middot; SPACE SCRAMBLE / REVEAL / SUBMIT &middot; R NEW SCRAMBLE
-      </p>
+      <!-- TAB 3: 3D (NUMBERING, ORDER & CAMERA) -->
+      <div class="cfg-pane hidden-view" data-cfgpane="3d">
+        <div id="numMode3dBlock" class="sec-block">
+          <span class="sec-label">3D Tile Numbering (1 = Top-Left-Back)</span>
+          <div id="numMode3dSelector" class="num-grid">
+            <button class="opt-btn" type="button" data-num3d="seq">
+              <span>1..N³</span>
+              <span class="opt-sub">Sequential</span>
+            </button>
+            <button class="opt-btn" type="button" data-num3d="per_layer">
+              <span>1..N² / L</span>
+              <span class="opt-sub">Per Layer</span>
+            </button>
+            <button class="opt-btn" type="button" data-num3d="layer_code">
+              <span>A1..D15</span>
+              <span class="opt-sub">Layer+Idx</span>
+            </button>
+            <button class="opt-btn" type="button" data-num3d="coords">
+              <span>XYZ</span>
+              <span class="opt-sub">111..444</span>
+            </button>
+            <button class="opt-btn" type="button" data-num3d="letters">
+              <span>A..Z</span>
+              <span class="opt-sub">BLD Letters</span>
+            </button>
+            <button class="opt-btn" type="button" data-num3d="none">
+              <span>BLANK</span>
+              <span class="opt-sub">Color Only</span>
+            </button>
+          </div>
+        </div>
 
-      <div class="pwa-status-row" aria-live="polite">
-        <span class="pwa-status-label">Offline Cache</span>
-        <span id="offlineCacheStatus" class="pwa-status-val">Checking...</span>
+        <div id="order3dBlock" class="sec-block">
+          <span class="sec-label">3D Numbering Order (Also Drives Fringe &amp; Layers)</span>
+          <div id="order3dSelector" class="num-grid">
+            <button class="opt-btn" type="button" data-order3d="zyx">
+              <span>Z → Y → X</span>
+              <span class="opt-sub">Back → Front</span>
+            </button>
+            <button class="opt-btn" type="button" data-order3d="yzx">
+              <span>Y → Z → X</span>
+              <span class="opt-sub">Top Floors</span>
+            </button>
+            <button class="opt-btn" type="button" data-order3d="xyz">
+              <span>X → Y → Z</span>
+              <span class="opt-sub">Left → Right</span>
+            </button>
+            <button class="opt-btn" type="button" data-order3d="zxy">
+              <span>Z → X → Y</span>
+              <span class="opt-sub">Back · Cols</span>
+            </button>
+            <button class="opt-btn" type="button" data-order3d="yxz">
+              <span>Y → X → Z</span>
+              <span class="opt-sub">Top · Cols</span>
+            </button>
+            <button class="opt-btn" type="button" data-order3d="xzy">
+              <span>X → Z → Y</span>
+              <span class="opt-sub">Left · Depth</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sec-block">
+          <span class="sec-label">3D Camera &amp; Stage Sliders</span>
+          <div class="cfg-list">
+            <div class="cfg-slider-row">
+              <div class="cfg-slider-head">
+                <span class="cfg-name">Cube Spacing (GAP)</span>
+                <span id="cfgSpreadVal" class="spread3d-val">1.24</span>
+              </div>
+              <div class="cfg-slider-ctrl">
+                <input id="cfgSpreadRange" class="spread3d-range" type="range" min="1.06" max="1.65" step="0.01" value="1.24" aria-label="Cube spacing" />
+              </div>
+            </div>
+
+            <div class="cfg-slider-row">
+              <div class="cfg-slider-head">
+                <span class="cfg-name">Perspective (PERSP)</span>
+                <span id="cfgPerspVal" class="spread3d-val">45%</span>
+              </div>
+              <div class="cfg-slider-ctrl">
+                <button id="btnCfgOrtho" class="persp-end-btn" type="button">ORTHO</button>
+                <input id="cfgPerspRange" class="spread3d-range" type="range" min="0" max="100" step="5" value="45" aria-label="3D perspective distortion" />
+              </div>
+            </div>
+
+            <div class="cfg-row">
+              <div class="cfg-meta">
+                <span class="cfg-name">Show Spacing Slider on Stage</span>
+                <span class="cfg-desc">Hide once your GAP is dialed in</span>
+              </div>
+              <button id="togShowGapBar" class="rocker" type="button" role="switch" aria-checked="true" aria-label="Toggle Spacing Slider on Stage"></button>
+            </div>
+
+            <div class="cfg-row">
+              <div class="cfg-meta">
+                <span class="cfg-name">Show Perspective Slider on Stage</span>
+                <span class="cfg-desc">Hide once your PERSP is dialed in</span>
+              </div>
+              <button id="togShowPerspBar" class="rocker" type="button" role="switch" aria-checked="true" aria-label="Toggle Perspective Slider on Stage"></button>
+            </div>
+
+            <div class="cfg-row">
+              <div class="cfg-meta">
+                <span class="cfg-name">Lock Camera Rotation</span>
+                <span class="cfg-desc">Sliding moves tiles instead of rotating cube</span>
+              </div>
+              <button id="togLockRot3d" class="rocker" type="button" role="switch" aria-checked="false" aria-label="Toggle Lock Camera Rotation"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: INPUT & HARDWARE -->
+      <div class="cfg-pane hidden-view" data-cfgpane="input">
+        <div class="sec-block">
+          <span class="sec-label">Motion &amp; Controls</span>
+          <div class="cfg-list">
+            <div class="cfg-row">
+              <div class="cfg-meta">
+                <span class="cfg-name">Slide Motion</span>
+                <span class="cfg-desc">0ms instant vs 50ms snappy slide</span>
+              </div>
+              <div class="seg-pair" id="animSelector">
+                <button class="seg-item" type="button" data-anim="0">0ms</button>
+                <button class="seg-item" type="button" data-anim="50">50ms</button>
+              </div>
+            </div>
+
+            <div class="cfg-row">
+              <div class="cfg-meta">
+                <span class="cfg-name">Keyboard Axis</span>
+                <span class="cfg-desc">Arrow / WASD moves Tile or Blank</span>
+              </div>
+              <div class="seg-pair" id="kbDirSelector">
+                <button class="seg-item" type="button" data-kb="tile">Tile</button>
+                <button class="seg-item" type="button" data-kb="blank">Blank</button>
+              </div>
+            </div>
+
+            <div class="cfg-row">
+              <div class="cfg-meta">
+                <span class="cfg-name">Touch Glide</span>
+                <span class="cfg-desc">Continuous sliding without lifting finger</span>
+              </div>
+              <button id="togGlide" class="rocker" type="button" role="switch" aria-checked="true" aria-label="Toggle Touch Glide"></button>
+            </div>
+
+            <div class="cfg-row">
+              <div class="cfg-meta">
+                <span class="cfg-name">Hide Empty Slot in BLD</span>
+                <span class="cfg-desc">Pure mental blank tracking during EXEC</span>
+              </div>
+              <button id="togHideBlank" class="rocker" type="button" role="switch" aria-checked="false" aria-label="Toggle Hide Empty Slot in BLD"></button>
+            </div>
+
+            <div class="cfg-row">
+              <div class="cfg-meta">
+                <span class="cfg-name">Mechanical Click</span>
+                <span class="cfg-desc">Synthesized Web Audio tick on slide</span>
+              </div>
+              <button id="togSound" class="rocker" type="button" role="switch" aria-checked="false" aria-label="Toggle Mechanical Click"></button>
+            </div>
+          </div>
+        </div>
+
+        <p class="kb-legend">
+          KEYS: ARROWS / WASD SLIDE &middot; Q / E DEPTH (3D) &middot; V HOLD SOLVED &middot; 1-4 PLANE &middot; X/Y/Z AXIS &middot; SPACE SCRAMBLE / REVEAL / SUBMIT &middot; R NEW SCRAMBLE
+        </p>
       </div>
     </div>
   </aside>
@@ -2606,7 +2868,7 @@
       const SIZES = [3, 4, 5, 6, 7, 8];
       const SIZES_3D = [2, 3, 4];
       const MODES = ['std', 'bld_auto', 'bld_sub'];
-      const SCHEMES_3D = ['layers_z', 'layers_y', 'layers_x', 'fringe_3d', 'prism', 'octants', 'checker_3d', 'mono'];
+      const SCHEMES_3D = ['layers_order', 'fringe_3d', 'prism', 'octants', 'layers_z', 'layers_y', 'checker_3d', 'mono', 'layers_x'];
       const NUM_MODES_3D = ['seq', 'per_layer', 'layer_code', 'coords', 'letters', 'none'];
       const ORDERS_3D = ['zyx', 'yzx', 'xyz', 'zxy', 'yxz', 'xzy'];
 
@@ -2635,7 +2897,7 @@
         mode: 'std',            // 'std' | 'bld_auto' | 'bld_sub'
         theme: 'graphite',      // 'graphite' | 'paper'
         scheme: 'fringe_split', // 2D color scheme
-        scheme3d: 'layers_z',   // 3D color scheme
+        scheme3d: 'layers_order', // 3D color scheme (follows active numbering order by default)
         numMode3d: 'seq',       // 3D numbering option ('seq' starts at Top-Left-Back)
         order3d: 'zyx',         // 3D numbering axis traversal order ('zyx', 'yzx', 'xyz', 'zxy', 'yxz', 'xzy')
         animMs: 0,              // 0 | 50
@@ -2648,6 +2910,9 @@
         view3d: 'cube',         // 'cube' | 'plane' | 'layers'
         spread3d: 1.24,         // 1.06 .. 1.65
         persp3d: 45,            // 0 (Orthographic) .. 100 (Strong Perspective)
+        showGapBar: true,       // show GAP slider on 3D stage toolbar
+        showPerspBar: true,     // show PERSP slider on 3D stage toolbar
+        lockRot3d: false,       // lock 3D camera orbit (enables instant tap & touch glide)
         xray3d: false,
         planeAxis: 'z',         // 'z' | 'y' | 'x'
         planeIndex: 2,          // 0 .. size3d-1
@@ -2683,6 +2948,9 @@
       let isPractice = false;
       let peekSolved3d = false;
       let peekPointerId = null;
+      let filter3d = null;          // null | { type: 'color'|'face', key, label, bg }
+      let filterPopoverOpen = false;
+      let activeConfigTab = 'session';
       const solvedBoard3dCache = {};
 
       function getSolvedBoard3D(N) {
@@ -2805,7 +3073,13 @@
       const bldOverlayLayers = document.getElementById('bldOverlayLayers');
       const bldOverlayLayersMode = document.getElementById('bldOverlayLayersMode');
 
+      const focus3dBar = document.getElementById('focus3dBar');
+      const focus3dColorPills = document.getElementById('focus3dColorPills');
+      const focus3dFacePills = document.getElementById('focus3dFacePills');
       const subCube = document.getElementById('subCube');
+      const btnFocus3d = document.getElementById('btnFocus3d');
+      const focus3dBtnTxt = document.getElementById('focus3dBtnTxt');
+      const gapBox3d = document.getElementById('gapBox3d');
       const subPlane = document.getElementById('subPlane');
       const subPerspRow = document.getElementById('subPerspRow');
       const btnOrthoQuick = document.getElementById('btnOrthoQuick');
@@ -2815,6 +3089,9 @@
       const btnXray3d = document.getElementById('btnXray3d');
       const spread3dRange = document.getElementById('spread3dRange');
       const spread3dVal = document.getElementById('spread3dVal');
+      const btnLockRot3d = document.getElementById('btnLockRot3d');
+      const iconLockOpen = document.getElementById('iconLockOpen');
+      const iconLockClosed = document.getElementById('iconLockClosed');
       const btnResetCam3d = document.getElementById('btnResetCam3d');
       const planeAxisSeg = document.getElementById('planeAxisSeg');
       const planeIdxSeg = document.getElementById('planeIdxSeg');
@@ -2828,6 +3105,7 @@
       const controlBar = document.getElementById('controlBar');
       const scrim = document.getElementById('scrim');
       const configSheet = document.getElementById('configSheet');
+      const cfgTabs = document.getElementById('cfgTabs');
       const statsSheet = document.getElementById('statsSheet');
 
       const sizeSelector = document.getElementById('sizeSelector');
@@ -2841,6 +3119,14 @@
       const numMode3dSelector = document.getElementById('numMode3dSelector');
       const order3dBlock = document.getElementById('order3dBlock');
       const order3dSelector = document.getElementById('order3dSelector');
+      const cfgSpreadRange = document.getElementById('cfgSpreadRange');
+      const cfgSpreadVal = document.getElementById('cfgSpreadVal');
+      const cfgPerspRange = document.getElementById('cfgPerspRange');
+      const cfgPerspVal = document.getElementById('cfgPerspVal');
+      const btnCfgOrtho = document.getElementById('btnCfgOrtho');
+      const togShowGapBar = document.getElementById('togShowGapBar');
+      const togShowPerspBar = document.getElementById('togShowPerspBar');
+      const togLockRot3d = document.getElementById('togLockRot3d');
       const themeSelector = document.getElementById('themeSelector');
       const animSelector = document.getElementById('animSelector');
       const kbDirSelector = document.getElementById('kbDirSelector');
@@ -3287,24 +3573,36 @@
         };
       }
 
-      function getTilePigment3D(val, N = cfg.size3d, scheme = cfg.scheme3d) {
+      const AXIS_START_NAME = { z: 'BACK', y: 'TOP', x: 'LEFT' };
+
+      function getOrderAxes(order = cfg.order3d) {
+        return [order[0] || 'z', order[1] || 'y', order[2] || 'x'];
+      }
+
+      function getTilePigment3D(val, N = cfg.size3d, scheme = cfg.scheme3d, order = cfg.order3d) {
         if (scheme === 'mono') return null;
         const home = coords3d(val - 1, N);
+        const [a0, a1, a2] = getOrderAxes(order);
+        const c0 = home[a0];
+        const c1 = home[a1];
+        const c2 = home[a2];
 
+        if (scheme === 'layers_order') return getSliceColor3D(c0, N);
+        if (scheme === 'layers_z') return getSliceColor3D(home.z, N);
         if (scheme === 'layers_y') return getSliceColor3D(home.y, N);
         if (scheme === 'layers_x') return getSliceColor3D(home.x, N);
 
         if (scheme === 'fringe_3d') {
-          const L = Math.min(home.x, home.y, home.z);
+          const L = Math.min(c0, c1, c2);
           if (N === 2) {
-            if (home.z === 0) return PIGMENTS[0];
-            if (home.y === 0) return PIGMENTS[1];
+            if (c0 === 0) return PIGMENTS[0];
+            if (c1 === 0) return PIGMENTS[1];
             return PIGMENTS[2];
           }
           if (L === N - 2) return PIGMENTS[4]; // Inner 2×2×2 core (slate teal)
-          // Split outer shell(s) cleanly by Back (Z), Top (Y), Left (X) face
+          // Split outer shell(s) cleanly in active Numbering Order priority (a0 -> a1 -> a2)
           const base = L * 3;
-          const sub = home.z === L ? 0 : (home.y === L ? 1 : 2);
+          const sub = c0 === L ? 0 : (c1 === L ? 1 : 2);
           return PIGMENTS[(base + sub) % 8];
         }
 
@@ -3314,7 +3612,7 @@
 
         if (scheme === 'octants') {
           const half = N / 2;
-          const oct = (home.z >= half ? 4 : 0) | (home.y >= half ? 2 : 0) | (home.x >= half ? 1 : 0);
+          const oct = (c0 >= half ? 4 : 0) | (c1 >= half ? 2 : 0) | (c2 >= half ? 1 : 0);
           return PIGMENTS[oct];
         }
 
@@ -3323,8 +3621,139 @@
           return par === 0 ? PIGMENTS[0] : PIGMENTS[3];
         }
 
-        // Default ('layers_z'): Back -> Front Z-layer slice colors
-        return getSliceColor3D(home.z, N);
+        return getSliceColor3D(c0, N);
+      }
+
+      function getTileColorGroupKey3D(val, N = cfg.size3d, scheme = cfg.scheme3d, order = cfg.order3d) {
+        const home = coords3d(val - 1, N);
+        const [a0, a1, a2] = getOrderAxes(order);
+        const c0 = home[a0];
+        const c1 = home[a1];
+        const c2 = home[a2];
+
+        if (scheme === 'layers_order' || scheme === 'prism' || scheme === 'mono') return `s${c0}`;
+        if (scheme === 'layers_z') return `s${home.z}`;
+        if (scheme === 'layers_y') return `s${home.y}`;
+        if (scheme === 'layers_x') return `s${home.x}`;
+
+        if (scheme === 'fringe_3d') {
+          const L = Math.min(c0, c1, c2);
+          if (N === 2) {
+            if (c0 === 0) return 'f0_0';
+            if (c1 === 0) return 'f0_1';
+            return 'f0_2';
+          }
+          if (L === N - 2) return 'core';
+          const sub = c0 === L ? 0 : (c1 === L ? 1 : 2);
+          return `f${L}_${sub}`;
+        }
+
+        if (scheme === 'octants') {
+          const half = N / 2;
+          const oct = (c0 >= half ? 4 : 0) | (c1 >= half ? 2 : 0) | (c2 >= half ? 1 : 0);
+          return `o${oct}`;
+        }
+
+        if (scheme === 'checker_3d') {
+          return ((home.x + home.y + home.z) & 1) === 0 ? 'even' : 'odd';
+        }
+
+        return `s${c0}`;
+      }
+
+      function getColorGroups3D(N = cfg.size3d, scheme = cfg.scheme3d, order = cfg.order3d) {
+        const [a0, a1, a2] = getOrderAxes(order);
+        const n2 = N * N;
+        const maxVal = N * N * N - 1;
+
+        if (scheme === 'layers_order' || scheme === 'layers_z' || scheme === 'layers_y' || scheme === 'layers_x') {
+          const ax = scheme === 'layers_order' ? a0 : scheme.slice(-1);
+          const pref = ax.toUpperCase();
+          const showRange = ax === a0 && cfg.numMode3d === 'seq' && N < 4;
+          const out = [];
+          for (let L = 0; L < N; L++) {
+            const lo = L * n2 + 1;
+            const hi = Math.min(maxVal, (L + 1) * n2);
+            out.push({
+              key: `s${L}`,
+              label: showRange ? `${lo}-${hi}` : `${pref}${L + 1}`,
+              bg: getSliceColor3D(L, N).bg
+            });
+          }
+          return out;
+        }
+
+        if (scheme === 'fringe_3d') {
+          const n0 = AXIS_START_NAME[a0];
+          const n1 = AXIS_START_NAME[a1];
+          const n2Name = AXIS_START_NAME[a2];
+          if (N === 2) {
+            return [
+              { key: 'f0_0', label: n0, bg: PIGMENTS[0].bg },
+              { key: 'f0_1', label: n1, bg: PIGMENTS[1].bg },
+              { key: 'f0_2', label: n2Name, bg: PIGMENTS[2].bg }
+            ];
+          }
+          const out = [];
+          for (let L = 0; L < N - 2; L++) {
+            const pfx = N >= 4 ? `S${L + 1}·` : '';
+            out.push({ key: `f${L}_0`, label: `${pfx}${n0}`, bg: PIGMENTS[(L * 3) % 8].bg });
+            out.push({ key: `f${L}_1`, label: `${pfx}${n1}`, bg: PIGMENTS[(L * 3 + 1) % 8].bg });
+            out.push({ key: `f${L}_2`, label: `${pfx}${n2Name}`, bg: PIGMENTS[(L * 3 + 2) % 8].bg });
+          }
+          out.push({ key: 'core', label: 'CORE', bg: PIGMENTS[4].bg });
+          return out;
+        }
+
+        if (scheme === 'octants') {
+          const out = [];
+          for (let oct = 0; oct < 8; oct++) {
+            out.push({ key: `o${oct}`, label: `O${oct + 1}`, bg: PIGMENTS[oct].bg });
+          }
+          return out;
+        }
+
+        if (scheme === 'checker_3d') {
+          return [
+            { key: 'even', label: 'EVEN', bg: PIGMENTS[0].bg },
+            { key: 'odd', label: 'ODD', bg: PIGMENTS[3].bg }
+          ];
+        }
+
+        // Prism / Mono: group cleanly by primary order slices
+        const pref = a0.toUpperCase();
+        const showRange = cfg.numMode3d === 'seq' && N < 4;
+        const out = [];
+        for (let L = 0; L < N; L++) {
+          const lo = L * n2 + 1;
+          const hi = Math.min(maxVal, (L + 1) * n2);
+          const bg = scheme === 'prism'
+            ? (L === 0 ? '#C85A42' : (L === N - 1 ? '#325F9E' : '#3D9A68'))
+            : '#666D78';
+          out.push({
+            key: `s${L}`,
+            label: showRange ? `${lo}-${hi}` : `${pref}${L + 1}`,
+            bg
+          });
+        }
+        return out;
+      }
+
+      function tileMatchesFilter3D(val, N = cfg.size3d) {
+        if (!filter3d) return true;
+        if (filter3d.type === 'color') {
+          return getTileColorGroupKey3D(val, N, cfg.scheme3d, cfg.order3d) === filter3d.key;
+        }
+        if (filter3d.type === 'face') {
+          const h = coords3d(val - 1, N);
+          if (filter3d.key === 'back') return h.z === 0;
+          if (filter3d.key === 'front') return h.z === N - 1;
+          if (filter3d.key === 'top') return h.y === 0;
+          if (filter3d.key === 'bot') return h.y === N - 1;
+          if (filter3d.key === 'left') return h.x === 0;
+          if (filter3d.key === 'right') return h.x === N - 1;
+        }
+        return true;
       }
 
       const BLD_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+';
@@ -3562,6 +3991,9 @@
             view3d: ['cube', 'plane', 'layers'].includes(p.view3d) ? p.view3d : DEFAULT_CFG.view3d,
             spread3d: Number.isFinite(sp) ? Math.max(1.06, Math.min(1.65, sp)) : DEFAULT_CFG.spread3d,
             persp3d: Number.isFinite(pr) ? Math.max(0, Math.min(100, Math.round(pr))) : DEFAULT_CFG.persp3d,
+            showGapBar: typeof p.showGapBar === 'boolean' ? p.showGapBar : DEFAULT_CFG.showGapBar,
+            showPerspBar: typeof p.showPerspBar === 'boolean' ? p.showPerspBar : DEFAULT_CFG.showPerspBar,
+            lockRot3d: typeof p.lockRot3d === 'boolean' ? p.lockRot3d : DEFAULT_CFG.lockRot3d,
             xray3d: typeof p.xray3d === 'boolean' ? p.xray3d : DEFAULT_CFG.xray3d,
             planeAxis: ['z', 'y', 'x'].includes(p.planeAxis) ? p.planeAxis : DEFAULT_CFG.planeAxis,
             planeIndex: Number.isInteger(pIdx) && pIdx >= 0 && pIdx < s3d ? pIdx : s3d - 1,
@@ -4117,7 +4549,7 @@
           } else {
             layerLbls[L].textContent = getPlaneShortLabel(ax, L, N);
           }
-          const showSliceSwatch = cfg.scheme3d === 'layers_z' || cfg.scheme3d === 'layers_y' || cfg.scheme3d === 'layers_x';
+          const showSliceSwatch = cfg.scheme3d === 'layers_order' || cfg.scheme3d === 'layers_z' || cfg.scheme3d === 'layers_y' || cfg.scheme3d === 'layers_x';
           layerSwatches[L].style.background = showSliceSwatch ? getSliceColor3D(L, N).bg : 'var(--border-strong)';
         }
       }
@@ -4258,9 +4690,11 @@
 
           const correct = i === val - 1;
           const isZLink = !peekSolved3d && lc.layer !== emptyLC.layer && lc.r === emptyLC.r && lc.c === emptyLC.c;
+          const filterDim = !peekSolved3d && Boolean(filter3d) && !tileMatchesFilter3D(val, N);
           slot.classList.toggle('in-place', correct);
           slot.classList.toggle('is-misplaced', showMisplaced && !correct);
           slot.classList.toggle('is-z-link', isZLink);
+          slot.classList.toggle('is-filter-dim', filterDim);
         }
       }
 
@@ -4698,9 +5132,11 @@
             }
 
             const movable = !isPeek && isAlignedWithEmpty3D(pos.x, pos.y, pos.z, empty);
+            const matchesFilter = isPeek || !filter3d || tileMatchesFilter3D(val, N);
             let alpha = 1.0;
             let interactive = !isPeek;
             let isPerpPeek = false;
+            let isGhost = false;
 
             if (isPlaneMode) {
               const inPlane = isInActivePlane(pos.x, pos.y, pos.z);
@@ -4716,6 +5152,18 @@
             } else if (!isPeek && cfg.xray3d && !movable) {
               alpha = 0.14;
               interactive = false;
+              isGhost = true;
+            }
+
+            if (!isPeek && !matchesFilter) {
+              if (cfg.xray3d && !movable) {
+                alpha = 0.06;
+                interactive = false;
+              } else {
+                alpha = movable ? 0.22 : 0.09;
+                interactive = movable;
+              }
+              isGhost = true;
             }
 
             let wx, wy, wz;
@@ -4746,7 +5194,8 @@
               movable,
               alpha,
               interactive,
-              isPerpPeek
+              isPerpPeek,
+              isGhost
             });
           }
 
@@ -4771,7 +5220,7 @@
               continue;
             }
 
-            const pigment = getTilePigment3D(it.val, N, cfg.scheme3d);
+            const pigment = getTilePigment3D(it.val, N, cfg.scheme3d, cfg.order3d);
             const baseRgb = masked
               ? pal.maskedBg
               : (pigment ? parseHexRgb(pigment.bg) : pal.monoBg);
@@ -4811,7 +5260,7 @@
 
               const quad = [p00, p10, p11, p01];
               if (it.interactive) {
-                nextHitQuads.push({ tileId: it.val, pos: it.pos, movable: it.movable, quad });
+                nextHitQuads.push({ tileId: it.val, pos: it.pos, movable: it.movable, isGhost: it.isGhost, quad });
               }
 
               const kDot = Math.max(0, f.n[0] * LIGHT_KEY[0] + f.n[1] * LIGHT_KEY[1] + f.n[2] * LIGHT_KEY[2]);
@@ -4904,7 +5353,12 @@
           const y = clientY - rect.top;
 
           for (let i = 0; i < hitQuads.length; i++) {
-            if (pointInQuad(x, y, hitQuads[i].quad)) {
+            if (!hitQuads[i].isGhost && pointInQuad(x, y, hitQuads[i].quad)) {
+              return hitQuads[i];
+            }
+          }
+          for (let i = 0; i < hitQuads.length; i++) {
+            if (hitQuads[i].isGhost && pointInQuad(x, y, hitQuads[i].quad)) {
               return hitQuads[i];
             }
           }
@@ -4914,7 +5368,16 @@
             const ox = x + offsets[o][0];
             const oy = y + offsets[o][1];
             for (let i = 0; i < hitQuads.length; i++) {
-              if (hitQuads[i].movable && pointInQuad(ox, oy, hitQuads[i].quad)) {
+              if (!hitQuads[i].isGhost && hitQuads[i].movable && pointInQuad(ox, oy, hitQuads[i].quad)) {
+                return hitQuads[i];
+              }
+            }
+          }
+          for (let o = 0; o < offsets.length; o++) {
+            const ox = x + offsets[o][0];
+            const oy = y + offsets[o][1];
+            for (let i = 0; i < hitQuads.length; i++) {
+              if (hitQuads[i].isGhost && hitQuads[i].movable && pointInQuad(ox, oy, hitQuads[i].quad)) {
                 return hitQuads[i];
               }
             }
@@ -4958,6 +5421,9 @@
           return Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
         }
 
+        let lockedDragActive = false;
+        let lastLockedGridKey = null;
+
         cube3dCanvas.addEventListener('pointerdown', (e) => {
           if (!cfg.is3d || (cfg.view3d !== 'cube' && cfg.view3d !== 'plane')) return;
           if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -4983,8 +5449,21 @@
             maxDrag = 0;
             wasMulti = false;
             lastPinch = null;
+            lockedDragActive = cfg.lockRot3d;
+            lastLockedGridKey = null;
+
+            if (lockedDragActive) {
+              const hit = pickAt(e.clientX, e.clientY);
+              if (hit && hit.movable) {
+                lastLockedGridKey = `${hit.pos.x},${hit.pos.y},${hit.pos.z}`;
+                executeMove3DAt(hit.pos.x, hit.pos.y, hit.pos.z);
+                drawFrame(performance.now());
+              }
+            }
           } else if (ptrs.size >= 2) {
             wasMulti = true;
+            lockedDragActive = false;
+            lastLockedGridKey = null;
             lastPinch = pinchDist();
             cube3dCanvas.classList.remove('is-dragging');
           }
@@ -5020,6 +5499,24 @@
           }
 
           if (e.pointerId === primaryId && !wasMulti) {
+            if (lockedDragActive || cfg.lockRot3d) {
+              // Rotation locked: never rotate camera; optionally glide across movable tiles!
+              if (cfg.glide) {
+                const hit = pickAt(e.clientX, e.clientY);
+                if (hit && hit.movable) {
+                  const key = `${hit.pos.x},${hit.pos.y},${hit.pos.z}`;
+                  if (key !== lastLockedGridKey) {
+                    lastLockedGridKey = key;
+                    executeMove3DAt(hit.pos.x, hit.pos.y, hit.pos.z);
+                    drawFrame(performance.now());
+                  }
+                } else {
+                  lastLockedGridKey = null;
+                }
+              }
+              return;
+            }
+
             const dx = e.clientX - lastX;
             const dy = e.clientY - lastY;
             lastX = e.clientX;
@@ -5046,12 +5543,16 @@
 
           if (e.pointerId === primaryId) {
             cube3dCanvas.classList.remove('is-dragging');
+            const wasLocked = lockedDragActive;
+            lockedDragActive = false;
+            lastLockedGridKey = null;
+
             const tapThresh = e.pointerType === 'touch' ? 11 : 8;
-            if (!wasMulti && !ignoredPointers.has(e.pointerId) && maxDrag < tapThresh) {
+            if (!wasLocked && !wasMulti && !ignoredPointers.has(e.pointerId) && maxDrag < tapThresh) {
               const hit = pickAt(e.clientX, e.clientY);
               if (hit && hit.movable) {
                 executeMove3DAt(hit.pos.x, hit.pos.y, hit.pos.z);
-              } else if (!hit) {
+              } else if (!hit && !cfg.lockRot3d) {
                 const nowTs = performance.now();
                 if (nowTs - lastBgTapTs < 320) {
                   if (cfg.view3d === 'plane') snapCameraForPlane(cfg.planeAxis);
@@ -5108,38 +5609,107 @@
         planeIdxSeg.appendChild(frag);
       }
 
-      function update3DLegend() {
-        const N = cfg.size3d;
-        const n2 = N * N;
-        const maxVal = N * N * N - 1;
-        const sc = cfg.scheme3d;
-        const primaryAxis = cfg.order3d[0];
+      const FACE_FILTER_META = {
+        back: 'BACK',
+        front: 'FRONT',
+        top: 'TOP',
+        bot: 'BOT',
+        left: 'LEFT',
+        right: 'RIGHT'
+      };
 
-        const pair = (bg, txt) => `<span class="legend-pair"><span class="legend-dot" style="background:${bg}"></span>${txt}</span>`;
-
-        if (sc === 'layers_z' || sc === 'layers_y' || sc === 'layers_x') {
-          const ax = sc.slice(-1);
-          const pref = ax.toUpperCase();
-          const showRange = ax === primaryAxis && cfg.numMode3d === 'seq' && N < 4;
-          const parts = [];
-          for (let L = 0; L < N; L++) {
-            const lo = L * n2 + 1;
-            const hi = Math.min(maxVal, (L + 1) * n2);
-            const lbl = showRange ? `${lo}-${hi}` : `${pref}${L + 1}`;
-            parts.push(pair(getSliceColor3D(L, N).bg, lbl));
+      function validateFilter3D() {
+        if (!filter3d) return;
+        if (filter3d.type === 'color') {
+          const groups = getColorGroups3D(cfg.size3d, cfg.scheme3d, cfg.order3d);
+          const match = groups.find((g) => g.key === filter3d.key);
+          if (!match) {
+            filter3d = null;
+          } else {
+            filter3d.label = match.label;
+            filter3d.bg = match.bg;
           }
-          cube3dLegend.innerHTML = parts.join('');
-        } else if (sc === 'fringe_3d') {
-          cube3dLegend.innerHTML = pair(PIGMENTS[0].bg, 'BACK') + pair(PIGMENTS[1].bg, 'TOP') + pair(PIGMENTS[2].bg, 'LEFT') + (N >= 3 ? pair(PIGMENTS[4].bg, 'CORE') : '');
-        } else if (sc === 'checker_3d') {
-          cube3dLegend.innerHTML = pair(PIGMENTS[0].bg, 'EVEN') + pair(PIGMENTS[3].bg, 'ODD');
-        } else if (sc === 'prism') {
-          cube3dLegend.innerHTML = pair('#C85A42', 'TLB') + pair('#3D9A68', 'PRISM') + pair('#325F9E', 'BRF');
-        } else if (sc === 'octants') {
-          cube3dLegend.innerHTML = pair(PIGMENTS[0].bg, 'OCTANTS · 1=TLB');
-        } else {
-          cube3dLegend.innerHTML = `<span>1 = TOP-LEFT-BACK</span>`;
         }
+      }
+
+      function renderFocus3DUI() {
+        validateFilter3D();
+        const groups = getColorGroups3D(cfg.size3d, cfg.scheme3d, cfg.order3d);
+
+        // Render Color pills inside Focus popover
+        const allActive = !filter3d;
+        const cParts = [
+          `<button class="focus-pill is-all${allActive ? ' active' : ''}" type="button" data-fclear="1">ALL</button>`
+        ];
+        for (let i = 0; i < groups.length; i++) {
+          const g = groups[i];
+          const isAct = filter3d && filter3d.type === 'color' && filter3d.key === g.key;
+          cParts.push(
+            `<button class="focus-pill${isAct ? ' active' : ''}" type="button" data-fcolor="${g.key}"><span class="legend-dot" style="background:${g.bg}"></span>${g.label}</button>`
+          );
+        }
+        focus3dColorPills.innerHTML = cParts.join('');
+
+        // Highlight active Face pill inside Focus popover
+        focus3dFacePills.querySelectorAll('[data-fface]').forEach((b) => {
+          const isAct = filter3d && filter3d.type === 'face' && filter3d.key === b.dataset.fface;
+          b.classList.toggle('active', isAct);
+        });
+
+        // Update FOCUS button label & active state
+        const isFiltered = Boolean(filter3d);
+        btnFocus3d.classList.toggle('active', isFiltered || filterPopoverOpen);
+        btnFocus3d.setAttribute('aria-pressed', String(isFiltered));
+        btnFocus3d.setAttribute('aria-expanded', String(filterPopoverOpen));
+        focus3dBtnTxt.textContent = isFiltered ? filter3d.label : 'FOCUS';
+        focus3dBar.classList.toggle('hidden-view', !filterPopoverOpen || cfg.view3d !== 'cube');
+      }
+
+      function update3DLegend() {
+        validateFilter3D();
+        const groups = getColorGroups3D(cfg.size3d, cfg.scheme3d, cfg.order3d);
+        const parts = [];
+
+        // Keep legend compact (up to 4 interactive chips on canvas; octants/4x4x4 fringe use FOCUS bar + first chips)
+        const maxInline = groups.length <= 4 ? groups.length : 0;
+        if (maxInline > 0) {
+          for (let i = 0; i < groups.length; i++) {
+            const g = groups[i];
+            const isAct = filter3d && filter3d.type === 'color' && filter3d.key === g.key;
+            parts.push(
+              `<button class="legend-pair is-btn${isAct ? ' is-active' : ''}" type="button" data-fcolor="${g.key}" title="Tap to isolate ${g.label}"><span class="legend-dot" style="background:${g.bg}"></span>${g.label}</button>`
+            );
+          }
+        } else {
+          // For 7+ group schemes (Octants, 4x4x4 Fringe), show concise indicator + active filter chip if any
+          if (filter3d && filter3d.type === 'color') {
+            parts.push(
+              `<button class="legend-pair is-btn is-active" type="button" data-fclear="1" title="Tap to clear filter"><span class="legend-dot" style="background:${filter3d.bg}"></span>${filter3d.label} ×</button>`
+            );
+          } else {
+            const tag = cfg.scheme3d === 'octants' ? 'OCTANTS · 1=TLB' : 'FRINGE · 1=TLB';
+            parts.push(`<span class="legend-pair"><span class="legend-dot" style="background:${PIGMENTS[0].bg}"></span>${tag}</span>`);
+          }
+        }
+
+        if (filter3d && filter3d.type === 'face') {
+          parts.push(
+            `<button class="legend-pair is-btn is-active" type="button" data-fclear="1" title="Tap to clear face filter">FACE: ${filter3d.label} ×</button>`
+          );
+        }
+
+        cube3dLegend.innerHTML = parts.join('');
+        renderFocus3DUI();
+      }
+
+      function setFilter3D(next) {
+        if (next && filter3d && filter3d.type === next.type && filter3d.key === next.key) {
+          filter3d = null;
+        } else {
+          filter3d = next;
+        }
+        update3DLegend();
+        render3DViews();
       }
 
       function setPeekSolved3d(active) {
@@ -5622,6 +6192,20 @@
       /* =======================================================================
          UI SYNC: HEADER, STATS BAR, CONFIG SHEET, STATS SHEET
          ======================================================================= */
+      function setConfigTab(tabName) {
+        activeConfigTab = tabName;
+        cfgTabs.querySelectorAll('[data-cfgtab]').forEach((b) => {
+          const act = b.dataset.cfgtab === tabName;
+          b.classList.toggle('active', act);
+          b.setAttribute('aria-selected', String(act));
+        });
+        configSheet.querySelectorAll('[data-cfgpane]').forEach((pane) => {
+          pane.classList.toggle('hidden-view', pane.dataset.cfgpane !== tabName);
+        });
+        const body = configSheet.querySelector('.sheet-body');
+        if (body) body.scrollTop = 0;
+      }
+
       function apply3DViewUI() {
         const is3d = cfg.is3d;
         const N = cfg.size3d;
@@ -5634,11 +6218,9 @@
 
         tabLayers3d.textContent = `${N} Layers`;
 
-        // Toggle 2D vs 3D Config Sheet option blocks cleanly
+        // Toggle 2D vs 3D pigment schemes cleanly inside Style tab
         scheme2dBlock.classList.toggle('hidden-view', is3d);
         scheme3dBlock.classList.toggle('hidden-view', !is3d);
-        numMode3dBlock.classList.toggle('hidden-view', !is3d);
-        order3dBlock.classList.toggle('hidden-view', !is3d);
 
         // View mode tabs
         view3dTabs.querySelectorAll('[data-view3d]').forEach((b) => {
@@ -5654,21 +6236,36 @@
         cube3dFrame.classList.toggle('hidden-view', isLayers);
         layers3dWrap.classList.toggle('hidden-view', !isLayers);
 
+        if (!isCube) filterPopoverOpen = false;
         subCube.classList.toggle('hidden-view', !isCube);
+        gapBox3d.classList.toggle('hidden-view', !cfg.showGapBar);
         subPlane.classList.toggle('hidden-view', !isPlane);
-        subPerspRow.classList.toggle('hidden-view', isLayers);
+        subPerspRow.classList.toggle('hidden-view', isLayers || !cfg.showPerspBar);
         subLayers.classList.toggle('hidden-view', !isLayers);
 
-        // Cube subbar
+        // Cube subbar & in-config GAP slider sync
         btnXray3d.classList.toggle('active', cfg.xray3d);
         btnXray3d.setAttribute('aria-pressed', String(cfg.xray3d));
-        spread3dRange.value = cfg.spread3d.toFixed(2);
-        spread3dVal.textContent = cfg.spread3d.toFixed(2);
+        btnLockRot3d.classList.toggle('active', cfg.lockRot3d);
+        btnLockRot3d.setAttribute('aria-pressed', String(cfg.lockRot3d));
+        iconLockOpen.classList.toggle('hidden-view', cfg.lockRot3d);
+        iconLockClosed.classList.toggle('hidden-view', !cfg.lockRot3d);
+        cube3dCanvas.classList.toggle('is-rot-locked', cfg.lockRot3d);
+        const spTxt = cfg.spread3d.toFixed(2);
+        spread3dRange.value = spTxt;
+        spread3dVal.textContent = spTxt;
+        cfgSpreadRange.value = spTxt;
+        cfgSpreadVal.textContent = spTxt;
 
-        // Perspective / Ortho slider (shared by Cube & Plane views)
-        persp3dRange.value = String(cfg.persp3d);
-        persp3dVal.textContent = cfg.persp3d === 0 ? '0%' : `${cfg.persp3d}%`;
+        // Perspective / Ortho slider sync (Stage & Config)
+        const prStr = String(cfg.persp3d);
+        const prTxt = `${cfg.persp3d}%`;
+        persp3dRange.value = prStr;
+        persp3dVal.textContent = prTxt;
         btnOrthoQuick.classList.toggle('active', cfg.persp3d === 0);
+        cfgPerspRange.value = prStr;
+        cfgPerspVal.textContent = prTxt;
+        btnCfgOrtho.classList.toggle('active', cfg.persp3d === 0);
 
         // Plane subbar
         planeAxisSeg.querySelectorAll('[data-paxis]').forEach((b) => {
@@ -5749,6 +6346,9 @@
         togHideBlank.setAttribute('aria-checked', String(cfg.hideBlankBld));
         togSound.setAttribute('aria-checked', String(cfg.sound));
         togDots.setAttribute('aria-checked', String(cfg.dots));
+        togShowGapBar.setAttribute('aria-checked', String(cfg.showGapBar));
+        togShowPerspBar.setAttribute('aria-checked', String(cfg.showPerspBar));
+        togLockRot3d.setAttribute('aria-checked', String(cfg.lockRot3d));
 
         if (cfg.is3d) {
           applyLayerPigmentsAndLabels();
@@ -6166,38 +6766,103 @@
         btnXray3d.blur();
       });
 
-      spread3dRange.addEventListener('input', (e) => {
-        cfg.spread3d = Math.max(1.06, Math.min(1.65, parseFloat(e.target.value) || 1.24));
-        spread3dVal.textContent = cfg.spread3d.toFixed(2);
+      function applySpread3dLive(rawVal) {
+        cfg.spread3d = Math.max(1.06, Math.min(1.65, parseFloat(rawVal) || 1.24));
+        const txt = cfg.spread3d.toFixed(2);
+        spread3dRange.value = txt;
+        spread3dVal.textContent = txt;
+        cfgSpreadRange.value = txt;
+        cfgSpreadVal.textContent = txt;
         cube3d.requestFrame();
+      }
+
+      function applyPersp3dLive(rawVal) {
+        const v = Math.max(0, Math.min(100, Math.round(parseFloat(rawVal) || 0)));
+        cfg.persp3d = v;
+        const s = String(v);
+        const txt = `${v}%`;
+        persp3dRange.value = s;
+        persp3dVal.textContent = txt;
+        btnOrthoQuick.classList.toggle('active', v === 0);
+        cfgPerspRange.value = s;
+        cfgPerspVal.textContent = txt;
+        btnCfgOrtho.classList.toggle('active', v === 0);
+        cube3d.requestFrame();
+      }
+
+      btnFocus3d.addEventListener('click', () => {
+        filterPopoverOpen = !filterPopoverOpen;
+        renderFocus3DUI();
+        layoutActiveStage();
+        btnFocus3d.blur();
       });
 
+      function handleFilterPillClick(e) {
+        const clr = e.target.closest('[data-fclear]');
+        if (clr) {
+          setFilter3D(null);
+          clr.blur();
+          return;
+        }
+        const col = e.target.closest('[data-fcolor]');
+        if (col) {
+          const key = col.dataset.fcolor;
+          const grp = getColorGroups3D(cfg.size3d, cfg.scheme3d, cfg.order3d).find((g) => g.key === key);
+          if (grp) {
+            setFilter3D({ type: 'color', key: grp.key, label: grp.label, bg: grp.bg });
+          }
+          col.blur();
+          return;
+        }
+        const fac = e.target.closest('[data-fface]');
+        if (fac) {
+          const key = fac.dataset.fface;
+          if (FACE_FILTER_META[key]) {
+            setFilter3D({ type: 'face', key, label: FACE_FILTER_META[key], bg: 'var(--sig-amber)' });
+          }
+          fac.blur();
+        }
+      }
+
+      focus3dColorPills.addEventListener('click', handleFilterPillClick);
+      focus3dFacePills.addEventListener('click', handleFilterPillClick);
+      cube3dLegend.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleFilterPillClick(e);
+      });
+
+      spread3dRange.addEventListener('input', (e) => applySpread3dLive(e.target.value));
       spread3dRange.addEventListener('change', () => {
         saveCfg();
         spread3dRange.blur();
       });
 
-      // Live Perspective / Orthographic slider (0 = Orthographic, 100 = Wide Perspective)
-      persp3dRange.addEventListener('input', (e) => {
-        const v = Math.max(0, Math.min(100, Math.round(parseFloat(e.target.value) || 0)));
-        cfg.persp3d = v;
-        persp3dVal.textContent = `${v}%`;
-        btnOrthoQuick.classList.toggle('active', v === 0);
-        cube3d.requestFrame();
+      cfgSpreadRange.addEventListener('input', (e) => applySpread3dLive(e.target.value));
+      cfgSpreadRange.addEventListener('change', () => {
+        saveCfg();
+        cfgSpreadRange.blur();
       });
 
+      // Live Perspective / Orthographic sliders (0 = Orthographic, 100 = Wide Perspective)
+      persp3dRange.addEventListener('input', (e) => applyPersp3dLive(e.target.value));
       persp3dRange.addEventListener('change', () => {
         saveCfg();
         persp3dRange.blur();
       });
 
-      btnOrthoQuick.addEventListener('click', () => {
-        cfg.persp3d = 0;
+      cfgPerspRange.addEventListener('input', (e) => applyPersp3dLive(e.target.value));
+      cfgPerspRange.addEventListener('change', () => {
         saveCfg();
-        apply3DViewUI();
-        cube3d.requestFrame();
-        btnOrthoQuick.blur();
+        cfgPerspRange.blur();
       });
+
+      const snapOrtho = (btn) => {
+        applyPersp3dLive(0);
+        saveCfg();
+        btn.blur();
+      };
+      btnOrthoQuick.addEventListener('click', () => snapOrtho(btnOrthoQuick));
+      btnCfgOrtho.addEventListener('click', () => snapOrtho(btnCfgOrtho));
 
       // Hold-to-Peek Solved Reference button (active ONLY while pressed and held)
       btnPeekSolved3d.addEventListener('pointerdown', (e) => {
@@ -6463,8 +7128,21 @@
         resetClearConfirm();
       }
 
-      btnSessionTrigger.addEventListener('click', () => openSheet(configSheet));
-      btnOpenConfig.addEventListener('click', () => openSheet(configSheet));
+      btnSessionTrigger.addEventListener('click', () => {
+        setConfigTab('session');
+        openSheet(configSheet);
+      });
+      btnOpenConfig.addEventListener('click', () => {
+        setConfigTab(activeConfigTab);
+        openSheet(configSheet);
+      });
+
+      cfgTabs.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-cfgtab]');
+        if (!b) return;
+        setConfigTab(b.dataset.cfgtab);
+        b.blur();
+      });
 
       const openStatsAction = () => {
         renderStatsSheet();
@@ -6571,7 +7249,7 @@
         applyConfigUI();
       });
 
-      // Hardware rockers
+      // Hardware & 3D Stage Slider rockers
       togGlide.addEventListener('click', () => {
         cfg.glide = !cfg.glide;
         saveCfg();
@@ -6599,6 +7277,29 @@
         saveCfg();
         applyConfigUI();
       });
+
+      togShowGapBar.addEventListener('click', () => {
+        cfg.showGapBar = !cfg.showGapBar;
+        saveCfg();
+        applyConfigUI();
+        layoutActiveStage();
+      });
+
+      togShowPerspBar.addEventListener('click', () => {
+        cfg.showPerspBar = !cfg.showPerspBar;
+        saveCfg();
+        applyConfigUI();
+        layoutActiveStage();
+      });
+
+      const toggleLockRot3d = (btn) => {
+        cfg.lockRot3d = !cfg.lockRot3d;
+        saveCfg();
+        applyConfigUI();
+        if (btn) btn.blur();
+      };
+      btnLockRot3d.addEventListener('click', () => toggleLockRot3d(btnLockRot3d));
+      togLockRot3d.addEventListener('click', () => toggleLockRot3d(null));
 
       // History row actions (Replay from seed / Delete)
       historyWrap.addEventListener('click', (e) => {
