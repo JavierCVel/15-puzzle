@@ -99,10 +99,10 @@
       --tile-mono-border: #C9C5BB;
       --tile-mono-ink: #141517;
 
-      --tile-masked-bg: #D9D5CC;
-      --tile-masked-border: #C4BFB4;
+      --tile-masked-bg: #888D96;
+      --tile-masked-border: #6C717A;
       --slot-recess: #DDD9D0;
-      --slot-recess-border: #CECAC0;
+      --slot-recess-border: #C6C1B6;
 
       --scrim: rgba(20, 21, 23, 0.56);
     }
@@ -819,12 +819,20 @@
     }
 
     .sheet-body {
+      flex: 1 1 auto;
+      min-height: 0;
       overflow-y: auto;
+      overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
-      padding: 14px 16px 6px;
+      touch-action: pan-y;
+      padding: 14px 16px 18px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
+    }
+
+    .sheet-body > * {
+      flex-shrink: 0;
     }
 
     .sec-block {
@@ -1331,18 +1339,17 @@
       font-weight: 700;
     }
 
-    .size-3d-btn {
+    .size-3d-grid {
       margin-top: 6px;
-      width: 100%;
-      flex-direction: row;
-      justify-content: space-between;
-      padding: 8px 12px;
-      min-height: 38px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
     }
 
-    .size-3d-btn .opt-sub {
-      font-size: 0.62rem;
-      letter-spacing: 0.05em;
+    .num-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
     }
 
     .board-stage.is-3d-mode {
@@ -1353,6 +1360,10 @@
 
     .board-stage.is-3d-wide {
       max-width: 780px;
+    }
+
+    .board-stage.is-3d-xl {
+      max-width: 980px;
     }
 
     .app-shell.compact-side-pad {
@@ -1539,7 +1550,7 @@
       flex-shrink: 0;
     }
 
-    /* 3-Layer 3×3 Side-by-Side / Stack Container */
+    /* N-Layer N×N Side-by-Side / Stack / 2×2 Grid Container */
     .layers3d-wrap {
       position: relative;
       width: 100%;
@@ -1557,6 +1568,15 @@
     .layers3d-wrap.is-stack {
       flex-direction: column;
       gap: 6px;
+    }
+
+    .layers3d-wrap.is-grid2x2 {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      align-content: center;
+      justify-content: center;
+      align-items: center;
+      justify-items: center;
     }
 
     .layer-col {
@@ -1987,32 +2007,28 @@
         </div>
       </div>
 
-      <!-- 3D 3×3×3 STAGE (CUBE / PLANE / 3 LAYERS) -->
-      <div id="stage3d" class="stage-3d hidden-view" aria-label="3D 3x3x3 Sliding Cube Stage">
+      <!-- 3D N×N×N STAGE (CUBE / PLANE / N LAYERS) -->
+      <div id="stage3d" class="stage-3d hidden-view" aria-label="3D Sliding Cube Stage">
         <!-- 3-Way View Mode Switcher -->
         <div id="view3dTabs" class="view3d-tabs" role="tablist" aria-label="3D View Mode">
           <button class="view3d-tab active" type="button" role="tab" data-view3d="cube">3D Cube</button>
           <button class="view3d-tab" type="button" role="tab" data-view3d="plane">Plane</button>
-          <button class="view3d-tab" type="button" role="tab" data-view3d="layers">3 Layers</button>
+          <button id="tabLayers3d" class="view3d-tab" type="button" role="tab" data-view3d="layers">3 Layers</button>
         </div>
 
         <!-- Active Viewport -->
         <div id="viewport3d" class="viewport-3d">
           <!-- 3D Canvas Viewport (Cube & Plane Modes) -->
           <div id="cube3dFrame" class="cube3d-frame">
-            <canvas id="cube3dCanvas" aria-label="Interactive 3D 3x3x3 Sliding Cube"></canvas>
+            <canvas id="cube3dCanvas" aria-label="Interactive 3D Sliding Cube"></canvas>
             <div class="cube3d-hud-top">
               <span id="cube3dPlaneTag" class="cube3d-chip hidden-view">
                 <span id="cube3dPlaneDot" class="cube3d-chip-dot hidden-view"></span>
-                <span id="cube3dPlaneText">Z1 · FRONT</span>
+                <span id="cube3dPlaneText">Z1 · BACK</span>
               </span>
               <button id="btnJumpEmptyPlane" class="cube3d-chip is-interactive hidden-view" type="button" aria-label="Jump to plane containing empty slot">HOLE: Z3</button>
             </div>
-            <div id="cube3dLegend" class="cube3d-legend">
-              <span class="legend-pair"><span class="legend-dot" style="background:#C98A2C"></span>1-9</span>
-              <span class="legend-pair"><span class="legend-dot" style="background:#3E8255"></span>10-18</span>
-              <span class="legend-pair"><span class="legend-dot" style="background:#3B74A5"></span>19-26</span>
-            </div>
+            <div id="cube3dLegend" class="cube3d-legend"></div>
             <div id="bldOverlay3d" class="bld-overlay" aria-hidden="true">
               <span id="bldOverlay3dMode" class="bld-overlay-mode">BLD &middot; SUBMIT</span>
               <span class="bld-overlay-cta">TAP TO REVEAL &amp; START</span>
@@ -2020,47 +2036,8 @@
             </div>
           </div>
 
-          <!-- 3-Layer 3×3 Boards Viewport -->
-          <div id="layers3dWrap" class="layers3d-wrap hidden-view" role="application" aria-label="Three 3x3 Layer Boards">
-            <div id="layerCol0" class="layer-col" data-layer="0">
-              <div class="layer-head">
-                <span class="layer-head-left"><span id="layerSwatch0" class="layer-swatch" style="background:#C98A2C"></span><span id="layerLbl0">L1 · 1-9</span></span>
-                <span class="layer-empty-dot" aria-hidden="true"></span>
-              </div>
-              <div id="layerFrame0" class="layer-frame">
-                <div id="layerGrid0" class="layer-grid">
-                  <div id="layerBackdrop0" class="layer-backdrop" aria-hidden="true"></div>
-                  <div id="layerTiles0"></div>
-                </div>
-              </div>
-            </div>
-
-            <div id="layerCol1" class="layer-col" data-layer="1">
-              <div class="layer-head">
-                <span class="layer-head-left"><span id="layerSwatch1" class="layer-swatch" style="background:#3E8255"></span><span id="layerLbl1">L2 · 10-18</span></span>
-                <span class="layer-empty-dot" aria-hidden="true"></span>
-              </div>
-              <div id="layerFrame1" class="layer-frame">
-                <div id="layerGrid1" class="layer-grid">
-                  <div id="layerBackdrop1" class="layer-backdrop" aria-hidden="true"></div>
-                  <div id="layerTiles1"></div>
-                </div>
-              </div>
-            </div>
-
-            <div id="layerCol2" class="layer-col" data-layer="2">
-              <div class="layer-head">
-                <span class="layer-head-left"><span id="layerSwatch2" class="layer-swatch" style="background:#3B74A5"></span><span id="layerLbl2">L3 · 19-26</span></span>
-                <span class="layer-empty-dot" aria-hidden="true"></span>
-              </div>
-              <div id="layerFrame2" class="layer-frame">
-                <div id="layerGrid2" class="layer-grid">
-                  <div id="layerBackdrop2" class="layer-backdrop" aria-hidden="true"></div>
-                  <div id="layerTiles2"></div>
-                </div>
-              </div>
-            </div>
-
+          <!-- Dynamic N-Layer N×N Boards Viewport -->
+          <div id="layers3dWrap" class="layers3d-wrap hidden-view" role="application" aria-label="Layer Boards">
             <div id="bldOverlayLayers" class="bld-overlay" aria-hidden="true">
               <span id="bldOverlayLayersMode" class="bld-overlay-mode">BLD &middot; SUBMIT</span>
               <span class="bld-overlay-cta">TAP TO REVEAL &amp; START</span>
@@ -2093,11 +2070,7 @@
               <button class="seg3d-btn" type="button" data-paxis="y">Y</button>
               <button class="seg3d-btn" type="button" data-paxis="x">X</button>
             </div>
-            <div id="planeIdxSeg" class="seg3d" aria-label="Plane index">
-              <button class="seg3d-btn" type="button" data-pidx="0">1<span class="plane-empty-dot"></span></button>
-              <button class="seg3d-btn" type="button" data-pidx="1">2<span class="plane-empty-dot"></span></button>
-              <button class="seg3d-btn active" type="button" data-pidx="2">3<span class="plane-empty-dot"></span></button>
-            </div>
+            <div id="planeIdxSeg" class="seg3d" aria-label="Plane index"></div>
             <button id="btnPlaneDepth" class="tog3d-btn active" type="button" aria-pressed="true" title="Show movable tiles perpendicular to active plane">
               <span class="t-dot"></span><span>+MOV</span>
             </button>
@@ -2106,16 +2079,16 @@
             </button>
           </div>
 
-          <!-- Subbar: 3 LAYERS -->
+          <!-- Subbar: N LAYERS -->
           <div id="subLayers" class="subbar-group hidden-view" style="justify-content:space-between;">
-            <div id="layersAxisSeg" class="seg3d" aria-label="3-Layer slice axis">
+            <div id="layersAxisSeg" class="seg3d" aria-label="Layer slice axis">
               <button class="seg3d-btn active" type="button" data-laxis="z">Z · LAYERS</button>
               <button class="seg3d-btn" type="button" data-laxis="y">Y · ROWS</button>
               <button class="seg3d-btn" type="button" data-laxis="x">X · COLS</button>
             </div>
-            <div id="layersLayoutSeg" class="seg3d" aria-label="3-Layer board arrangement">
-              <button class="seg3d-btn active" type="button" data-llayout="row" title="3 boards side-by-side">SIDE</button>
-              <button class="seg3d-btn" type="button" data-llayout="stack" title="3 boards stacked vertically">STACK</button>
+            <div id="layersLayoutSeg" class="seg3d" aria-label="Layer board arrangement">
+              <button id="btnLayersRow" class="seg3d-btn active" type="button" data-llayout="row" title="Boards side-by-side">SIDE</button>
+              <button id="btnLayersStack" class="seg3d-btn" type="button" data-llayout="stack" title="Boards stacked vertically">STACK</button>
             </div>
           </div>
         </div>
@@ -2151,10 +2124,20 @@
           <button class="opt-btn" type="button" data-size="7">7×7</button>
           <button class="opt-btn" type="button" data-size="8">8×8</button>
         </div>
-        <button id="btnSelect3dSize" class="opt-btn size-3d-btn" type="button" data-size-3d="true">
-          <span>3×3×3 &middot; 3D CUBE</span>
-          <span class="opt-sub">CUBE / PLANE / 3-LAYER</span>
-        </button>
+        <div id="size3dSelector" class="size-3d-grid">
+          <button class="opt-btn" type="button" data-size3d="2">
+            <span>2×2×2</span>
+            <span class="opt-sub">3D · 7 Tiles</span>
+          </button>
+          <button class="opt-btn" type="button" data-size3d="3">
+            <span>3×3×3</span>
+            <span class="opt-sub">3D · 26 Tiles</span>
+          </button>
+          <button class="opt-btn" type="button" data-size3d="4">
+            <span>4×4×4</span>
+            <span class="opt-sub">3D · 63 Tiles</span>
+          </button>
+        </div>
       </div>
 
       <div class="sec-block">
@@ -2175,7 +2158,8 @@
         </div>
       </div>
 
-      <div class="sec-block">
+      <!-- 2D Color Schemes -->
+      <div id="scheme2dBlock" class="sec-block">
         <span class="sec-label">Pigment Color Scheme</span>
         <div id="schemeSelector" class="scheme-grid">
           <button class="opt-btn scheme-btn" type="button" data-scheme="fringe_split">
@@ -2222,6 +2206,116 @@
               <span class="sw" style="background:#363B44"></span>
               <span class="sw" style="background:#666D78"></span>
             </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3D Color Schemes -->
+      <div id="scheme3dBlock" class="sec-block hidden-view">
+        <span class="sec-label">3D Pigment Color Scheme</span>
+        <div id="scheme3dSelector" class="scheme-grid">
+          <button class="opt-btn scheme-btn" type="button" data-scheme3d="layers_z">
+            <span>Z LAYERS</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#C44932"></span>
+              <span class="sw" style="background:#C98A2C"></span>
+              <span class="sw" style="background:#3E8255"></span>
+              <span class="sw" style="background:#3B74A5"></span>
+            </span>
+          </button>
+          <button class="opt-btn scheme-btn" type="button" data-scheme3d="layers_y">
+            <span>Y ROWS</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#C44932"></span>
+              <span class="sw" style="background:#C98A2C"></span>
+              <span class="sw" style="background:#3E8255"></span>
+              <span class="sw" style="background:#3B74A5"></span>
+            </span>
+          </button>
+          <button class="opt-btn scheme-btn" type="button" data-scheme3d="layers_x">
+            <span>X COLUMNS</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#C44932"></span>
+              <span class="sw" style="background:#C98A2C"></span>
+              <span class="sw" style="background:#3E8255"></span>
+              <span class="sw" style="background:#3B74A5"></span>
+            </span>
+          </button>
+          <button class="opt-btn scheme-btn" type="button" data-scheme3d="fringe_3d">
+            <span>3D FRINGE</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#C44932"></span>
+              <span class="sw" style="background:#CF8A2A"></span>
+              <span class="sw" style="background:#448558"></span>
+              <span class="sw" style="background:#2B8282"></span>
+            </span>
+          </button>
+          <button class="opt-btn scheme-btn" type="button" data-scheme3d="prism">
+            <span>3D PRISM</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#C85A42"></span>
+              <span class="sw" style="background:#D49B38"></span>
+              <span class="sw" style="background:#3D9A68"></span>
+              <span class="sw" style="background:#2E8A8A"></span>
+              <span class="sw" style="background:#325F9E"></span>
+            </span>
+          </button>
+          <button class="opt-btn scheme-btn" type="button" data-scheme3d="octants">
+            <span>3D OCTANTS</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#C44932"></span>
+              <span class="sw" style="background:#CF8A2A"></span>
+              <span class="sw" style="background:#448558"></span>
+              <span class="sw" style="background:#7A4D78"></span>
+            </span>
+          </button>
+          <button class="opt-btn scheme-btn" type="button" data-scheme3d="checker_3d">
+            <span>3D PARITY</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#C44932"></span>
+              <span class="sw" style="background:#326696"></span>
+              <span class="sw" style="background:#C44932"></span>
+              <span class="sw" style="background:#326696"></span>
+            </span>
+          </button>
+          <button class="opt-btn scheme-btn" type="button" data-scheme3d="mono">
+            <span>MATTE MONO</span>
+            <span class="scheme-swatches">
+              <span class="sw" style="background:#23262C;border:1px solid #444"></span>
+              <span class="sw" style="background:#363B44"></span>
+              <span class="sw" style="background:#666D78"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3D Tile Numbering Options -->
+      <div id="numMode3dBlock" class="sec-block hidden-view">
+        <span class="sec-label">3D Tile Numbering (1 = Top-Left-Back)</span>
+        <div id="numMode3dSelector" class="num-grid">
+          <button class="opt-btn" type="button" data-num3d="seq">
+            <span>1..N³</span>
+            <span class="opt-sub">Sequential</span>
+          </button>
+          <button class="opt-btn" type="button" data-num3d="per_layer">
+            <span>1..N² / L</span>
+            <span class="opt-sub">Per Layer</span>
+          </button>
+          <button class="opt-btn" type="button" data-num3d="layer_code">
+            <span>A1..D15</span>
+            <span class="opt-sub">Layer+Idx</span>
+          </button>
+          <button class="opt-btn" type="button" data-num3d="coords">
+            <span>XYZ</span>
+            <span class="opt-sub">111..444</span>
+          </button>
+          <button class="opt-btn" type="button" data-num3d="letters">
+            <span>A..Z</span>
+            <span class="opt-sub">BLD Letters</span>
+          </button>
+          <button class="opt-btn" type="button" data-num3d="none">
+            <span>BLANK</span>
+            <span class="opt-sub">Color Only</span>
           </button>
         </div>
       </div>
@@ -2361,7 +2455,10 @@
       const CFG_KEY = 'sp2_cfg_v1';
       const SESSION_PREFIX = 'sp2_s_';
       const SIZES = [3, 4, 5, 6, 7, 8];
+      const SIZES_3D = [2, 3, 4];
       const MODES = ['std', 'bld_auto', 'bld_sub'];
+      const SCHEMES_3D = ['layers_z', 'layers_y', 'layers_x', 'fringe_3d', 'prism', 'octants', 'checker_3d', 'mono'];
+      const NUM_MODES_3D = ['seq', 'per_layer', 'layer_code', 'coords', 'letters', 'none'];
 
       const MODE_META = {
         std:      { short: 'STD',      full: 'STANDARD',     overlay: '' },
@@ -2383,42 +2480,53 @@
 
       const DEFAULT_CFG = {
         size: 4,
-        is3d: false,            // false (2D N×N) | true (3D 3×3×3)
+        size3d: 3,              // 2 | 3 | 4 (2×2×2, 3×3×3, 4×4×4)
+        is3d: false,            // false (2D N×N) | true (3D N×N×N)
         mode: 'std',            // 'std' | 'bld_auto' | 'bld_sub'
         theme: 'graphite',      // 'graphite' | 'paper'
-        scheme: 'fringe_split', // 'fringe_split' | 'fringe' | 'rows' | 'cols' | 'mono'
+        scheme: 'fringe_split', // 2D color scheme
+        scheme3d: 'layers_z',   // 3D color scheme
+        numMode3d: 'seq',       // 3D numbering option ('seq' starts at Top-Left-Back)
         animMs: 0,              // 0 | 50
         kbDir: 'tile',          // 'tile' | 'blank'
         glide: true,
         hideBlankBld: false,
         sound: false,
         dots: false,
-        // 3D 3×3×3 view preferences
+        // 3D view preferences
         view3d: 'cube',         // 'cube' | 'plane' | 'layers'
         spread3d: 1.24,         // 1.06 .. 1.65
         xray3d: false,
         planeAxis: 'z',         // 'z' | 'y' | 'x'
-        planeIndex: 2,          // 0 | 1 | 2
+        planeIndex: 2,          // 0 .. size3d-1
         planeDepth: true,       // show perpendicular movable tiles in plane mode
         planeAuto: true,        // auto-follow empty slot across planes
         layersAxis: 'z',        // 'z' | 'y' | 'x'
-        layersLayout: 'row'     // 'row' (side-by-side) | 'stack'
+        layersLayout: 'row'     // 'row' (side-by-side / 2x2 on mobile 4x4x4) | 'stack'
       };
 
-      const SLICE_3D_COLORS = [
-        { bg: '#C98A2C', ink: '#FAF9F6' }, // Front / Layer 1 (1-9)
-        { bg: '#3E8255', ink: '#FAF9F6' }, // Middle / Layer 2 (10-18)
-        { bg: '#3B74A5', ink: '#FAF9F6' }  // Back / Layer 3 (19-26)
+      // Calibrated matte slice pigments for 2, 3, or 4 layers (Back -> Front)
+      const SLICE_3D_4 = [
+        { bg: '#C44932', ink: '#FAF9F6' }, // Layer 1 (Back)
+        { bg: '#C98A2C', ink: '#FAF9F6' }, // Layer 2
+        { bg: '#3E8255', ink: '#FAF9F6' }, // Layer 3
+        { bg: '#3B74A5', ink: '#FAF9F6' }  // Layer 4 (Front)
       ];
+
+      function getSliceColor3D(layerIdx, N) {
+        if (N === 2) return layerIdx === 0 ? SLICE_3D_4[1] : SLICE_3D_4[3];
+        if (N === 3) return SLICE_3D_4[layerIdx + 1];
+        return SLICE_3D_4[layerIdx % 4];
+      }
 
       /* =======================================================================
          APPLICATION RUNTIME STATE
          ======================================================================= */
       let cfg = loadCfg();
-      let activeSolves = []; // Loaded lazily for active (size/3d, mode) session only
+      let activeSolves = []; // Loaded lazily for active (size/size3d, mode) session only
 
       let board = [];
-      let board3d = new Array(27);
+      let board3d = [];
       let currentSeed = 0;
       let isPractice = false;
 
@@ -2438,20 +2546,27 @@
       let cellPx = 80;
       let tilePad = 3;
 
-      // Persistent tile DOM pool for current N (1..N*N-1)
+      // Persistent tile DOM pool for current 2D N (1..N*N-1)
       let tilePoolSize = 0;
       let tileSlots = [];
       let tileFaces = [];
 
-      // Persistent 3-Layer DOM pool for 3D tiles (1..26)
+      // Persistent dynamic N-Layer DOM pool for 3D (N = 2, 3, or 4)
+      let layerPoolN = 0;
       let layerCellPx = 40;
       let layerTilePad = 2;
+      let layerCols = [];
+      let layerSwatches = [];
+      let layerLbls = [];
+      let layerFrames = [];
+      let layerGrids = [];
+      let layerBackdrops = [];
+      let layerTileContainers = [];
       let layerTileSlots = [];
       let layerTileFaces = [];
-      let layerBackdropCells = [[], [], []];
-      let layersDomBuilt = false;
+      let layerBackdropCells = [];
 
-      // Multi-touch pointer sets (2D & 3-Layer)
+      // Multi-touch pointer sets (2D & N-Layer)
       const activePointers = new Set();
       const ignoredPointers = new Set(); // Prevents BLD_READY reveal tap from moving tiles
       const layerLastCellKey = new Map();
@@ -2501,6 +2616,7 @@
       // 3D Stage DOM references
       const stage3d = document.getElementById('stage3d');
       const view3dTabs = document.getElementById('view3dTabs');
+      const tabLayers3d = document.getElementById('tabLayers3d');
       const viewport3d = document.getElementById('viewport3d');
       const cube3dFrame = document.getElementById('cube3dFrame');
       const cube3dCanvas = document.getElementById('cube3dCanvas');
@@ -2513,13 +2629,6 @@
       const bldOverlay3dMode = document.getElementById('bldOverlay3dMode');
 
       const layers3dWrap = document.getElementById('layers3dWrap');
-      const layerCols = [0, 1, 2].map((i) => document.getElementById(`layerCol${i}`));
-      const layerSwatches = [0, 1, 2].map((i) => document.getElementById(`layerSwatch${i}`));
-      const layerLbls = [0, 1, 2].map((i) => document.getElementById(`layerLbl${i}`));
-      const layerFrames = [0, 1, 2].map((i) => document.getElementById(`layerFrame${i}`));
-      const layerGrids = [0, 1, 2].map((i) => document.getElementById(`layerGrid${i}`));
-      const layerBackdrops = [0, 1, 2].map((i) => document.getElementById(`layerBackdrop${i}`));
-      const layerTileContainers = [0, 1, 2].map((i) => document.getElementById(`layerTiles${i}`));
       const bldOverlayLayers = document.getElementById('bldOverlayLayers');
       const bldOverlayLayersMode = document.getElementById('bldOverlayLayersMode');
 
@@ -2536,6 +2645,8 @@
       const btnPlaneAuto = document.getElementById('btnPlaneAuto');
       const layersAxisSeg = document.getElementById('layersAxisSeg');
       const layersLayoutSeg = document.getElementById('layersLayoutSeg');
+      const btnLayersRow = document.getElementById('btnLayersRow');
+      const btnLayersStack = document.getElementById('btnLayersStack');
 
       const controlBar = document.getElementById('controlBar');
       const scrim = document.getElementById('scrim');
@@ -2543,9 +2654,14 @@
       const statsSheet = document.getElementById('statsSheet');
 
       const sizeSelector = document.getElementById('sizeSelector');
-      const btnSelect3dSize = document.getElementById('btnSelect3dSize');
+      const size3dSelector = document.getElementById('size3dSelector');
       const modeSelector = document.getElementById('modeSelector');
+      const scheme2dBlock = document.getElementById('scheme2dBlock');
       const schemeSelector = document.getElementById('schemeSelector');
+      const scheme3dBlock = document.getElementById('scheme3dBlock');
+      const scheme3dSelector = document.getElementById('scheme3dSelector');
+      const numMode3dBlock = document.getElementById('numMode3dBlock');
+      const numMode3dSelector = document.getElementById('numMode3dSelector');
       const themeSelector = document.getElementById('themeSelector');
       const animSelector = document.getElementById('animSelector');
       const kbDirSelector = document.getElementById('kbDirSelector');
@@ -2803,57 +2919,70 @@
       }
 
       /* =======================================================================
-         3D 3×3×3 LOGICAL PUZZLE ENGINE (EXACT EVEN-INVERSION PARITY & SLIDES)
-         Coordinates: x in 0..2 (L->R), y in 0..2 (T->B), z in 0..2 (Front->Back)
-         Index: idx = z * 9 + y * 3 + x. Solved: 1..26 at 0..25, 0 at 26.
+         3D N×N×N LOGICAL PUZZLE ENGINE (N = 2, 3, 4 · EXACT PARITY & SLIDES)
+         Coordinates: x in 0..N-1 (Left->Right), y in 0..N-1 (Top->Bottom),
+                      z in 0..N-1 (Back->Front).
+         Solved: Tile 1 at (0,0,0) = Top-Left-Back, Empty 0 at (N-1,N-1,N-1) = Bottom-Right-Front.
          ======================================================================= */
-      function idx3d(x, y, z) {
-        return z * 9 + y * 3 + x;
+      function idx3d(x, y, z, N = cfg.size3d) {
+        return z * N * N + y * N + x;
       }
 
-      function coords3d(i) {
-        const z = Math.floor(i / 9);
-        const rem = i % 9;
-        return { x: rem % 3, y: Math.floor(rem / 3), z };
+      function coords3d(i, N = cfg.size3d) {
+        const n2 = N * N;
+        const z = Math.floor(i / n2);
+        const rem = i % n2;
+        return { x: rem % N, y: Math.floor(rem / N), z };
       }
 
-      function isSolvable3D(arr) {
+      /**
+       * Exact generalized N×N×N sliding cube solvability invariant:
+       *   Odd N  (3×3×3):        inv % 2 === 0
+       *   Even N (2×2×2, 4×4×4): (inv + (N - 1 - emptyY) + (N - 1 - emptyZ)) % 2 === 0
+       */
+      function isSolvable3D(arr, N = cfg.size3d) {
+        const total = N * N * N;
         let inv = 0;
-        for (let i = 0; i < 27; i++) {
+        for (let i = 0; i < total; i++) {
           const a = arr[i];
           if (a === 0) continue;
-          for (let j = i + 1; j < 27; j++) {
+          for (let j = i + 1; j < total; j++) {
             const b = arr[j];
             if (b !== 0 && a > b) inv++;
           }
         }
-        return (inv & 1) === 0;
+        if (N % 2 === 1) return (inv & 1) === 0;
+        const bIdx = arr.indexOf(0);
+        const bc = coords3d(bIdx, N);
+        return ((inv + (N - 1 - bc.y) + (N - 1 - bc.z)) & 1) === 0;
       }
 
-      function isSolved3D(arr) {
-        for (let i = 0; i < 26; i++) {
+      function isSolved3D(arr, N = cfg.size3d) {
+        const last = N * N * N - 1;
+        for (let i = 0; i < last; i++) {
           if (arr[i] !== i + 1) return false;
         }
-        return arr[26] === 0;
+        return arr[last] === 0;
       }
 
-      function generateScramble3DFromSeed(seed) {
+      function generateScramble3DFromSeed(seed, N = cfg.size3d) {
+        const total = N * N * N;
         const rng = mulberry32(seed >>> 0);
         while (true) {
-          const arr = new Array(27);
-          for (let i = 0; i < 27; i++) arr[i] = i;
+          const arr = new Array(total);
+          for (let i = 0; i < total; i++) arr[i] = i;
 
-          for (let i = 26; i > 0; i--) {
+          for (let i = total - 1; i > 0; i--) {
             const j = Math.floor(rng() * (i + 1));
             const tmp = arr[i];
             arr[i] = arr[j];
             arr[j] = tmp;
           }
 
-          if (!isSolvable3D(arr)) {
+          if (!isSolvable3D(arr, N)) {
             let p1 = -1;
             let p2 = -1;
-            for (let i = 0; i < 27; i++) {
+            for (let i = 0; i < total; i++) {
               if (arr[i] !== 0) {
                 if (p1 === -1) p1 = i;
                 else {
@@ -2867,13 +2996,14 @@
             arr[p2] = tmp;
           }
 
-          if (!isSolved3D(arr)) return arr;
+          if (!isSolved3D(arr, N)) return arr;
         }
       }
 
       function getEmpty3D() {
+        const N = cfg.size3d;
         const i = board3d.indexOf(0);
-        return i >= 0 ? coords3d(i) : { x: 2, y: 2, z: 2 };
+        return i >= 0 ? coords3d(i, N) : { x: N - 1, y: N - 1, z: N - 1 };
       }
 
       function isAlignedWithEmpty3D(x, y, z, empty) {
@@ -2887,7 +3017,8 @@
        * line — into the empty slot. Returns transition info or null if invalid.
        */
       function slide3DAt(tx, ty, tz) {
-        if (tx < 0 || tx > 2 || ty < 0 || ty > 2 || tz < 0 || tz > 2) return null;
+        const N = cfg.size3d;
+        if (tx < 0 || tx >= N || ty < 0 || ty >= N || tz < 0 || tz >= N) return null;
         const empty = getEmpty3D();
         if (!isAlignedWithEmpty3D(tx, ty, tz, empty)) return null;
 
@@ -2905,8 +3036,8 @@
           const nx = cx + dx;
           const ny = cy + dy;
           const nz = cz + dz;
-          const tileId = board3d[idx3d(nx, ny, nz)];
-          board3d[idx3d(cx, cy, cz)] = tileId;
+          const tileId = board3d[idx3d(nx, ny, nz, N)];
+          board3d[idx3d(cx, cy, cz, N)] = tileId;
           moved.push({
             tileId,
             from: { x: nx, y: ny, z: nz },
@@ -2917,7 +3048,7 @@
           cz = nz;
         }
 
-        board3d[idx3d(tx, ty, tz)] = 0;
+        board3d[idx3d(tx, ty, tz, N)] = 0;
         return {
           moved,
           dist,
@@ -2926,11 +3057,11 @@
         };
       }
 
-      // Bijection between 3-Layer (layer, r, c) and 3D (x, y, z) for active slice axis
+      // Bijection between N-Layer (layer, r, c) and 3D (x, y, z) for active slice axis
       function layerCellTo3D(axis, layer, r, c) {
         if (axis === 'y') return { x: c, y: layer, z: r };
         if (axis === 'x') return { x: layer, y: r, z: c };
-        return { x: c, y: r, z: layer }; // default 'z'
+        return { x: c, y: r, z: layer }; // default 'z' (Back -> Front)
       }
 
       function coords3DToLayerCell(axis, x, y, z) {
@@ -2939,24 +3070,105 @@
         return { layer: z, r: y, c: x }; // default 'z'
       }
 
-      function getTilePigment3D(val, scheme) {
+      // 8 Curated Matte Corner Pigments for Creative 3D Spatial Prism Spectrum
+      const PRISM_CORNERS = [
+        [200,  90,  66], // (0,0,0) Top-Left-Back: terracotta coral
+        [212, 155,  56], // (1,0,0) Top-Right-Back: ochre gold
+        [126,  75, 122], // (0,1,0) Bot-Left-Back: plum oxide
+        [111, 142,  68], // (1,1,0) Bot-Right-Back: moss olive
+        [ 46, 138, 138], // (0,0,1) Top-Left-Front: ocean teal
+        [ 61, 154, 104], // (1,0,1) Top-Right-Front: sage emerald
+        [ 50,  95, 158], // (0,1,1) Bot-Left-Front: steel cobalt
+        [ 74, 116, 168]  // (1,1,1) Bot-Right-Front: slate indigo
+      ];
+
+      function rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+      }
+
+      function getPrismPigment3D(hx, hy, hz, N) {
+        const d = Math.max(1, N - 1);
+        const tx = hx / d;
+        const ty = hy / d;
+        const tz = hz / d;
+        const out = [0, 0, 0];
+        for (let c = 0; c < 3; c++) {
+          const c00 = PRISM_CORNERS[0][c] * (1 - tx) + PRISM_CORNERS[1][c] * tx;
+          const c10 = PRISM_CORNERS[2][c] * (1 - tx) + PRISM_CORNERS[3][c] * tx;
+          const c01 = PRISM_CORNERS[4][c] * (1 - tx) + PRISM_CORNERS[5][c] * tx;
+          const c11 = PRISM_CORNERS[6][c] * (1 - tx) + PRISM_CORNERS[7][c] * tx;
+          const c0 = c00 * (1 - ty) + c10 * ty;
+          const c1 = c01 * (1 - ty) + c11 * ty;
+          out[c] = c0 * (1 - tz) + c1 * tz;
+        }
+        const lum = 0.299 * out[0] + 0.587 * out[1] + 0.114 * out[2];
+        return {
+          bg: rgbToHex(out[0], out[1], out[2]),
+          ink: lum > 158 ? '#121315' : '#FAF9F6'
+        };
+      }
+
+      function getTilePigment3D(val, N = cfg.size3d, scheme = cfg.scheme3d) {
         if (scheme === 'mono') return null;
-        const home = coords3d(val - 1);
-        if (scheme === 'rows') {
-          return SLICE_3D_COLORS[home.y];
-        }
-        if (scheme === 'cols') {
-          return SLICE_3D_COLORS[home.x];
-        }
-        if (scheme === 'fringe') {
-          const shell = Math.min(home.x, home.y, home.z);
-          if (shell === 0) {
-            return SLICE_3D_COLORS[home.z];
+        const home = coords3d(val - 1, N);
+
+        if (scheme === 'layers_y') return getSliceColor3D(home.y, N);
+        if (scheme === 'layers_x') return getSliceColor3D(home.x, N);
+
+        if (scheme === 'fringe_3d') {
+          const L = Math.min(home.x, home.y, home.z);
+          if (N === 2) {
+            if (home.z === 0) return PIGMENTS[0];
+            if (home.y === 0) return PIGMENTS[1];
+            return PIGMENTS[2];
           }
-          return PIGMENTS[4]; // Inner 2×2×2 core highlight (slate teal)
+          if (L === N - 2) return PIGMENTS[4]; // Inner 2×2×2 core (slate teal)
+          // Split outer shell(s) cleanly by Back (Z), Top (Y), Left (X) face
+          const base = L * 3;
+          const sub = home.z === L ? 0 : (home.y === L ? 1 : 2);
+          return PIGMENTS[(base + sub) % 8];
         }
-        // Default ('fringe_split'): Classic 3D Z-layer slice colors (1-9, 10-18, 19-26)
-        return SLICE_3D_COLORS[home.z];
+
+        if (scheme === 'prism') {
+          return getPrismPigment3D(home.x, home.y, home.z, N);
+        }
+
+        if (scheme === 'octants') {
+          const half = N / 2;
+          const oct = (home.z >= half ? 4 : 0) | (home.y >= half ? 2 : 0) | (home.x >= half ? 1 : 0);
+          return PIGMENTS[oct];
+        }
+
+        if (scheme === 'checker_3d') {
+          const par = (home.x + home.y + home.z) & 1;
+          return par === 0 ? PIGMENTS[0] : PIGMENTS[3];
+        }
+
+        // Default ('layers_z'): Back -> Front Z-layer slice colors
+        return getSliceColor3D(home.z, N);
+      }
+
+      const BLD_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+';
+
+      function formatTileLabel3D(val, N = cfg.size3d, mode = cfg.numMode3d) {
+        if (mode === 'none') return '';
+        if (mode === 'seq') return String(val);
+
+        const home = coords3d(val - 1, N);
+        if (mode === 'per_layer') {
+          return String(home.y * N + home.x + 1);
+        }
+        if (mode === 'layer_code') {
+          const letter = ['A', 'B', 'C', 'D'][home.z] || 'Z';
+          return `${letter}${home.y * N + home.x + 1}`;
+        }
+        if (mode === 'coords') {
+          return `${home.x + 1}${home.y + 1}${home.z + 1}`;
+        }
+        if (mode === 'letters') {
+          return BLD_ALPHABET[(val - 1) % BLD_ALPHABET.length];
+        }
+        return String(val);
       }
 
       /* =======================================================================
@@ -2992,13 +3204,13 @@
            std: <timeMs>,<moves>,<tsDeltaSec>,<seed>
            bld: <timeMs>,<memoMs>,<moves>,<flags>,<tsDeltaSec>,<seed>
          ======================================================================= */
-      function sessionKey(size, mode, is3d = false) {
-        if (is3d) return `${SESSION_PREFIX}3x3x3_${mode}`;
+      function sessionKey(size, mode, is3d = false, size3d = cfg.size3d) {
+        if (is3d) return `${SESSION_PREFIX}${size3d}x${size3d}x${size3d}_${mode}`;
         return `${SESSION_PREFIX}${size}x${size}_${mode}`;
       }
 
       function activeSessionKey() {
-        return sessionKey(cfg.size, cfg.mode, cfg.is3d);
+        return sessionKey(cfg.size, cfg.mode, cfg.is3d, cfg.size3d);
       }
 
       function isBldMode(mode) {
@@ -3135,12 +3347,17 @@
           if (!raw) return { ...DEFAULT_CFG };
           const p = JSON.parse(raw);
           const sp = Number(p.spread3d);
+          const s3d = SIZES_3D.includes(p.size3d) ? p.size3d : DEFAULT_CFG.size3d;
+          const pIdx = Number(p.planeIndex);
           return {
             size: SIZES.includes(p.size) ? p.size : DEFAULT_CFG.size,
+            size3d: s3d,
             is3d: typeof p.is3d === 'boolean' ? p.is3d : DEFAULT_CFG.is3d,
             mode: MODES.includes(p.mode) ? p.mode : DEFAULT_CFG.mode,
             theme: p.theme === 'paper' ? 'paper' : 'graphite',
             scheme: ['fringe_split', 'fringe', 'rows', 'cols', 'mono'].includes(p.scheme) ? p.scheme : DEFAULT_CFG.scheme,
+            scheme3d: SCHEMES_3D.includes(p.scheme3d) ? p.scheme3d : DEFAULT_CFG.scheme3d,
+            numMode3d: NUM_MODES_3D.includes(p.numMode3d) ? p.numMode3d : DEFAULT_CFG.numMode3d,
             animMs: p.animMs === 50 ? 50 : 0,
             kbDir: p.kbDir === 'blank' ? 'blank' : 'tile',
             glide: typeof p.glide === 'boolean' ? p.glide : DEFAULT_CFG.glide,
@@ -3151,7 +3368,7 @@
             spread3d: Number.isFinite(sp) ? Math.max(1.06, Math.min(1.65, sp)) : DEFAULT_CFG.spread3d,
             xray3d: typeof p.xray3d === 'boolean' ? p.xray3d : DEFAULT_CFG.xray3d,
             planeAxis: ['z', 'y', 'x'].includes(p.planeAxis) ? p.planeAxis : DEFAULT_CFG.planeAxis,
-            planeIndex: [0, 1, 2].includes(p.planeIndex) ? p.planeIndex : DEFAULT_CFG.planeIndex,
+            planeIndex: Number.isInteger(pIdx) && pIdx >= 0 && pIdx < s3d ? pIdx : s3d - 1,
             planeDepth: typeof p.planeDepth === 'boolean' ? p.planeDepth : DEFAULT_CFG.planeDepth,
             planeAuto: typeof p.planeAuto === 'boolean' ? p.planeAuto : DEFAULT_CFG.planeAuto,
             layersAxis: ['z', 'y', 'x'].includes(p.layersAxis) ? p.layersAxis : DEFAULT_CFG.layersAxis,
@@ -3531,37 +3748,107 @@
       /* =======================================================================
          3-LAYER 3×3 BOARD ENGINE (SIDE-BY-SIDE OR STACKED + CROSS-BOARD GLIDE)
          ======================================================================= */
-      function buildLayers3DDOM() {
-        if (layersDomBuilt) return;
-        layersDomBuilt = true;
+      function buildLayers3DDOM(N = cfg.size3d) {
+        if (layerPoolN === N) return;
+        layerPoolN = N;
 
-        layerBackdropCells = [[], [], []];
-        for (let L = 0; L < 3; L++) {
-          const bd = layerBackdrops[L];
-          bd.innerHTML = '';
-          const frag = document.createDocumentFragment();
-          for (let i = 0; i < 9; i++) {
+        // Clear previous layer columns while preserving #bldOverlayLayers
+        Array.from(layers3dWrap.children).forEach((ch) => {
+          if (ch !== bldOverlayLayers) ch.remove();
+        });
+
+        layerCols = [];
+        layerSwatches = [];
+        layerLbls = [];
+        layerFrames = [];
+        layerGrids = [];
+        layerBackdrops = [];
+        layerTileContainers = [];
+        layerBackdropCells = [];
+
+        const total = N * N * N;
+        const n2 = N * N;
+        const wrapFrag = document.createDocumentFragment();
+
+        for (let L = 0; L < N; L++) {
+          const col = document.createElement('div');
+          col.className = 'layer-col';
+          col.dataset.layer = String(L);
+
+          const head = document.createElement('div');
+          head.className = 'layer-head';
+
+          const headLeft = document.createElement('span');
+          headLeft.className = 'layer-head-left';
+
+          const swatch = document.createElement('span');
+          swatch.className = 'layer-swatch';
+
+          const lbl = document.createElement('span');
+
+          const eDot = document.createElement('span');
+          eDot.className = 'layer-empty-dot';
+          eDot.setAttribute('aria-hidden', 'true');
+
+          headLeft.appendChild(swatch);
+          headLeft.appendChild(lbl);
+          head.appendChild(headLeft);
+          head.appendChild(eDot);
+
+          const frame = document.createElement('div');
+          frame.className = 'layer-frame';
+
+          const grid = document.createElement('div');
+          grid.className = 'layer-grid';
+
+          const bd = document.createElement('div');
+          bd.className = 'layer-backdrop';
+          bd.setAttribute('aria-hidden', 'true');
+          bd.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
+          bd.style.gridTemplateRows = `repeat(${N}, 1fr)`;
+
+          const bgCells = [];
+          for (let i = 0; i < n2; i++) {
             const cell = document.createElement('div');
             cell.className = 'backdrop-cell';
             const inner = document.createElement('div');
             inner.className = 'backdrop-cell-inner';
             cell.appendChild(inner);
-            frag.appendChild(cell);
-            layerBackdropCells[L].push(cell);
+            bd.appendChild(cell);
+            bgCells.push(cell);
           }
-          bd.appendChild(frag);
-          layerTileContainers[L].innerHTML = '';
+
+          const tilesBox = document.createElement('div');
+          grid.appendChild(bd);
+          grid.appendChild(tilesBox);
+          frame.appendChild(grid);
+          col.appendChild(head);
+          col.appendChild(frame);
+          wrapFrag.appendChild(col);
+
+          layerCols.push(col);
+          layerSwatches.push(swatch);
+          layerLbls.push(lbl);
+          layerFrames.push(frame);
+          layerGrids.push(grid);
+          layerBackdrops.push(bd);
+          layerTileContainers.push(tilesBox);
+          layerBackdropCells.push(bgCells);
         }
 
-        layerTileSlots = new Array(27);
-        layerTileFaces = new Array(27);
-        for (let val = 1; val <= 26; val++) {
+        layers3dWrap.insertBefore(wrapFrag, bldOverlayLayers);
+
+        layerTileSlots = new Array(total);
+        layerTileFaces = new Array(total);
+        for (let val = 1; val < total; val++) {
           const slot = document.createElement('div');
           slot.className = 'tile-slot';
 
           const face = document.createElement('div');
           face.className = 'tile-face';
-          face.textContent = String(val);
+          const textSpan = document.createElement('span');
+          textSpan.className = 'tile-txt';
+          face.appendChild(textSpan);
 
           const dot = document.createElement('span');
           dot.className = 'tile-dot';
@@ -3570,18 +3857,20 @@
           slot.appendChild(face);
           layerTileSlots[val] = slot;
           layerTileFaces[val] = face;
-          layerTileContainers[Math.floor((val - 1) / 9)].appendChild(slot);
+          layerTileContainers[Math.min(N - 1, Math.floor((val - 1) / n2))].appendChild(slot);
         }
 
-        applyLayerPigments();
+        applyLayerPigmentsAndLabels();
       }
 
-      function applyLayerPigments() {
-        if (!layersDomBuilt) return;
-        for (let val = 1; val <= 26; val++) {
+      function applyLayerPigmentsAndLabels() {
+        const N = cfg.size3d;
+        if (layerPoolN !== N) return;
+        const total = N * N * N;
+        for (let val = 1; val < total; val++) {
           const face = layerTileFaces[val];
           if (!face) continue;
-          const p = getTilePigment3D(val, cfg.scheme);
+          const p = getTilePigment3D(val, N, cfg.scheme3d);
           if (!p) {
             face.classList.add('is-mono');
             face.style.backgroundColor = '';
@@ -3591,59 +3880,104 @@
             face.style.backgroundColor = p.bg;
             face.style.color = p.ink;
           }
+          const lbl = formatTileLabel3D(val, N, cfg.numMode3d);
+          const txtEl = face.firstElementChild;
+          if (txtEl) txtEl.textContent = lbl;
         }
       }
 
-      function updateLayerHeaders() {
-        const ax = cfg.layersAxis;
-        const labels = ax === 'z'
-          ? ['L1 · 1-9', 'L2 · 10-18', 'L3 · 19-26']
-          : ax === 'y'
-            ? ['Y1 · TOP', 'Y2 · MID', 'Y3 · BOT']
-            : ['X1 · LEFT', 'X2 · MID', 'X3 · RIGHT'];
-
-        for (let L = 0; L < 3; L++) {
-          layerLbls[L].textContent = labels[L];
-          layerSwatches[L].style.background = cfg.scheme === 'mono' ? 'var(--border-strong)' : SLICE_3D_COLORS[L].bg;
+      function getPlaneShortLabel(axis, idx, N) {
+        if (axis === 'z') {
+          if (N === 2) return idx === 0 ? 'Z1 · BACK' : 'Z2 · FRONT';
+          if (N === 3) return ['Z1 · BACK', 'Z2 · MID', 'Z3 · FRONT'][idx];
+          return ['Z1 · BACK', 'Z2 · MID-B', 'Z3 · MID-F', 'Z4 · FRONT'][idx];
         }
+        if (axis === 'y') {
+          if (N === 2) return idx === 0 ? 'Y1 · TOP' : 'Y2 · BOT';
+          if (N === 3) return ['Y1 · TOP', 'Y2 · MID', 'Y3 · BOT'][idx];
+          return ['Y1 · TOP', 'Y2 · UP-M', 'Y3 · LO-M', 'Y4 · BOT'][idx];
+        }
+        if (N === 2) return idx === 0 ? 'X1 · LEFT' : 'X2 · RIGHT';
+        if (N === 3) return ['X1 · LEFT', 'X2 · MID', 'X3 · RIGHT'][idx];
+        return ['X1 · LEFT', 'X2 · MID-L', 'X3 · MID-R', 'X4 · RIGHT'][idx];
+      }
+
+      function updateLayerHeaders() {
+        const N = cfg.size3d;
+        const ax = cfg.layersAxis;
+        const n2 = N * N;
+        const total = N * N * N - 1;
+
+        for (let L = 0; L < N; L++) {
+          if (ax === 'z') {
+            const lo = L * n2 + 1;
+            const hi = Math.min(total, (L + 1) * n2);
+            const tag = L === 0 ? 'B' : (L === N - 1 ? 'F' : '');
+            layerLbls[L].textContent = N === 4 ? `Z${L + 1}${tag ? '·' + tag : ''} (${lo}-${hi})` : `Z${L + 1} · ${lo}-${hi}`;
+          } else {
+            layerLbls[L].textContent = getPlaneShortLabel(ax, L, N);
+          }
+          const showSliceSwatch = cfg.scheme3d === 'layers_z' || cfg.scheme3d === 'layers_y' || cfg.scheme3d === 'layers_x';
+          layerSwatches[L].style.background = showSliceSwatch ? getSliceColor3D(L, N).bg : 'var(--border-strong)';
+        }
+      }
+
+      function isMobileGrid2x2For4(rectWidth) {
+        return cfg.size3d === 4 && (
+          (cfg.layersLayout === 'row' && rectWidth < 560) ||
+          (cfg.layersLayout === 'stack' && rectWidth >= 560)
+        );
       }
 
       function layoutLayers3D() {
         if (!cfg.is3d || cfg.view3d !== 'layers') return;
-        buildLayers3DDOM();
+        const N = cfg.size3d;
+        buildLayers3DDOM(N);
 
         const rect = viewport3d.getBoundingClientRect();
         if (rect.width <= 0 || rect.height <= 0) return;
 
-        const isStack = cfg.layersLayout === 'stack';
+        // Smart responsive layout for 4x4x4: 2x2 grid on phones (huge touch tiles!), 4-in-a-row on desktop!
+        const useGrid2x2 = isMobileGrid2x2For4(rect.width);
+        const isStack = !useGrid2x2 && cfg.layersLayout === 'stack';
+
+        layers3dWrap.classList.toggle('is-grid2x2', useGrid2x2);
         layers3dWrap.classList.toggle('is-stack', isStack);
 
         let maxFrame;
-        if (!isStack) {
-          const gap = rect.width < 420 ? 4 : (rect.width < 580 ? 7 : 12);
+        if (useGrid2x2) {
+          const gap = rect.width < 420 ? 6 : 10;
           layers3dWrap.style.gap = `${gap}px`;
-          const maxW = Math.floor((rect.width - gap * 2) / 3);
+          const maxW = Math.floor((rect.width - gap) / 2);
+          const maxH = Math.floor((rect.height - gap - 6) / 2) - 18;
+          maxFrame = Math.min(maxW, maxH, 236);
+        } else if (!isStack) {
+          const gap = rect.width < 420 ? 4 : (rect.width < 640 ? 7 : 10);
+          layers3dWrap.style.gap = `${gap}px`;
+          const maxW = Math.floor((rect.width - gap * (N - 1)) / N);
           const maxH = Math.floor(rect.height - 22);
-          maxFrame = Math.min(maxW, maxH, 244);
+          maxFrame = Math.min(maxW, maxH, N === 2 ? 220 : (N === 3 ? 244 : 230));
         } else {
           const gap = 6;
           layers3dWrap.style.gap = `${gap}px`;
-          const maxH = Math.floor((rect.height - gap * 2 - 12) / 3) - 18;
+          const maxH = Math.floor((rect.height - gap * (N - 1) - 12) / N) - 18;
           const maxW = Math.floor(Math.min(rect.width, 244));
           maxFrame = Math.min(maxW, maxH, 244);
         }
 
-        const trayPad = maxFrame < 130 ? 3 : 5;
-        const usable = Math.max(66, maxFrame - trayPad * 2 - 2);
-        layerCellPx = Math.max(20, Math.floor(usable / 3));
-        const gridPx = layerCellPx * 3;
+        const trayPad = maxFrame < 130 ? 3 : 4;
+        const usable = Math.max(N * 18, maxFrame - trayPad * 2 - 2);
+        layerCellPx = Math.max(18, Math.floor(usable / N));
+        const gridPx = layerCellPx * N;
         const framePx = gridPx + trayPad * 2 + 2;
 
-        layerTilePad = layerCellPx < 42 ? 2 : 3;
-        const fontPx = Math.max(12, Math.round(layerCellPx * 0.44));
+        layerTilePad = layerCellPx < 34 ? 1 : (layerCellPx < 48 ? 2 : 3);
+        const labelLenScale = (cfg.numMode3d === 'coords' || (cfg.numMode3d === 'layer_code' && N === 4)) ? 0.34 : 0.43;
+        const fontPx = Math.max(10, Math.round(layerCellPx * labelLenScale));
         const dotPx = Math.max(3, Math.round(layerCellPx * 0.095));
 
-        for (let L = 0; L < 3; L++) {
+        const n2 = N * N;
+        for (let L = 0; L < N; L++) {
           layerCols[L].style.width = `${framePx}px`;
           layerFrames[L].style.width = `${framePx}px`;
           layerFrames[L].style.height = `${framePx}px`;
@@ -3651,12 +3985,13 @@
           layerGrids[L].style.height = `${gridPx}px`;
 
           const bgCells = layerBackdropCells[L];
-          for (let i = 0; i < 9; i++) {
+          for (let i = 0; i < n2; i++) {
             bgCells[i].style.padding = `${layerTilePad}px`;
           }
         }
 
-        for (let val = 1; val <= 26; val++) {
+        const total = N * N * N;
+        for (let val = 1; val < total; val++) {
           const slot = layerTileSlots[val];
           const face = layerTileFaces[val];
           if (!slot || !face) continue;
@@ -3664,39 +3999,51 @@
           slot.style.height = `${layerCellPx}px`;
           slot.style.padding = `${layerTilePad}px`;
           face.style.fontSize = `${fontPx}px`;
-          const dot = face.firstElementChild;
+          const dot = face.lastElementChild;
           if (dot) {
             dot.style.width = `${dotPx}px`;
             dot.style.height = `${dotPx}px`;
           }
         }
 
+        // Update layout button text dynamically for 4x4x4 clarity
+        if (N === 4) {
+          btnLayersRow.textContent = rect.width < 560 ? '2×2' : '4-ROW';
+          btnLayersStack.textContent = rect.width < 560 ? 'STACK' : '2×2';
+        } else {
+          btnLayersRow.textContent = 'SIDE';
+          btnLayersStack.textContent = 'STACK';
+        }
+
         renderLayers3D();
       }
 
       function renderLayers3D() {
-        if (!layersDomBuilt) return;
+        const N = cfg.size3d;
+        if (layerPoolN !== N) buildLayers3DDOM(N);
         const ax = cfg.layersAxis;
         const empty = getEmpty3D();
         const emptyLC = coords3DToLayerCell(ax, empty.x, empty.y, empty.z);
         const showMisplaced = phase === 'DONE' && finalDnf;
         const hideBlank = phase === 'BLD_EXEC' && cfg.hideBlankBld;
+        const n2 = N * N;
+        const total = N * N * N;
 
         updateLayerHeaders();
 
-        for (let L = 0; L < 3; L++) {
+        for (let L = 0; L < N; L++) {
           layerCols[L].classList.toggle('has-empty', !hideBlank && L === emptyLC.layer);
           const bgCells = layerBackdropCells[L];
-          for (let i = 0; i < 9; i++) {
-            const isEmptyHere = !hideBlank && L === emptyLC.layer && i === emptyLC.r * 3 + emptyLC.c;
+          for (let i = 0; i < n2; i++) {
+            const isEmptyHere = !hideBlank && L === emptyLC.layer && i === emptyLC.r * N + emptyLC.c;
             bgCells[i].classList.toggle('is-empty-cell', isEmptyHere);
           }
         }
 
-        for (let i = 0; i < 27; i++) {
+        for (let i = 0; i < total; i++) {
           const val = board3d[i];
           if (val === 0) continue;
-          const pos = coords3d(i);
+          const pos = coords3d(i, N);
           const lc = coords3DToLayerCell(ax, pos.x, pos.y, pos.z);
           const slot = layerTileSlots[val];
           if (!slot) continue;
@@ -3717,12 +4064,15 @@
       }
 
       function pointerToLayer3D(e) {
-        for (let L = 0; L < 3; L++) {
-          const rect = layerGrids[L].getBoundingClientRect();
+        const N = cfg.size3d;
+        for (let L = 0; L < N; L++) {
+          const grid = layerGrids[L];
+          if (!grid) continue;
+          const rect = grid.getBoundingClientRect();
           if (rect.width <= 0 || rect.height <= 0) continue;
           if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
-            const c = Math.min(2, Math.max(0, Math.floor(((e.clientX - rect.left) / rect.width) * 3)));
-            const r = Math.min(2, Math.max(0, Math.floor(((e.clientY - rect.top) / rect.height) * 3)));
+            const c = Math.min(N - 1, Math.max(0, Math.floor(((e.clientX - rect.left) / rect.width) * N)));
+            const r = Math.min(N - 1, Math.max(0, Math.floor(((e.clientY - rect.top) / rect.height) * N)));
             return { layer: L, r, c };
           }
         }
@@ -3778,9 +4128,9 @@
       layers3dWrap.addEventListener('lostpointercapture', onLayerPointerEnd);
 
       /* =======================================================================
-         ZERO-DEPENDENCY HIGH-DPI 3D CANVAS ENGINE (CUBE + PLANE MODE)
+         ZERO-DEPENDENCY HIGH-DPI 3D CANVAS ENGINE (2×2×2, 3×3×3, 4×4×4)
          - Exact L1 Manhattan depth sorting (100% artifact-free for cube grids)
-         - Perspective-projected matte faces + studio lighting + vector numbers
+         - Origin: Tile 1 at Top-Left-Back (0,0,0), Empty at Bottom-Right-Front
          - Smooth spherical orbit, 2-finger pinch zoom, scroll zoom, hover & tap
          ======================================================================= */
       const CUBE_FACES = [
@@ -3847,16 +4197,14 @@
         let targetTheta = theta;
         let targetPhi = phi;
         let targetRadius = radius;
-        const minRadius = 5.0;
-        const maxRadius = 15.0;
         const minPhi = 0.12;
         const maxPhi = Math.PI - 0.12;
 
         // Slide animations & hover
-        let tileAnims = new Map(); // tileId -> { from, to, start, dur }
+        let tileAnims = new Map();
         let emptyAnim = null;
         let hoveredTileId = null;
-        let hitQuads = []; // Front-to-back interactive quads from latest frame
+        let hitQuads = [];
 
         // RAF management
         let loopId = null;
@@ -3874,9 +4222,19 @@
         let lastPinch = null;
         let lastBgTapTs = 0;
 
+        function radiusBounds() {
+          const N = cfg.size3d;
+          if (N === 2) return { min: 3.6, max: 11.5 };
+          if (N === 4) return { min: 6.4, max: 20.0 };
+          return { min: 5.0, max: 15.0 };
+        }
+
         function defaultRadiusForViewport() {
+          const N = cfg.size3d;
           const aspect = width / Math.max(1, height);
-          return aspect < 0.85 ? 9.2 : 8.2;
+          const portraitScale = aspect < 0.85 ? 1.12 : 1.0;
+          const base = N === 2 ? 5.8 : (N === 4 ? 11.2 : 8.2);
+          return base * portraitScale;
         }
 
         function resize() {
@@ -3913,7 +4271,7 @@
             targetTheta = 1.28;
             targetPhi = 1.38;
           }
-          targetRadius = Math.min(targetRadius, defaultRadiusForViewport() * 0.94);
+          targetRadius = defaultRadiusForViewport() * 0.94;
           requestFrame();
         }
 
@@ -3935,26 +4293,32 @@
           requestFrame();
         }
 
+        /**
+         * World coordinates with Tile 1 (0,0,0) at TOP-LEFT-BACK
+         * and Empty Slot (N-1,N-1,N-1) at BOTTOM-RIGHT-FRONT.
+         */
         function gridToWorld(gx, gy, gz) {
+          const half = (cfg.size3d - 1) * 0.5;
           const s = cfg.spread3d;
-          return [(gx - 1) * s, (1 - gy) * s, (1 - gz) * s];
+          return [(gx - half) * s, (half - gy) * s, (gz - half) * s];
         }
 
-        function getThemePalette() {
+        function getThemePalette(masked) {
           const isPaper = cfg.theme === 'paper';
           return {
             bg: isPaper ? '#E5E2DA' : '#15171A',
             monoBg: isPaper ? [252, 251, 248] : [42, 46, 54],
             monoInk: isPaper ? '#141517' : '#EDEDEA',
-            maskedBg: isPaper ? [217, 213, 204] : [35, 39, 46],
+            // Crisp matte slate for BLD masked tiles on Paper theme so they are unmistakably visible!
+            maskedBg: isPaper ? [136, 141, 150] : [42, 46, 55],
             wireEmpty: isPaper ? '#B87918' : '#38BDF8',
-            wireEmptyFill: isPaper ? 'rgba(184,121,24,0.09)' : 'rgba(56,189,248,0.08)',
-            wireBounds: isPaper ? 'rgba(20,21,23,0.16)' : 'rgba(237,237,234,0.13)',
-            wirePlaneFrame: isPaper ? 'rgba(184,121,24,0.52)' : 'rgba(224,159,62,0.52)',
-            movableEdge: isPaper ? 'rgba(20,21,23,0.55)' : 'rgba(237,237,234,0.48)',
+            wireEmptyFill: isPaper ? 'rgba(184,121,24,0.10)' : 'rgba(56,189,248,0.08)',
+            wireBounds: isPaper ? 'rgba(20,21,23,0.18)' : 'rgba(237,237,234,0.14)',
+            wirePlaneFrame: isPaper ? 'rgba(184,121,24,0.56)' : 'rgba(224,159,62,0.54)',
+            movableEdge: isPaper ? 'rgba(20,21,23,0.58)' : 'rgba(237,237,234,0.48)',
             hoverEdge: isPaper ? '#141517' : '#38BDF8',
             dnfRed: isPaper ? '#C23535' : '#D64545',
-            chamferDark: isPaper ? 'rgba(20,21,23,0.18)' : 'rgba(0,0,0,0.34)',
+            chamferDark: isPaper ? (masked ? 'rgba(20,21,23,0.34)' : 'rgba(20,21,23,0.20)') : 'rgba(0,0,0,0.34)',
             chamferLight: isPaper ? 'rgba(255,255,255,0.32)' : 'rgba(255,255,255,0.16)'
           };
         }
@@ -3970,7 +4334,6 @@
           const fy = -camY * invR;
           const fz = -camZ * invR;
 
-          // right = normalize(cross(fwd, (0,1,0))) = normalize((-fz, 0, fx))
           let rx = -fz;
           let rz = fx;
           const rLen = Math.hypot(rx, rz) || 1;
@@ -3978,7 +4341,6 @@
           rz /= rLen;
           const ry = 0;
 
-          // up = cross(right, fwd)
           const ux = ry * fz - rz * fy;
           const uy = rz * fx - rx * fz;
           const uz = rx * fy - ry * fx;
@@ -4058,18 +4420,21 @@
         function drawFrame(now) {
           if (!ctx || width <= 0 || height <= 0) return;
 
-          // Smooth camera damping
+          const N = cfg.size3d;
+          const total = N * N * N;
+          const half = (N - 1) * 0.5;
+
           const damp = 0.22;
           theta += (targetTheta - theta) * damp;
           phi += (targetPhi - phi) * damp;
           radius += (targetRadius - radius) * damp;
 
-          const pal = getThemePalette();
-          const b = computeCameraBasis();
           const isPlaneMode = cfg.view3d === 'plane';
           const masked = phase === 'BLD_READY' || phase === 'BLD_EXEC';
           const hideBlank = phase === 'BLD_EXEC' && cfg.hideBlankBld;
           const showMisplaced = phase === 'DONE' && finalDnf;
+          const pal = getThemePalette(masked);
+          const b = computeCameraBasis();
           const empty = getEmpty3D();
 
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -4078,11 +4443,11 @@
 
           // In Plane mode, draw subtle outer volume wireframe + active plane frame
           if (isPlaneMode) {
-            const halfVol = cfg.spread3d + HALF;
+            const s = cfg.spread3d;
+            const halfVol = half * s + HALF;
             drawWireBox(0, 0, 0, halfVol, halfVol, halfVol, b, pal.wireBounds, 1, null);
 
-            const s = cfg.spread3d;
-            const pPos = (cfg.planeAxis === 'z' ? (1 - cfg.planeIndex) : (cfg.planeAxis === 'y' ? (1 - cfg.planeIndex) : (cfg.planeIndex - 1))) * s;
+            const pPos = (cfg.planeAxis === 'y' ? (half - cfg.planeIndex) : (cfg.planeIndex - half)) * s;
             const pad = HALF + 0.06;
             if (cfg.planeAxis === 'z') {
               drawWireBox(0, 0, pPos, halfVol + 0.04, halfVol + 0.04, pad, b, pal.wirePlaneFrame, 1.2, null);
@@ -4093,13 +4458,12 @@
             }
           }
 
-          // Collect renderables (cubes + empty wireframe)
           const items = [];
           const activeAnimDone = [];
 
-          for (let i = 0; i < 27; i++) {
+          for (let i = 0; i < total; i++) {
             const val = board3d[i];
-            const pos = coords3d(i);
+            const pos = coords3d(i, N);
 
             if (val === 0) {
               if (hideBlank) continue;
@@ -4134,16 +4498,15 @@
               const inPlane = isInActivePlane(pos.x, pos.y, pos.z);
               if (!inPlane) {
                 if (cfg.planeDepth && movable) {
-                  // Perpendicular movable cube aligned with empty slot!
                   alpha = 0.86;
                   interactive = true;
                   isPerpPeek = true;
                 } else {
-                  continue; // Completely hidden in plane mode for zero clutter!
+                  continue;
                 }
               }
             } else if (cfg.xray3d && !movable) {
-              alpha = 0.16;
+              alpha = 0.14;
               interactive = false;
             }
 
@@ -4200,7 +4563,7 @@
               continue;
             }
 
-            const pigment = getTilePigment3D(it.val, cfg.scheme);
+            const pigment = getTilePigment3D(it.val, N, cfg.scheme3d);
             const baseRgb = masked
               ? pal.maskedBg
               : (pigment ? parseHexRgb(pigment.bg) : pal.monoBg);
@@ -4213,7 +4576,8 @@
 
             const showMovableEdge = !masked && (isHovered || (it.movable && (cfg.xray3d || it.isPerpPeek || !isPlaneMode)));
             const movableEdgeCol = isHovered ? pal.hoverEdge : (it.isPerpPeek ? pal.wireEmpty : pal.movableEdge);
-            const movableEdgeW = isHovered ? 2.1 : (it.isPerpPeek ? 1.7 : 1.25);
+            const movableEdgeW = isHovered ? 2.1 : (it.isPerpPeek ? 1.7 : 1.2);
+            const lbl = masked ? '' : formatTileLabel3D(it.val, N, cfg.numMode3d);
 
             ctx.save();
             ctx.globalAlpha = it.alpha;
@@ -4224,11 +4588,9 @@
               const fcY = it.wy + f.n[1] * HALF;
               const fcZ = it.wz + f.n[2] * HALF;
 
-              // Backface culling: face normal must point toward camera
               const dotView = (fcX - b.cam[0]) * f.n[0] + (fcY - b.cam[1]) * f.n[1] + (fcZ - b.cam[2]) * f.n[2];
               if (dotView >= 0) continue;
 
-              // 4 corners: top-left, top-right, bottom-right, bottom-left
               const p00 = projectPt(fcX - f.u[0] * HALF - f.v[0] * HALF, fcY - f.u[1] * HALF - f.v[1] * HALF, fcZ - f.u[2] * HALF - f.v[2] * HALF, b);
               const p10 = projectPt(fcX + f.u[0] * HALF - f.v[0] * HALF, fcY + f.u[1] * HALF - f.v[1] * HALF, fcZ + f.u[2] * HALF - f.v[2] * HALF, b);
               const p11 = projectPt(fcX + f.u[0] * HALF + f.v[0] * HALF, fcY + f.u[1] * HALF + f.v[1] * HALF, fcZ + f.u[2] * HALF + f.v[2] * HALF, b);
@@ -4240,7 +4602,6 @@
                 nextHitQuads.push({ tileId: it.val, pos: it.pos, movable: it.movable, quad });
               }
 
-              // Matte directional studio lighting
               const kDot = Math.max(0, f.n[0] * LIGHT_KEY[0] + f.n[1] * LIGHT_KEY[1] + f.n[2] * LIGHT_KEY[2]);
               const fDot = Math.max(0, f.n[0] * LIGHT_FILL[0] + f.n[1] * LIGHT_FILL[1] + f.n[2] * LIGHT_FILL[2]);
               let shade = 0.72 + 0.30 * kDot + 0.10 * fDot;
@@ -4257,7 +4618,6 @@
               ctx.fillStyle = shadeRgb(baseRgb, shade);
               ctx.fill();
 
-              // Crisp chamfer hairline or movable/hover front-face highlight (zero back-edge bleed!)
               if (isMisplaced) {
                 ctx.strokeStyle = pal.dnfRed;
                 ctx.lineWidth = 2.0;
@@ -4270,7 +4630,6 @@
               }
               ctx.stroke();
 
-              // Crisp vector monospace label projected into face tangent plane
               if (!masked && it.alpha > 0.35) {
                 const cx2 = (p00.x + p10.x + p11.x + p01.x) * 0.25;
                 const cy2 = (p00.y + p10.y + p11.y + p01.y) * 0.25;
@@ -4279,31 +4638,32 @@
                 const vx2 = ((p01.x + p11.x) - (p00.x + p10.x)) * 0.5 / 100;
                 const vy2 = ((p01.y + p11.y) - (p00.y + p10.y)) * 0.5 / 100;
 
-                // Skip ultra-grazing faces where text collapses to a sliver
                 const det = Math.abs(ux2 * vy2 - uy2 * vx2);
-                if (det > 0.012) {
+                if (det > 0.01) {
                   ctx.save();
                   ctx.transform(ux2, uy2, vx2, vy2, cx2, cy2);
 
-                  // Delicate inner highlight frame
                   ctx.strokeStyle = pal.chamferLight;
                   ctx.lineWidth = 2.4;
                   ctx.strokeRect(-43, -43, 86, 86);
 
-                  const lbl = String(it.val);
-                  const fSize = lbl.length === 1 ? 56 : 46;
-                  ctx.font = `700 ${fSize}px "IBM Plex Mono", ui-monospace, monospace`;
-                  ctx.textAlign = 'center';
-                  ctx.textBaseline = 'middle';
+                  if (lbl) {
+                    const fSize = lbl.length === 1 ? 56 : (lbl.length === 2 ? 46 : 34);
+                    ctx.font = `700 ${fSize}px "IBM Plex Mono", ui-monospace, monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
 
-                  ctx.fillStyle = 'rgba(0,0,0,0.28)';
-                  ctx.fillText(lbl, 0, 3);
-                  ctx.fillStyle = inkColor;
-                  ctx.fillText(lbl, 0, 0);
-
-                  if (it.val === 6 || it.val === 9) {
+                    if (inkColor === '#FAF9F6') {
+                      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+                      ctx.fillText(lbl, 0, 3);
+                    }
                     ctx.fillStyle = inkColor;
-                    ctx.fillRect(-10, 27, 20, 3.2);
+                    ctx.fillText(lbl, 0, 0);
+
+                    if (lbl === '6' || lbl === '9') {
+                      ctx.fillStyle = inkColor;
+                      ctx.fillRect(-10, 27, 20, 3.2);
+                    }
                   }
 
                   if (cfg.dots && inPlace) {
@@ -4322,7 +4682,6 @@
             ctx.restore();
           }
 
-          // Store front-to-back order for exact picking
           hitQuads = nextHitQuads.reverse();
         }
 
@@ -4338,7 +4697,6 @@
             }
           }
 
-          // Forgiving 7px mobile tap margin strictly for movable cubes
           const offsets = [[0,-7],[0,7],[-7,0],[7,0]];
           for (let o = 0; o < offsets.length; o++) {
             const ox = x + offsets[o][0];
@@ -4442,7 +4800,8 @@
           if (ptrs.size >= 2) {
             const dist = pinchDist();
             if (lastPinch !== null && dist > 0) {
-              targetRadius = Math.max(minRadius, Math.min(maxRadius, targetRadius + (lastPinch - dist) * 0.022));
+              const rb = radiusBounds();
+              targetRadius = Math.max(rb.min, Math.min(rb.max, targetRadius + (lastPinch - dist) * 0.024));
             }
             lastPinch = dist;
             return;
@@ -4481,7 +4840,6 @@
               if (hit && hit.movable) {
                 executeMove3DAt(hit.pos.x, hit.pos.y, hit.pos.z);
               } else if (!hit) {
-                // Double-tap empty background resets camera nicely
                 const nowTs = performance.now();
                 if (nowTs - lastBgTapTs < 320) {
                   if (cfg.view3d === 'plane') snapCameraForPlane(cfg.planeAxis);
@@ -4502,7 +4860,8 @@
         cube3dCanvas.addEventListener('wheel', (e) => {
           if (!cfg.is3d || (cfg.view3d !== 'cube' && cfg.view3d !== 'plane')) return;
           e.preventDefault();
-          targetRadius = Math.max(minRadius, Math.min(maxRadius, targetRadius + e.deltaY * 0.0055));
+          const rb = radiusBounds();
+          targetRadius = Math.max(rb.min, Math.min(rb.max, targetRadius + e.deltaY * 0.006));
         }, { passive: false });
         cube3dCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
         cube3dCanvas.addEventListener('gesturestart', (e) => e.preventDefault());
@@ -4519,7 +4878,66 @@
         };
       })();
 
+      let planeIdxBuiltN = 0;
+      function ensurePlaneIdxButtons() {
+        const N = cfg.size3d;
+        if (planeIdxBuiltN === N) return;
+        planeIdxBuiltN = N;
+        planeIdxSeg.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < N; i++) {
+          const b = document.createElement('button');
+          b.className = 'seg3d-btn';
+          b.type = 'button';
+          b.dataset.pidx = String(i);
+          b.innerHTML = `${i + 1}<span class="plane-empty-dot"></span>`;
+          frag.appendChild(b);
+        }
+        planeIdxSeg.appendChild(frag);
+      }
+
+      function update3DLegend() {
+        const N = cfg.size3d;
+        const n2 = N * N;
+        const maxVal = N * N * N - 1;
+        const sc = cfg.scheme3d;
+
+        const pair = (bg, txt) => `<span class="legend-pair"><span class="legend-dot" style="background:${bg}"></span>${txt}</span>`;
+
+        if (sc === 'layers_z') {
+          const parts = [];
+          for (let L = 0; L < N; L++) {
+            const lo = L * n2 + 1;
+            const hi = Math.min(maxVal, (L + 1) * n2);
+            const lbl = N === 4 ? `Z${L + 1}` : `${lo}-${hi}`;
+            parts.push(pair(getSliceColor3D(L, N).bg, lbl));
+          }
+          cube3dLegend.innerHTML = parts.join('');
+        } else if (sc === 'layers_y' || sc === 'layers_x') {
+          const pref = sc === 'layers_y' ? 'Y' : 'X';
+          const parts = [];
+          for (let L = 0; L < N; L++) {
+            parts.push(pair(getSliceColor3D(L, N).bg, `${pref}${L + 1}`));
+          }
+          cube3dLegend.innerHTML = parts.join('');
+        } else if (sc === 'fringe_3d') {
+          cube3dLegend.innerHTML = pair(PIGMENTS[0].bg, 'BACK') + pair(PIGMENTS[1].bg, 'TOP') + pair(PIGMENTS[2].bg, 'LEFT') + (N >= 3 ? pair(PIGMENTS[4].bg, 'CORE') : '');
+        } else if (sc === 'checker_3d') {
+          cube3dLegend.innerHTML = pair(PIGMENTS[0].bg, 'EVEN') + pair(PIGMENTS[3].bg, 'ODD');
+        } else if (sc === 'prism') {
+          cube3dLegend.innerHTML = pair('#C85A42', 'TLB') + pair('#3D9A68', 'PRISM') + pair('#325F9E', 'BRF');
+        } else if (sc === 'octants') {
+          cube3dLegend.innerHTML = pair(PIGMENTS[0].bg, 'OCTANTS · 1=TLB');
+        } else {
+          cube3dLegend.innerHTML = `<span>1 = TOP-LEFT-BACK</span>`;
+        }
+      }
+
       function updatePlaneOverlayAndDots() {
+        const N = cfg.size3d;
+        ensurePlaneIdxButtons();
+        if (cfg.planeIndex >= N) cfg.planeIndex = N - 1;
+
         const empty = getEmpty3D();
         const emptyIdxOnAxis = cfg.planeAxis === 'z' ? empty.z : (cfg.planeAxis === 'y' ? empty.y : empty.x);
         const masked = phase === 'BLD_READY' || phase === 'BLD_EXEC';
@@ -4535,12 +4953,7 @@
         cube3dPlaneTag.classList.toggle('hidden-view', !isPlane);
 
         if (isPlane) {
-          const axisNames = {
-            z: ['Z1 · FRONT', 'Z2 · MID', 'Z3 · BACK'],
-            y: ['Y1 · TOP', 'Y2 · MID', 'Y3 · BOT'],
-            x: ['X1 · LEFT', 'X2 · MID', 'X3 · RIGHT']
-          };
-          cube3dPlaneText.textContent = axisNames[cfg.planeAxis][cfg.planeIndex];
+          cube3dPlaneText.textContent = getPlaneShortLabel(cfg.planeAxis, cfg.planeIndex, N);
 
           const emptyInThisPlane = emptyIdxOnAxis === cfg.planeIndex;
           cube3dPlaneDot.classList.toggle('hidden-view', hideBlank || !emptyInThisPlane);
@@ -4559,8 +4972,9 @@
       function render3DViews() {
         if (!cfg.is3d) return;
         updatePlaneOverlayAndDots();
+        update3DLegend();
         if (cfg.view3d === 'layers') {
-          buildLayers3DDOM();
+          buildLayers3DDOM(cfg.size3d);
           renderLayers3D();
         } else {
           cube3d.requestFrame();
@@ -4569,12 +4983,16 @@
 
       function layoutActiveStage() {
         if (cfg.is3d) {
-          const wideLayers = cfg.view3d === 'layers' && cfg.layersLayout === 'row';
-          boardStage.classList.add('is-3d-mode');
-          boardStage.classList.toggle('is-3d-wide', wideLayers);
-          appShell.classList.toggle('compact-side-pad', wideLayers && window.innerWidth < 460);
+          const isLayers = cfg.view3d === 'layers';
+          const wideLayers = isLayers && (cfg.layersLayout === 'row' || cfg.size3d === 4);
+          const xlLayers = isLayers && cfg.size3d === 4 && cfg.layersLayout === 'row' && window.innerWidth >= 560;
 
-          if (cfg.view3d === 'layers') {
+          boardStage.classList.add('is-3d-mode');
+          boardStage.classList.toggle('is-3d-wide', wideLayers && !xlLayers);
+          boardStage.classList.toggle('is-3d-xl', xlLayers);
+          appShell.classList.toggle('compact-side-pad', isLayers && window.innerWidth < 460);
+
+          if (isLayers) {
             cube3d.stopLoop();
             layoutLayers3D();
           } else {
@@ -4583,7 +5001,7 @@
           }
         } else {
           cube3d.stopLoop();
-          boardStage.classList.remove('is-3d-mode', 'is-3d-wide');
+          boardStage.classList.remove('is-3d-mode', 'is-3d-wide', 'is-3d-xl');
           appShell.classList.remove('compact-side-pad');
           layoutBoardExact();
         }
@@ -4936,15 +5354,20 @@
         loadScrambleState(currentSeed, true);
       }
 
-      function switchSession(nextSize, nextMode, nextIs3d = cfg.is3d) {
+      function switchSession(nextSize, nextMode, nextIs3d = cfg.is3d, nextSize3d = cfg.size3d) {
         const sizeChanged = nextSize !== cfg.size;
+        const size3dChanged = nextSize3d !== cfg.size3d;
         const modeChanged = nextMode !== cfg.mode;
         const dimChanged = nextIs3d !== cfg.is3d;
-        if (!sizeChanged && !modeChanged && !dimChanged) return;
+        if (!sizeChanged && !size3dChanged && !modeChanged && !dimChanged) return;
 
         cfg.size = nextSize;
+        cfg.size3d = nextSize3d;
         cfg.mode = nextMode;
         cfg.is3d = nextIs3d;
+        if (cfg.planeIndex >= cfg.size3d) {
+          cfg.planeIndex = cfg.size3d - 1;
+        }
         saveCfg();
 
         historyLimit = 60;
@@ -4957,8 +5380,12 @@
             applyTilePigments();
           }
         } else {
-          buildLayers3DDOM();
-          applyLayerPigments();
+          buildLayers3DDOM(cfg.size3d);
+          applyLayerPigmentsAndLabels();
+          if (size3dChanged || dimChanged) {
+            if (cfg.view3d === 'plane') cube3d.snapCameraForPlane(cfg.planeAxis);
+            else cube3d.resetCamera(false);
+          }
         }
 
         applyConfigUI();
@@ -4972,12 +5399,19 @@
          ======================================================================= */
       function apply3DViewUI() {
         const is3d = cfg.is3d;
+        const N = cfg.size3d;
         boardFrame.classList.toggle('hidden-view', is3d);
         stage3d.classList.toggle('hidden-view', !is3d);
 
         btnToggle3d.classList.toggle('is-3d-active', is3d);
         btnToggle3d.setAttribute('aria-pressed', String(is3d));
-        btnSelect3dSize.classList.toggle('active', is3d);
+
+        tabLayers3d.textContent = `${N} Layers`;
+
+        // Toggle 2D vs 3D Config Sheet option blocks cleanly
+        scheme2dBlock.classList.toggle('hidden-view', is3d);
+        scheme3dBlock.classList.toggle('hidden-view', !is3d);
+        numMode3dBlock.classList.toggle('hidden-view', !is3d);
 
         // View mode tabs
         view3dTabs.querySelectorAll('[data-view3d]').forEach((b) => {
@@ -5012,7 +5446,7 @@
         btnPlaneAuto.classList.toggle('active', cfg.planeAuto);
         btnPlaneAuto.setAttribute('aria-pressed', String(cfg.planeAuto));
 
-        // 3-Layers subbar
+        // N-Layers subbar
         layersAxisSeg.querySelectorAll('[data-laxis]').forEach((b) => {
           b.classList.toggle('active', b.dataset.laxis === cfg.layersAxis);
         });
@@ -5020,12 +5454,13 @@
           b.classList.toggle('active', b.dataset.llayout === cfg.layersLayout);
         });
 
-        // 3-Layer board animation & dots classes
+        // N-Layer board animation & dots classes
         layers3dWrap.classList.toggle('anim-snappy', cfg.animMs === 50);
         layers3dWrap.classList.toggle('show-dots', cfg.dots);
 
         if (is3d) {
           updatePlaneOverlayAndDots();
+          update3DLegend();
         }
       }
 
@@ -5041,7 +5476,7 @@
         updateBoardMasking();
 
         // Header badge
-        hdrSize.textContent = cfg.is3d ? '3×3×3' : `${cfg.size}×${cfg.size}`;
+        hdrSize.textContent = cfg.is3d ? `${cfg.size3d}×${cfg.size3d}×${cfg.size3d}` : `${cfg.size}×${cfg.size}`;
         hdrMode.textContent = MODE_META[cfg.mode].short;
         hdrMode.classList.toggle('is-bld', isBldMode(cfg.mode));
 
@@ -5049,11 +5484,20 @@
         sizeSelector.querySelectorAll('[data-size]').forEach((b) => {
           b.classList.toggle('active', !cfg.is3d && Number(b.dataset.size) === cfg.size);
         });
+        size3dSelector.querySelectorAll('[data-size3d]').forEach((b) => {
+          b.classList.toggle('active', cfg.is3d && Number(b.dataset.size3d) === cfg.size3d);
+        });
         modeSelector.querySelectorAll('[data-mode]').forEach((b) => {
           b.classList.toggle('active', b.dataset.mode === cfg.mode);
         });
         schemeSelector.querySelectorAll('[data-scheme]').forEach((b) => {
           b.classList.toggle('active', b.dataset.scheme === cfg.scheme);
+        });
+        scheme3dSelector.querySelectorAll('[data-scheme3d]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.scheme3d === cfg.scheme3d);
+        });
+        numMode3dSelector.querySelectorAll('[data-num3d]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.num3d === cfg.numMode3d);
         });
         themeSelector.querySelectorAll('[data-theme-val]').forEach((b) => {
           b.classList.toggle('active', b.dataset.themeVal === cfg.theme);
@@ -5071,7 +5515,7 @@
         togDots.setAttribute('aria-checked', String(cfg.dots));
 
         if (cfg.is3d) {
-          applyLayerPigments();
+          applyLayerPigmentsAndLabels();
           render3DViews();
         }
       }
@@ -5104,7 +5548,8 @@
         const bld = isBldMode(cfg.mode);
         const fp = getStorageFootprint();
 
-        stSessionName.textContent = `${cfg.is3d ? '3×3×3' : `${cfg.size}×${cfg.size}`} · ${MODE_META[cfg.mode].full}`;
+        const dimLabel = cfg.is3d ? `${cfg.size3d}×${cfg.size3d}×${cfg.size3d}` : `${cfg.size}×${cfg.size}`;
+        stSessionName.textContent = `${dimLabel} · ${MODE_META[cfg.mode].full}`;
         stStorageInfo.textContent =
           `Active: ${st.total} solves · ${(fp.activeBytes / 1024).toFixed(2)} KB | All sessions: ${(fp.totalBytes / 1024).toFixed(2)} KB`;
 
@@ -5237,7 +5682,7 @@
       }
 
       /* =======================================================================
-         COMPACT TEXT BACKUP (EXPORT & IMPORT ALL SESSIONS INCLUDING 3×3×3)
+         COMPACT TEXT BACKUP (EXPORT & IMPORT ALL SESSIONS INCLUDING 2D & 3D)
          ======================================================================= */
       function buildBackupString() {
         const lines = ['SP2_BACKUP_V1'];
@@ -5256,16 +5701,19 @@
             }
           }
         }
-        for (let mi = 0; mi < MODES.length; mi++) {
-          const md = MODES[mi];
-          const key = sessionKey(3, md, true);
-          try {
-            const raw = localStorage.getItem(key);
-            if (raw && raw.startsWith('1|')) {
-              lines.push(`3x3x3_${md}=${raw}`);
+        for (let s3 = 0; s3 < SIZES_3D.length; s3++) {
+          const n3 = SIZES_3D[s3];
+          for (let mi = 0; mi < MODES.length; mi++) {
+            const md = MODES[mi];
+            const key = sessionKey(3, md, true, n3);
+            try {
+              const raw = localStorage.getItem(key);
+              if (raw && raw.startsWith('1|')) {
+                lines.push(`${n3}x${n3}x${n3}_${md}=${raw}`);
+              }
+            } catch (_) {
+              // Ignore
             }
-          } catch (_) {
-            // Ignore
           }
         }
         return lines.join('\n');
@@ -5306,13 +5754,14 @@
           const id = line.slice(0, eq);
           const payload = line.slice(eq + 1);
 
-          const m3d = id.match(/^3x3x3_(std|bld_auto|bld_sub)$/);
-          if (m3d) {
-            const md = m3d[1];
+          const m3d = id.match(/^([2-4])x([2-4])x([2-4])_(std|bld_auto|bld_sub)$/);
+          if (m3d && m3d[1] === m3d[2] && m3d[2] === m3d[3]) {
+            const n3 = Number(m3d[1]);
+            const md = m3d[4];
             const parsed = unpackSession(payload, md);
             if (parsed.length === 0) continue;
             try {
-              localStorage.setItem(sessionKey(3, md, true), packSession(parsed, md));
+              localStorage.setItem(sessionKey(3, md, true, n3), packSession(parsed, md));
               importedSessions++;
               importedSolves += parsed.length;
             } catch (_) {
@@ -5439,7 +5888,6 @@
       function setPlaneAxis(axis) {
         if (!['z', 'y', 'x'].includes(axis)) return;
         cfg.planeAxis = axis;
-        // Jump straight to the empty slot's plane on the chosen axis for instant playability
         const e = getEmpty3D();
         cfg.planeIndex = axis === 'z' ? e.z : (axis === 'y' ? e.y : e.x);
         saveCfg();
@@ -5449,7 +5897,7 @@
       }
 
       function setPlaneIndex(idx) {
-        if (![0, 1, 2].includes(idx)) return;
+        if (!Number.isInteger(idx) || idx < 0 || idx >= cfg.size3d) return;
         cfg.planeIndex = idx;
         saveCfg();
         apply3DViewUI();
@@ -5457,12 +5905,14 @@
       }
 
       btnToggle3d.addEventListener('click', () => {
-        switchSession(cfg.size, cfg.mode, !cfg.is3d);
+        switchSession(cfg.size, cfg.mode, !cfg.is3d, cfg.size3d);
         btnToggle3d.blur();
       });
 
-      btnSelect3dSize.addEventListener('click', () => {
-        switchSession(cfg.size, cfg.mode, true);
+      size3dSelector.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-size3d]');
+        if (!b) return;
+        switchSession(cfg.size, cfg.mode, true, Number(b.dataset.size3d));
       });
 
       view3dTabs.addEventListener('click', (e) => {
@@ -5558,7 +6008,7 @@
       });
 
       /* =======================================================================
-         KEYBOARD SHORTCUTS (ARROWS / WASD + Q/E 3D DEPTH + 1-3 PLANE + X/Y/Z)
+         KEYBOARD SHORTCUTS (ARROWS / WASD + Q/E 3D DEPTH + 1-4 PLANE + X/Y/Z)
          ======================================================================= */
       function anySheetOpen() {
         return configSheet.classList.contains('open') || statsSheet.classList.contains('open');
@@ -5611,7 +6061,7 @@
         // 3D quick plane & axis shortcuts
         if (cfg.is3d) {
           const kl = k.toLowerCase();
-          if (cfg.view3d === 'plane' && (kl === '1' || kl === '2' || kl === '3')) {
+          if (cfg.view3d === 'plane' && kl >= '1' && kl <= String(cfg.size3d)) {
             e.preventDefault();
             setPlaneIndex(Number(kl) - 1);
             return;
@@ -5650,10 +6100,12 @@
             executeMove3DAt(empty.x - dir, empty.y, empty.z);
           } else if (k === 'e' || k === 'E') {
             e.preventDefault();
-            executeMove3DAt(empty.x, empty.y, empty.z + dir);
+            // z increases Back -> Front: E slides a tile forward (+z) into empty
+            executeMove3DAt(empty.x, empty.y, empty.z - dir);
           } else if (k === 'q' || k === 'Q') {
             e.preventDefault();
-            executeMove3DAt(empty.x, empty.y, empty.z - dir);
+            // Q slides a tile deeper (-z) into empty
+            executeMove3DAt(empty.x, empty.y, empty.z + dir);
           }
           return;
         }
@@ -5737,24 +6189,46 @@
       sizeSelector.addEventListener('click', (e) => {
         const b = e.target.closest('[data-size]');
         if (!b) return;
-        switchSession(Number(b.dataset.size), cfg.mode, false);
+        switchSession(Number(b.dataset.size), cfg.mode, false, cfg.size3d);
       });
 
       modeSelector.addEventListener('click', (e) => {
         const b = e.target.closest('[data-mode]');
         if (!b) return;
-        switchSession(cfg.size, b.dataset.mode, cfg.is3d);
+        switchSession(cfg.size, b.dataset.mode, cfg.is3d, cfg.size3d);
       });
 
-      // Pigment scheme
+      // 2D Pigment scheme
       schemeSelector.addEventListener('click', (e) => {
         const b = e.target.closest('[data-scheme]');
         if (!b) return;
         cfg.scheme = b.dataset.scheme;
         saveCfg();
         applyTilePigments();
-        applyLayerPigments();
         applyConfigUI();
+      });
+
+      // 3D Pigment scheme
+      scheme3dSelector.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-scheme3d]');
+        if (!b) return;
+        cfg.scheme3d = b.dataset.scheme3d;
+        saveCfg();
+        applyLayerPigmentsAndLabels();
+        applyConfigUI();
+      });
+
+      // 3D Tile numbering option
+      numMode3dSelector.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-num3d]');
+        if (!b) return;
+        cfg.numMode3d = b.dataset.num3d;
+        saveCfg();
+        applyLayerPigmentsAndLabels();
+        applyConfigUI();
+        if (cfg.is3d && cfg.view3d === 'layers') {
+          layoutLayers3D();
+        }
       });
 
       // Theme
