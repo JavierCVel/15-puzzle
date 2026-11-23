@@ -1746,7 +1746,7 @@
     }
 
     .tile-slot.is-filter-dim {
-      opacity: 0.16;
+      opacity: var(--filter-dim-opacity, 0.15);
     }
 
     /* N-Layer N×N Side-by-Side / Stack / 2×2 Grid Container */
@@ -2725,6 +2725,17 @@
               </div>
             </div>
 
+            <div class="cfg-slider-row">
+              <div class="cfg-slider-head">
+                <span class="cfg-name">Hidden / X-Ray Opacity</span>
+                <span id="cfgGhostVal" class="spread3d-val">15%</span>
+              </div>
+              <div class="cfg-slider-ctrl">
+                <button id="btnCfgGhostZero" class="persp-end-btn" type="button" title="Completely hide dimmed cubes">0%</button>
+                <input id="cfgGhostRange" class="spread3d-range" type="range" min="0" max="45" step="5" value="15" aria-label="Hidden and X-Ray block opacity" />
+              </div>
+            </div>
+
             <div class="cfg-row">
               <div class="cfg-meta">
                 <span class="cfg-name">Show Spacing Slider on Stage</span>
@@ -2910,6 +2921,7 @@
         view3d: 'cube',         // 'cube' | 'plane' | 'layers'
         spread3d: 1.24,         // 1.06 .. 1.65
         persp3d: 45,            // 0 (Orthographic) .. 100 (Strong Perspective)
+        ghostOpacity3d: 15,     // 0 .. 45 (%) opacity for hidden / X-RAY cubes
         showGapBar: true,       // show GAP slider on 3D stage toolbar
         showPerspBar: true,     // show PERSP slider on 3D stage toolbar
         lockRot3d: false,       // lock 3D camera orbit (enables instant tap & touch glide)
@@ -3124,6 +3136,9 @@
       const cfgPerspRange = document.getElementById('cfgPerspRange');
       const cfgPerspVal = document.getElementById('cfgPerspVal');
       const btnCfgOrtho = document.getElementById('btnCfgOrtho');
+      const cfgGhostRange = document.getElementById('cfgGhostRange');
+      const cfgGhostVal = document.getElementById('cfgGhostVal');
+      const btnCfgGhostZero = document.getElementById('btnCfgGhostZero');
       const togShowGapBar = document.getElementById('togShowGapBar');
       const togShowPerspBar = document.getElementById('togShowPerspBar');
       const togLockRot3d = document.getElementById('togLockRot3d');
@@ -3970,6 +3985,7 @@
           const p = JSON.parse(raw);
           const sp = Number(p.spread3d);
           const pr = Number(p.persp3d);
+          const gh = Number(p.ghostOpacity3d);
           const s3d = SIZES_3D.includes(p.size3d) ? p.size3d : DEFAULT_CFG.size3d;
           const pIdx = Number(p.planeIndex);
           return {
@@ -3991,6 +4007,7 @@
             view3d: ['cube', 'plane', 'layers'].includes(p.view3d) ? p.view3d : DEFAULT_CFG.view3d,
             spread3d: Number.isFinite(sp) ? Math.max(1.06, Math.min(1.65, sp)) : DEFAULT_CFG.spread3d,
             persp3d: Number.isFinite(pr) ? Math.max(0, Math.min(100, Math.round(pr))) : DEFAULT_CFG.persp3d,
+            ghostOpacity3d: Number.isFinite(gh) ? Math.max(0, Math.min(45, Math.round(gh))) : DEFAULT_CFG.ghostOpacity3d,
             showGapBar: typeof p.showGapBar === 'boolean' ? p.showGapBar : DEFAULT_CFG.showGapBar,
             showPerspBar: typeof p.showPerspBar === 'boolean' ? p.showPerspBar : DEFAULT_CFG.showPerspBar,
             lockRot3d: typeof p.lockRot3d === 'boolean' ? p.lockRot3d : DEFAULT_CFG.lockRot3d,
@@ -5138,6 +5155,8 @@
             let isPerpPeek = false;
             let isGhost = false;
 
+            const ghostAlpha = cfg.ghostOpacity3d / 100;
+
             if (isPlaneMode) {
               const inPlane = isInActivePlane(pos.x, pos.y, pos.z);
               if (!inPlane) {
@@ -5150,18 +5169,24 @@
                 }
               }
             } else if (!isPeek && cfg.xray3d && !movable) {
-              alpha = 0.14;
+              if (ghostAlpha <= 0) continue;
+              alpha = ghostAlpha;
               interactive = false;
               isGhost = true;
             }
 
             if (!isPeek && !matchesFilter) {
               if (cfg.xray3d && !movable) {
-                alpha = 0.06;
+                if (ghostAlpha <= 0) continue;
+                alpha = ghostAlpha * 0.55;
+                interactive = false;
+              } else if (!movable) {
+                if (ghostAlpha <= 0) continue;
+                alpha = ghostAlpha;
                 interactive = false;
               } else {
-                alpha = movable ? 0.22 : 0.09;
-                interactive = movable;
+                alpha = ghostAlpha <= 0 ? 0.09 : Math.min(0.60, ghostAlpha + 0.12);
+                interactive = true;
               }
               isGhost = true;
             }
@@ -5351,33 +5376,58 @@
           if (rect.width <= 0 || rect.height <= 0) return null;
           const x = clientX - rect.left;
           const y = clientY - rect.top;
-
-          for (let i = 0; i < hitQuads.length; i++) {
-            if (!hitQuads[i].isGhost && pointInQuad(x, y, hitQuads[i].quad)) {
-              return hitQuads[i];
-            }
-          }
-          for (let i = 0; i < hitQuads.length; i++) {
-            if (hitQuads[i].isGhost && pointInQuad(x, y, hitQuads[i].quad)) {
-              return hitQuads[i];
-            }
-          }
-
           const offsets = [[0,-7],[0,7],[-7,0],[7,0]];
-          for (let o = 0; o < offsets.length; o++) {
-            const ox = x + offsets[o][0];
-            const oy = y + offsets[o][1];
+
+          if (filter3d) {
+            // In Focus mode, non-movable cubes must NEVER swallow taps meant for movable cubes (like X-RAY).
+            // Priority: 1) Focused movable -> 2) Ghost movable -> 3) Tolerance focused movable -> 4) Tolerance ghost movable -> 5) Non-movable fallback
             for (let i = 0; i < hitQuads.length; i++) {
-              if (!hitQuads[i].isGhost && hitQuads[i].movable && pointInQuad(ox, oy, hitQuads[i].quad)) {
+              if (!hitQuads[i].isGhost && hitQuads[i].movable && pointInQuad(x, y, hitQuads[i].quad)) {
                 return hitQuads[i];
               }
             }
+            for (let i = 0; i < hitQuads.length; i++) {
+              if (hitQuads[i].isGhost && hitQuads[i].movable && pointInQuad(x, y, hitQuads[i].quad)) {
+                return hitQuads[i];
+              }
+            }
+            for (let o = 0; o < offsets.length; o++) {
+              const ox = x + offsets[o][0];
+              const oy = y + offsets[o][1];
+              for (let i = 0; i < hitQuads.length; i++) {
+                if (!hitQuads[i].isGhost && hitQuads[i].movable && pointInQuad(ox, oy, hitQuads[i].quad)) {
+                  return hitQuads[i];
+                }
+              }
+            }
+            for (let o = 0; o < offsets.length; o++) {
+              const ox = x + offsets[o][0];
+              const oy = y + offsets[o][1];
+              for (let i = 0; i < hitQuads.length; i++) {
+                if (hitQuads[i].isGhost && hitQuads[i].movable && pointInQuad(ox, oy, hitQuads[i].quad)) {
+                  return hitQuads[i];
+                }
+              }
+            }
+            for (let i = 0; i < hitQuads.length; i++) {
+              if (!hitQuads[i].isGhost && pointInQuad(x, y, hitQuads[i].quad)) {
+                return hitQuads[i];
+              }
+            }
+            return null;
           }
+
+          for (let i = 0; i < hitQuads.length; i++) {
+            if (pointInQuad(x, y, hitQuads[i].quad)) {
+              return hitQuads[i];
+            }
+          }
+
           for (let o = 0; o < offsets.length; o++) {
             const ox = x + offsets[o][0];
             const oy = y + offsets[o][1];
             for (let i = 0; i < hitQuads.length; i++) {
-              if (hitQuads[i].isGhost && hitQuads[i].movable && pointInQuad(ox, oy, hitQuads[i].quad)) {
+              if (hitQuads[i].movable && pointInQuad(ox, oy, hitQuads[i].quad)) {
                 return hitQuads[i];
               }
             }
@@ -5423,6 +5473,10 @@
 
         let lockedDragActive = false;
         let lastLockedGridKey = null;
+        let lastLockedTileId = null;
+        let lastLockedMoveX = 0;
+        let lastLockedMoveY = 0;
+        const LOCKED_GLIDE_DIST = 16; // Minimum px travel before touch glide can trigger another slide
 
         cube3dCanvas.addEventListener('pointerdown', (e) => {
           if (!cfg.is3d || (cfg.view3d !== 'cube' && cfg.view3d !== 'plane')) return;
@@ -5451,11 +5505,17 @@
             lastPinch = null;
             lockedDragActive = cfg.lockRot3d;
             lastLockedGridKey = null;
+            lastLockedTileId = null;
+            lastLockedMoveX = e.clientX;
+            lastLockedMoveY = e.clientY;
 
             if (lockedDragActive) {
               const hit = pickAt(e.clientX, e.clientY);
               if (hit && hit.movable) {
                 lastLockedGridKey = `${hit.pos.x},${hit.pos.y},${hit.pos.z}`;
+                lastLockedTileId = hit.tileId;
+                lastLockedMoveX = e.clientX;
+                lastLockedMoveY = e.clientY;
                 executeMove3DAt(hit.pos.x, hit.pos.y, hit.pos.z);
                 drawFrame(performance.now());
               }
@@ -5464,6 +5524,7 @@
             wasMulti = true;
             lockedDragActive = false;
             lastLockedGridKey = null;
+            lastLockedTileId = null;
             lastPinch = pinchDist();
             cube3dCanvas.classList.remove('is-dragging');
           }
@@ -5500,18 +5561,26 @@
 
           if (e.pointerId === primaryId && !wasMulti) {
             if (lockedDragActive || cfg.lockRot3d) {
-              // Rotation locked: never rotate camera; optionally glide across movable tiles!
+              // Rotation locked: never rotate camera; require real pointer travel before glide triggers
+              // so holding still on overlapping 3D cells never oscillates a block back and forth.
               if (cfg.glide) {
+                const movedDist = Math.hypot(e.clientX - lastLockedMoveX, e.clientY - lastLockedMoveY);
+                if (movedDist < LOCKED_GLIDE_DIST) return;
+
                 const hit = pickAt(e.clientX, e.clientY);
                 if (hit && hit.movable) {
                   const key = `${hit.pos.x},${hit.pos.y},${hit.pos.z}`;
-                  if (key !== lastLockedGridKey) {
+                  if (hit.tileId !== lastLockedTileId && key !== lastLockedGridKey) {
                     lastLockedGridKey = key;
+                    lastLockedTileId = hit.tileId;
+                    lastLockedMoveX = e.clientX;
+                    lastLockedMoveY = e.clientY;
                     executeMove3DAt(hit.pos.x, hit.pos.y, hit.pos.z);
                     drawFrame(performance.now());
                   }
-                } else {
+                } else if (!hit) {
                   lastLockedGridKey = null;
+                  lastLockedTileId = null;
                 }
               }
               return;
@@ -5546,6 +5615,7 @@
             const wasLocked = lockedDragActive;
             lockedDragActive = false;
             lastLockedGridKey = null;
+            lastLockedTileId = null;
 
             const tapThresh = e.pointerType === 'touch' ? 11 : 8;
             if (!wasLocked && !wasMulti && !ignoredPointers.has(e.pointerId) && maxDrag < tapThresh) {
@@ -6267,6 +6337,12 @@
         cfgPerspVal.textContent = prTxt;
         btnCfgOrtho.classList.toggle('active', cfg.persp3d === 0);
 
+        // Hidden / X-Ray opacity slider sync
+        cfgGhostRange.value = String(cfg.ghostOpacity3d);
+        cfgGhostVal.textContent = `${cfg.ghostOpacity3d}%`;
+        btnCfgGhostZero.classList.toggle('active', cfg.ghostOpacity3d === 0);
+        layers3dWrap.style.setProperty('--filter-dim-opacity', (cfg.ghostOpacity3d / 100).toFixed(2));
+
         // Plane subbar
         planeAxisSeg.querySelectorAll('[data-paxis]').forEach((b) => {
           b.classList.toggle('active', b.dataset.paxis === cfg.planeAxis);
@@ -6863,6 +6939,28 @@
       };
       btnOrthoQuick.addEventListener('click', () => snapOrtho(btnOrthoQuick));
       btnCfgOrtho.addEventListener('click', () => snapOrtho(btnCfgOrtho));
+
+      function applyGhostOpacity3dLive(rawVal) {
+        const v = Math.max(0, Math.min(45, Math.round(parseFloat(rawVal) || 0)));
+        cfg.ghostOpacity3d = v;
+        cfgGhostRange.value = String(v);
+        cfgGhostVal.textContent = `${v}%`;
+        btnCfgGhostZero.classList.toggle('active', v === 0);
+        layers3dWrap.style.setProperty('--filter-dim-opacity', (v / 100).toFixed(2));
+        cube3d.requestFrame();
+      }
+
+      cfgGhostRange.addEventListener('input', (e) => applyGhostOpacity3dLive(e.target.value));
+      cfgGhostRange.addEventListener('change', () => {
+        saveCfg();
+        cfgGhostRange.blur();
+      });
+
+      btnCfgGhostZero.addEventListener('click', () => {
+        applyGhostOpacity3dLive(0);
+        saveCfg();
+        btnCfgGhostZero.blur();
+      });
 
       // Hold-to-Peek Solved Reference button (active ONLY while pressed and held)
       btnPeekSolved3d.addEventListener('pointerdown', (e) => {
