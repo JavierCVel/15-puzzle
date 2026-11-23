@@ -315,6 +315,7 @@
     .stopwatch-panel.st-dnf    { border-color: var(--sig-red); }
     .stopwatch-panel.st-memo   { border-color: var(--sig-amber); }
     .stopwatch-panel.st-exec   { border-color: var(--sig-green); }
+    .stopwatch-panel.st-replay { border-color: var(--sig-amber); }
 
     .stopwatch-top {
       display: flex;
@@ -340,7 +341,8 @@
     .status-group {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
+      flex-shrink: 0;
     }
 
     .status-tag {
@@ -357,6 +359,7 @@
       background: var(--bg-control);
       color: var(--text-secondary);
       border: 1px solid var(--border-hairline);
+      white-space: nowrap;
     }
 
     .status-tag.sig-amber {
@@ -381,12 +384,59 @@
       display: none;
     }
 
-    .telemetry-line {
+    .status-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 20px;
+      padding: 0 7px;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: var(--sig-amber-bg);
+      color: var(--sig-amber);
+      border: 1px solid var(--sig-amber);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 90ms ease, color 90ms ease, border-color 90ms ease;
+    }
+
+    .status-action:active {
+      background: var(--sig-amber);
+      color: #121315;
+    }
+
+    .status-action.is-saved {
+      background: var(--sig-green-bg);
+      color: var(--sig-green);
+      border-color: var(--sig-green);
+      cursor: default;
+    }
+
+    .status-action.hidden {
+      display: none;
+    }
+
+    .telemetry-row {
       margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      height: 18px;
+    }
+
+    .telemetry-line {
+      min-width: 0;
+      flex: 1 1 auto;
       font-family: var(--font-mono);
       font-variant-numeric: tabular-nums;
       font-size: 0.72rem;
       font-weight: 500;
+      line-height: 1;
       letter-spacing: 0.02em;
       color: var(--text-secondary);
       white-space: nowrap;
@@ -402,6 +452,51 @@
     .telemetry-line .sep {
       margin: 0 6px;
       color: var(--text-tertiary);
+    }
+
+    .rec-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 18px;
+      padding: 0 6px;
+      border-radius: 3px;
+      border: 1px solid var(--border-hairline);
+      background: var(--bg-control);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.61rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      flex-shrink: 0;
+      white-space: nowrap;
+      transition: background 90ms ease, border-color 90ms ease, color 90ms ease;
+    }
+
+    .rec-pill:active {
+      background: var(--bg-control-active);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .rec-pill.has-recs {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .rec-pill-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .rec-pill.has-recs .rec-pill-dot {
+      background: var(--sig-amber);
     }
 
     /* 4-Cell Hairline-Divided Compact Stats Strip */
@@ -704,6 +799,7 @@
 
     .act-btn.flex-1 { flex: 1 1 0; }
     .act-btn.flex-2 { flex: 2 1 0; }
+    .act-btn.compact { flex: 0 0 auto; min-width: 50px; padding: 0 12px; }
 
     .act-btn.stark {
       background: var(--btn-stark-bg);
@@ -1393,6 +1489,100 @@
       letter-spacing: 0.06em;
       text-transform: uppercase;
       cursor: pointer;
+    }
+
+    /* Saved Replays Sheet List Rows */
+    .replay-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-hairline);
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      cursor: pointer;
+      transition: background 80ms ease;
+    }
+
+    .replay-row:last-child {
+      border-bottom: none;
+    }
+
+    .replay-row:active {
+      background: var(--bg-control-active);
+    }
+
+    .rep-main {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .rep-top {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .rep-badge {
+      display: inline-flex;
+      align-items: center;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 3px;
+      border: 1px solid var(--border-hairline);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .rep-badge.is-3d {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .rep-badge.is-bld {
+      border-color: var(--sig-amber);
+      color: var(--sig-amber);
+      background: var(--sig-amber-bg);
+    }
+
+    .rep-time {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .replay-row.is-dnf .rep-time {
+      color: var(--sig-red);
+    }
+
+    .rep-meta {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row-icon-btn.play {
+      color: var(--sig-amber);
+      border-color: var(--border-hairline);
+      background: var(--bg-surface);
+    }
+
+    .row-icon-btn.play:active {
+      background: var(--sig-amber);
+      border-color: var(--sig-amber);
+      color: #121315;
     }
 
     /* =========================================================================
@@ -2219,11 +2409,18 @@
         <div class="stopwatch-top">
           <div id="timerReadout" class="timer-readout">0.000</div>
           <div class="status-group">
+            <button id="btnSaveReplay" class="status-action hidden" type="button" title="Save timestamped replay of this solve" aria-label="Save replay">SAVE REC</button>
             <span id="practiceTag" class="status-tag hidden">PRACTICE</span>
             <span id="statusTag" class="status-tag">READY</span>
           </div>
         </div>
-        <div id="telemetryLine" class="telemetry-line">STM <strong>0</strong><span class="sep">&middot;</span><strong>0.00</strong> TPS</div>
+        <div class="telemetry-row">
+          <div id="telemetryLine" class="telemetry-line">STM <strong>0</strong><span class="sep">&middot;</span><strong>0.00</strong> TPS</div>
+          <button id="btnOpenReplays" class="rec-pill" type="button" title="Open saved solve replays" aria-label="Open saved replays">
+            <span class="rec-pill-dot" aria-hidden="true"></span>
+            <span id="recPillLabel">REC</span>
+          </button>
+        </div>
       </div>
 
       <div id="statsBar" class="stats-bar" role="button" tabindex="0" aria-label="Open detailed session statistics">
@@ -2867,6 +3064,32 @@
     </div>
   </aside>
 
+  <!-- SAVED REPLAYS SHEET -->
+  <aside id="replaysSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="replaysTitle" aria-hidden="true">
+    <div class="sheet-head">
+      <h2 id="replaysTitle" class="sheet-title">Saved Solve Replays</h2>
+      <button class="sheet-close" type="button" data-close-sheet aria-label="Close saved replays">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <div class="session-banner">
+        <div class="session-banner-name">TIMESTAMPED INPUT REPLAYS</div>
+        <div id="repStorageInfo" class="storage-line">0 saved replays &middot; 0.00 KB (opt-in save only)</div>
+      </div>
+
+      <div class="tools-row">
+        <span id="replaysLabel" class="sec-label">Saved Replays (0)</span>
+        <button id="btnClearReplays" class="mini-btn danger" type="button">Clear All</button>
+      </div>
+
+      <div id="replaysWrap" class="history-wrap"></div>
+    </div>
+  </aside>
+
   <script>
     (() => {
       'use strict';
@@ -2876,6 +3099,7 @@
          ======================================================================= */
       const CFG_KEY = 'sp2_cfg_v1';
       const SESSION_PREFIX = 'sp2_s_';
+      const REPLAYS_KEY = 'sp2_replays_v1';
       const SIZES = [3, 4, 5, 6, 7, 8];
       const SIZES_3D = [2, 3, 4];
       const MODES = ['std', 'bld_auto', 'bld_sub'];
@@ -3026,6 +3250,18 @@
       let clearTimer = null;
       let confirmingClear = false;
 
+      // Opt-in timestamped solve replay recording & playback state
+      let savedReplays = [];
+      let liveInputs = [];          // Active solve inputs: [[tMs, cellIdx], ...]
+      let pendingReplay = null;     // Completed solve candidate (saved ONLY if user clicks SAVE REC)
+      let pendingReplaySaved = false;
+      let replayRun = null;         // Active playback session state
+      let replayRafId = null;
+      let replaySpeed = 1;          // 0.5 | 1 | 2
+      let preReplayCtx = null;      // Snapshot of user's active session/view before watching a replay
+      let clearReplaysTimer = null;
+      let confirmingClearReplays = false;
+
       // Lazily unlocked Web Audio context
       let audioCtx = null;
 
@@ -3044,9 +3280,12 @@
 
       const stopwatchPanel = document.getElementById('stopwatchPanel');
       const timerReadout = document.getElementById('timerReadout');
+      const btnSaveReplay = document.getElementById('btnSaveReplay');
       const practiceTag = document.getElementById('practiceTag');
       const statusTag = document.getElementById('statusTag');
       const telemetryLine = document.getElementById('telemetryLine');
+      const btnOpenReplays = document.getElementById('btnOpenReplays');
+      const recPillLabel = document.getElementById('recPillLabel');
 
       const statsBar = document.getElementById('statsBar');
       const barPb = document.getElementById('barPb');
@@ -3119,6 +3358,11 @@
       const configSheet = document.getElementById('configSheet');
       const cfgTabs = document.getElementById('cfgTabs');
       const statsSheet = document.getElementById('statsSheet');
+      const replaysSheet = document.getElementById('replaysSheet');
+      const repStorageInfo = document.getElementById('repStorageInfo');
+      const replaysLabel = document.getElementById('replaysLabel');
+      const btnClearReplays = document.getElementById('btnClearReplays');
+      const replaysWrap = document.getElementById('replaysWrap');
 
       const sizeSelector = document.getElementById('sizeSelector');
       const size3dSelector = document.getElementById('size3dSelector');
@@ -4026,7 +4270,16 @@
 
       function saveCfg() {
         try {
-          localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+          const toSave = preReplayCtx
+            ? {
+                ...cfg,
+                is3d: preReplayCtx.is3d,
+                size: preReplayCtx.size,
+                size3d: preReplayCtx.size3d,
+                mode: preReplayCtx.mode
+              }
+            : cfg;
+          localStorage.setItem(CFG_KEY, JSON.stringify(toSave));
         } catch (_) {
           // Ignore
         }
@@ -5943,7 +6196,7 @@
       }
 
       function setVisualState(panelClass, badgeText, badgeSignal) {
-        const stateClasses = ['st-solved', 'st-pb', 'st-dnf', 'st-memo', 'st-exec'];
+        const stateClasses = ['st-solved', 'st-pb', 'st-dnf', 'st-memo', 'st-exec', 'st-replay'];
         stopwatchPanel.className = `stopwatch-panel${panelClass ? ' ' + panelClass : ''}`;
         boardFrame.classList.remove(...stateClasses);
         cube3dFrame.classList.remove(...stateClasses);
@@ -5955,17 +6208,18 @@
         }
         statusTag.textContent = badgeText;
         statusTag.className = `status-tag${badgeSignal ? ' ' + badgeSignal : ''}`;
-        practiceTag.classList.toggle('hidden', !isPractice);
+        practiceTag.classList.toggle('hidden', !isPractice || phase === 'REPLAY');
       }
 
       function renderControls() {
         controlBar.innerHTML = '';
 
-        const makeBtn = (label, cls, onClick) => {
+        const makeBtn = (label, cls, onClick, ariaLabel) => {
           const b = document.createElement('button');
           b.type = 'button';
           b.className = `act-btn ${cls}`;
           b.textContent = label;
+          if (ariaLabel) b.setAttribute('aria-label', ariaLabel);
           b.addEventListener('click', () => {
             onClick();
             b.blur();
@@ -5993,6 +6247,12 @@
         } else if (phase === 'DONE') {
           controlBar.appendChild(makeBtn('Replay', 'flex-1 muted', startReplayCurrent));
           controlBar.appendChild(makeBtn('Next Scramble', 'flex-2 stark', startNewScramble));
+        } else if (phase === 'REPLAY' && replayRun) {
+          controlBar.appendChild(makeBtn('⏮', 'compact muted', restartSavedReplay, 'Restart replay'));
+          const playLabel = replayRun.finished ? '▶ Again' : (replayRun.paused ? '▶ Play' : '⏸ Pause');
+          controlBar.appendChild(makeBtn(playLabel, 'flex-2 stark', toggleReplayPause));
+          controlBar.appendChild(makeBtn(`${replaySpeed}×`, 'flex-1', cycleReplaySpeed, 'Change replay speed'));
+          controlBar.appendChild(makeBtn('Exit', 'flex-1 muted', exitReplayPlayback));
         }
       }
 
@@ -6019,7 +6279,7 @@
       }
 
       function executeMoveAt(r, c) {
-        if (phase === 'DONE' || phase === 'BLD_READY') return;
+        if (phase === 'DONE' || phase === 'BLD_READY' || phase === 'REPLAY') return;
 
         const dist = slideAt(r, c);
         if (dist === 0) return;
@@ -6040,6 +6300,9 @@
           renderControls();
         }
 
+        // Capture timestamped user input in memory (opt-in save only after solve ends)
+        liveInputs.push([Math.max(0, Math.round(now - startTime)), r * cfg.size + c]);
+
         moves += dist;
         renderBoard();
 
@@ -6056,7 +6319,7 @@
       }
 
       function executeMove3DAt(tx, ty, tz) {
-        if (peekSolved3d || phase === 'DONE' || phase === 'BLD_READY') return;
+        if (peekSolved3d || phase === 'DONE' || phase === 'BLD_READY' || phase === 'REPLAY') return;
 
         const res = slide3DAt(tx, ty, tz);
         if (!res) return;
@@ -6075,6 +6338,9 @@
           updateBoardMasking();
           renderControls();
         }
+
+        // Capture timestamped user input in memory (opt-in save only after solve ends)
+        liveInputs.push([Math.max(0, Math.round(now - startTime)), idx3d(tx, ty, tz, cfg.size3d)]);
 
         moves += res.dist;
 
@@ -6127,6 +6393,27 @@
         finalDnf = isDnf;
         phase = 'DONE';
 
+        // Stage candidate replay in memory ONLY — never persisted unless user taps SAVE REC
+        if (liveInputs.length > 0) {
+          pendingReplay = {
+            id: `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+            is3d: cfg.is3d,
+            n: cfg.is3d ? cfg.size3d : cfg.size,
+            mode: cfg.mode,
+            seed: currentSeed >>> 0,
+            timeMs: finalTotalMs,
+            memoMs: isBldMode(cfg.mode) ? Math.round(memoMs) : 0,
+            moves,
+            dnf: isDnf,
+            practice: isPractice,
+            ts: Math.floor(Date.now() / 1000),
+            rec: packReplayInputs(liveInputs)
+          };
+        } else {
+          pendingReplay = null;
+        }
+        pendingReplaySaved = false;
+
         // Unmask board and highlight any misplaced tiles on DNF
         updateBoardMasking();
         renderBoard();
@@ -6141,6 +6428,7 @@
           } else {
             setVisualState('st-solved', 'SOLVED', 'sig-green');
           }
+          updateSaveReplayBtn();
           renderControls();
           return;
         }
@@ -6169,6 +6457,7 @@
           setVisualState('st-solved', 'SOLVED', 'sig-green');
         }
 
+        updateSaveReplayBtn();
         renderControls();
       }
 
@@ -6177,6 +6466,8 @@
          ======================================================================= */
       function loadScrambleState(seed, practiceFlag) {
         stopRaf();
+        stopReplayRaf();
+        replayRun = null;
         activePointers.clear();
         ignoredPointers.clear();
         layerLastCellKey.clear();
@@ -6184,6 +6475,9 @@
 
         currentSeed = seed >>> 0;
         isPractice = practiceFlag;
+        liveInputs = [];
+        pendingReplay = null;
+        pendingReplaySaved = false;
 
         if (cfg.is3d) {
           board3d = generateScramble3DFromSeed(currentSeed);
@@ -6205,6 +6499,7 @@
 
         timerReadout.textContent = '0.000';
         setVisualState('', 'READY', '');
+        updateSaveReplayBtn();
         renderLiveTelemetry(0);
         updateBoardMasking();
         renderBoard();
@@ -6212,6 +6507,10 @@
       }
 
       function startNewScramble() {
+        if (phase === 'REPLAY') {
+          exitReplayPlayback();
+          return;
+        }
         loadScrambleState(randomSeed32(), false);
       }
 
@@ -6220,11 +6519,17 @@
       }
 
       function switchSession(nextSize, nextMode, nextIs3d = cfg.is3d, nextSize3d = cfg.size3d) {
+        const wasReplay = phase === 'REPLAY';
+        if (wasReplay) {
+          stopReplayRaf();
+          replayRun = null;
+          preReplayCtx = null;
+        }
         const sizeChanged = nextSize !== cfg.size;
         const size3dChanged = nextSize3d !== cfg.size3d;
         const modeChanged = nextMode !== cfg.mode;
         const dimChanged = nextIs3d !== cfg.is3d;
-        if (!sizeChanged && !size3dChanged && !modeChanged && !dimChanged) return;
+        if (!wasReplay && !sizeChanged && !size3dChanged && !modeChanged && !dimChanged) return;
 
         cfg.size = nextSize;
         cfg.size3d = nextSize3d;
@@ -6257,6 +6562,462 @@
         updateHeaderAndStatsBar();
         startNewScramble();
         layoutActiveStage();
+      }
+
+      /* =======================================================================
+         OPT-IN TIMESTAMPED SOLVE REPLAYS (STORAGE, SHEET UI & PLAYBACK ENGINE)
+         ======================================================================= */
+      function packReplayInputs(inputs) {
+        const out = new Array(inputs.length);
+        let prevT = 0;
+        for (let i = 0; i < inputs.length; i++) {
+          const t = Math.max(prevT, Math.round(inputs[i][0]));
+          const dt = t - prevT;
+          prevT = t;
+          out[i] = `${dt.toString(36)}.${(inputs[i][1] >>> 0).toString(36)}`;
+        }
+        return out.join(',');
+      }
+
+      function unpackReplayInputs(recStr) {
+        if (!recStr || typeof recStr !== 'string') return [];
+        const parts = recStr.split(',');
+        const out = [];
+        let accT = 0;
+        for (let i = 0; i < parts.length; i++) {
+          const seg = parts[i];
+          const dot = seg.indexOf('.');
+          if (dot <= 0) continue;
+          const dt = parseInt(seg.slice(0, dot), 36);
+          const pos = parseInt(seg.slice(dot + 1), 36);
+          if (!Number.isFinite(dt) || !Number.isFinite(pos) || dt < 0 || pos < 0) continue;
+          accT += dt;
+          out.push([accT, pos]);
+        }
+        return out;
+      }
+
+      function loadSavedReplays() {
+        try {
+          const raw = localStorage.getItem(REPLAYS_KEY);
+          if (!raw) return [];
+          const arr = JSON.parse(raw);
+          if (!Array.isArray(arr)) return [];
+          return arr.filter((r) => r && typeof r === 'object' && typeof r.rec === 'string' && Number.isFinite(r.seed) && Number.isFinite(r.n));
+        } catch (_) {
+          return [];
+        }
+      }
+
+      function saveReplaysToStorage() {
+        try {
+          if (savedReplays.length === 0) {
+            localStorage.removeItem(REPLAYS_KEY);
+          } else {
+            // Keep up to 100 saved replays to stay well within localStorage quota
+            if (savedReplays.length > 100) savedReplays.length = 100;
+            localStorage.setItem(REPLAYS_KEY, JSON.stringify(savedReplays));
+          }
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function updateReplaysPill() {
+        const count = savedReplays.length;
+        recPillLabel.textContent = count > 0 ? `REC ${count}` : 'REC';
+        btnOpenReplays.classList.toggle('has-recs', count > 0);
+      }
+
+      function updateSaveReplayBtn() {
+        const canShow = phase === 'DONE' && pendingReplay !== null;
+        btnSaveReplay.classList.toggle('hidden', !canShow);
+        if (!canShow) return;
+        btnSaveReplay.classList.toggle('is-saved', pendingReplaySaved);
+        btnSaveReplay.textContent = pendingReplaySaved ? 'SAVED' : 'SAVE REC';
+        btnSaveReplay.disabled = pendingReplaySaved;
+      }
+
+      function savePendingReplay() {
+        if (phase !== 'DONE' || !pendingReplay || pendingReplaySaved) return;
+        savedReplays.unshift(pendingReplay);
+        if (saveReplaysToStorage()) {
+          pendingReplaySaved = true;
+          updateSaveReplayBtn();
+          updateReplaysPill();
+          if (replaysSheet.classList.contains('open')) {
+            renderReplaysSheet();
+          }
+        } else {
+          savedReplays.shift();
+        }
+      }
+
+      function resetClearReplaysConfirm() {
+        confirmingClearReplays = false;
+        if (clearReplaysTimer) {
+          clearTimeout(clearReplaysTimer);
+          clearReplaysTimer = null;
+        }
+        btnClearReplays.classList.remove('confirming');
+        btnClearReplays.textContent = 'Clear All';
+      }
+
+      function formatReplayDate(tsSec) {
+        if (!tsSec) return '';
+        const d = new Date(tsSec * 1000);
+        const now = new Date();
+        const sameDay = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        if (sameDay) return `${hh}:${mm}`;
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${months[d.getMonth()]} ${d.getDate()}`;
+      }
+
+      function renderReplaysSheet() {
+        const count = savedReplays.length;
+        let bytes = 0;
+        try {
+          const raw = localStorage.getItem(REPLAYS_KEY);
+          if (raw) bytes = raw.length;
+        } catch (_) {}
+        repStorageInfo.textContent = `${count} saved replay${count === 1 ? '' : 's'} · ${(bytes / 1024).toFixed(2)} KB (opt-in save only)`;
+        replaysLabel.textContent = `Saved Replays (${count})`;
+        btnClearReplays.disabled = count === 0;
+
+        replaysWrap.innerHTML = '';
+        if (count === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'history-empty';
+          empty.textContent = 'NO SAVED REPLAYS · COMPLETE A SOLVE AND TAP SAVE REC';
+          replaysWrap.appendChild(empty);
+          return;
+        }
+
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < count; i++) {
+          const r = savedReplays[i];
+          const row = document.createElement('div');
+          row.className = `replay-row${r.dnf ? ' is-dnf' : ''}`;
+          row.dataset.watchId = r.id;
+
+          const main = document.createElement('div');
+          main.className = 'rep-main';
+
+          const top = document.createElement('div');
+          top.className = 'rep-top';
+
+          const dimBadge = document.createElement('span');
+          dimBadge.className = `rep-badge${r.is3d ? ' is-3d' : ''}`;
+          dimBadge.textContent = r.is3d ? `${r.n}×${r.n}×${r.n}` : `${r.n}×${r.n}`;
+          top.appendChild(dimBadge);
+
+          if (isBldMode(r.mode)) {
+            const bldBadge = document.createElement('span');
+            bldBadge.className = 'rep-badge is-bld';
+            bldBadge.textContent = 'BLD';
+            top.appendChild(bldBadge);
+          }
+
+          if (r.practice) {
+            const pracBadge = document.createElement('span');
+            pracBadge.className = 'rep-badge';
+            pracBadge.textContent = 'PRAC';
+            top.appendChild(pracBadge);
+          }
+
+          const timeEl = document.createElement('span');
+          timeEl.className = 'rep-time';
+          timeEl.textContent = r.dnf ? `DNF (${formatTime(r.timeMs, 3)})` : formatTime(r.timeMs, 3);
+          top.appendChild(timeEl);
+
+          const meta = document.createElement('div');
+          meta.className = 'rep-meta';
+          const execMs = isBldMode(r.mode) ? Math.max(1, r.timeMs - (r.memoMs || 0)) : Math.max(1, r.timeMs);
+          const tps = (r.moves / (execMs / 1000)).toFixed(2);
+          const dateTxt = formatReplayDate(r.ts);
+          const bldSplit = isBldMode(r.mode) ? `MEMO ${formatTime(r.memoMs || 0, 2)} · ` : '';
+          meta.textContent = `${bldSplit}${r.moves} STM · ${tps} TPS${dateTxt ? ' · ' + dateTxt : ''}`;
+
+          main.appendChild(top);
+          main.appendChild(meta);
+
+          const actions = document.createElement('div');
+          actions.className = 'sr-actions';
+
+          const playBtn = document.createElement('button');
+          playBtn.type = 'button';
+          playBtn.className = 'row-icon-btn play';
+          playBtn.dataset.watchId = r.id;
+          playBtn.title = 'Watch replay';
+          playBtn.setAttribute('aria-label', 'Watch replay');
+          playBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>';
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'row-icon-btn del';
+          delBtn.dataset.delReplayId = r.id;
+          delBtn.title = 'Delete replay';
+          delBtn.setAttribute('aria-label', 'Delete replay');
+          delBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+
+          actions.appendChild(playBtn);
+          actions.appendChild(delBtn);
+
+          row.appendChild(main);
+          row.appendChild(actions);
+          frag.appendChild(row);
+        }
+        replaysWrap.appendChild(frag);
+      }
+
+      function stopReplayRaf() {
+        if (replayRafId !== null) {
+          cancelAnimationFrame(replayRafId);
+          replayRafId = null;
+        }
+      }
+
+      function applyReplayStageContext(targetIs3d, targetN, targetMode) {
+        const prevIs3d = cfg.is3d;
+        const prevSize = cfg.size;
+        const prevSize3d = cfg.size3d;
+
+        cfg.is3d = targetIs3d;
+        if (targetIs3d) {
+          cfg.size3d = targetN;
+          if (cfg.planeIndex >= cfg.size3d) cfg.planeIndex = cfg.size3d - 1;
+        } else {
+          cfg.size = targetN;
+        }
+        cfg.mode = targetMode;
+
+        if (!cfg.is3d) {
+          if (prevSize !== cfg.size || tilePoolSize !== cfg.size) {
+            rebuildBoardDOM(cfg.size);
+          } else {
+            applyTilePigments();
+          }
+        } else {
+          buildLayers3DDOM(cfg.size3d);
+          applyLayerPigmentsAndLabels();
+          if (prevSize3d !== cfg.size3d || prevIs3d !== cfg.is3d) {
+            if (cfg.view3d === 'plane') cube3d.snapCameraForPlane(cfg.planeAxis);
+            else cube3d.resetCamera(false);
+          }
+        }
+
+        apply3DViewUI();
+        layoutActiveStage();
+      }
+
+      function renderReplayTelemetry() {
+        if (!replayRun) return;
+        const rec = replayRun.rec;
+        const shownMs = Math.min(rec.timeMs, Math.max(0, replayRun.elapsedMs));
+        timerReadout.textContent = formatTime(shownMs, 3);
+        const dimTxt = rec.is3d ? `${rec.n}×${rec.n}×${rec.n}` : `${rec.n}×${rec.n}`;
+        telemetryLine.innerHTML = `<strong>${dimTxt}</strong><span class="sep">&middot;</span>${replayRun.idx}/${replayRun.inputs.length} IN<span class="sep">&middot;</span><strong>${moves}</strong> STM<span class="sep">&middot;</span><strong>${replaySpeed}×</strong>`;
+      }
+
+      function applyReplayInput(cellIdx) {
+        if (!replayRun) return;
+        const rec = replayRun.rec;
+        if (rec.is3d) {
+          const pos = coords3d(cellIdx, rec.n);
+          const res = slide3DAt(pos.x, pos.y, pos.z);
+          if (!res) return;
+          moves += res.dist;
+          if (cfg.view3d === 'plane' && cfg.planeAuto) {
+            const e = res.newEmpty;
+            const nextIdx = cfg.planeAxis === 'z' ? e.z : (cfg.planeAxis === 'y' ? e.y : e.x);
+            if (nextIdx !== cfg.planeIndex) {
+              cfg.planeIndex = nextIdx;
+            }
+          }
+          if (cfg.view3d !== 'layers') {
+            cube3d.animateSlide(res);
+          }
+          render3DViews();
+          playClick();
+        } else {
+          const r = Math.floor(cellIdx / rec.n);
+          const c = cellIdx % rec.n;
+          const dist = slideAt(r, c);
+          if (dist === 0) return;
+          moves += dist;
+          renderBoard();
+          playClick();
+        }
+      }
+
+      function replayTick(now) {
+        if (phase !== 'REPLAY' || !replayRun || replayRun.paused || replayRun.finished) {
+          replayRafId = null;
+          return;
+        }
+        const dt = Math.min(80, Math.max(0, now - replayRun.lastFrameTs)) * replaySpeed;
+        replayRun.lastFrameTs = now;
+        replayRun.elapsedMs += dt;
+
+        while (replayRun.idx < replayRun.inputs.length && replayRun.inputs[replayRun.idx][0] <= replayRun.elapsedMs) {
+          applyReplayInput(replayRun.inputs[replayRun.idx][1]);
+          replayRun.idx++;
+        }
+
+        const rec = replayRun.rec;
+        if (replayRun.idx >= replayRun.inputs.length && replayRun.elapsedMs >= rec.timeMs) {
+          replayRun.elapsedMs = rec.timeMs;
+          replayRun.finished = true;
+          replayRun.paused = true;
+          replayRafId = null;
+          renderReplayTelemetry();
+          setVisualState(rec.dnf ? 'st-dnf' : 'st-solved', rec.dnf ? 'REPLAY DNF' : 'REPLAY END', rec.dnf ? 'sig-red' : 'sig-green');
+          playFinishTone(rec.dnf);
+          renderControls();
+          return;
+        }
+
+        renderReplayTelemetry();
+        replayRafId = requestAnimationFrame(replayTick);
+      }
+
+      function startSavedReplay(rec) {
+        if (!rec) return;
+        const inputs = unpackReplayInputs(rec.rec);
+        if (inputs.length === 0) return;
+
+        stopRaf();
+        stopReplayRaf();
+        activePointers.clear();
+        ignoredPointers.clear();
+        layerLastCellKey.clear();
+        cube3d.clearAnimations();
+        if (peekSolved3d) setPeekSolved3d(false);
+
+        if (!preReplayCtx) {
+          preReplayCtx = {
+            is3d: cfg.is3d,
+            size: cfg.size,
+            size3d: cfg.size3d,
+            mode: cfg.mode,
+            seed: currentSeed,
+            isPractice
+          };
+        }
+
+        closeSheets();
+        applyReplayStageContext(rec.is3d, rec.n, rec.mode);
+
+        currentSeed = rec.seed >>> 0;
+        if (rec.is3d) {
+          board3d = generateScramble3DFromSeed(currentSeed, rec.n);
+          if (cfg.planeAuto) {
+            const e = getEmpty3D();
+            cfg.planeIndex = cfg.planeAxis === 'z' ? e.z : (cfg.planeAxis === 'y' ? e.y : e.x);
+          }
+        } else {
+          board = generateScrambleFromSeed(rec.n, currentSeed);
+        }
+
+        moves = 0;
+        finalDnf = false;
+        pendingReplay = null;
+        pendingReplaySaved = false;
+        phase = 'REPLAY';
+
+        // Give a crisp 350ms scrambled preview before first input; skip silent BLD memo delay
+        const firstT = inputs[0][0];
+        const startOffsetMs = isBldMode(rec.mode) && firstT > 1000
+          ? Math.max(0, firstT - 500)
+          : -350;
+
+        replayRun = {
+          rec,
+          inputs,
+          idx: 0,
+          elapsedMs: startOffsetMs,
+          lastFrameTs: performance.now(),
+          paused: false,
+          finished: false
+        };
+
+        updateSaveReplayBtn();
+        setVisualState('st-replay', 'REPLAY', 'sig-amber');
+        updateBoardMasking();
+        renderBoard();
+        renderReplayTelemetry();
+        renderControls();
+        replayRafId = requestAnimationFrame(replayTick);
+      }
+
+      function restartSavedReplay() {
+        if (!replayRun) return;
+        startSavedReplay(replayRun.rec);
+      }
+
+      function toggleReplayPause() {
+        if (phase !== 'REPLAY' || !replayRun) return;
+        if (replayRun.finished) {
+          restartSavedReplay();
+          return;
+        }
+        replayRun.paused = !replayRun.paused;
+        if (replayRun.paused) {
+          stopReplayRaf();
+          setVisualState('st-replay', 'PAUSED', 'sig-amber');
+        } else {
+          replayRun.lastFrameTs = performance.now();
+          setVisualState('st-replay', 'REPLAY', 'sig-amber');
+          replayRafId = requestAnimationFrame(replayTick);
+        }
+        renderControls();
+      }
+
+      function cycleReplaySpeed() {
+        if (phase !== 'REPLAY' || !replayRun) return;
+        const speeds = [0.5, 1, 2];
+        const nextIdx = (speeds.indexOf(replaySpeed) + 1) % speeds.length;
+        replaySpeed = speeds[nextIdx];
+        renderReplayTelemetry();
+        renderControls();
+      }
+
+      function exitReplayPlayback() {
+        stopReplayRaf();
+        replayRun = null;
+        const ctx = preReplayCtx;
+        preReplayCtx = null;
+
+        if (ctx) {
+          const needRebuild2d = !ctx.is3d && (ctx.size !== cfg.size || tilePoolSize !== ctx.size);
+          const needCamReset = ctx.is3d && (ctx.size3d !== cfg.size3d || ctx.is3d !== cfg.is3d);
+          cfg.is3d = ctx.is3d;
+          cfg.size = ctx.size;
+          cfg.size3d = ctx.size3d;
+          cfg.mode = ctx.mode;
+          if (cfg.planeIndex >= cfg.size3d) cfg.planeIndex = cfg.size3d - 1;
+
+          if (!cfg.is3d) {
+            if (needRebuild2d) rebuildBoardDOM(cfg.size);
+            else applyTilePigments();
+          } else {
+            buildLayers3DDOM(cfg.size3d);
+            applyLayerPigmentsAndLabels();
+            if (needCamReset) {
+              if (cfg.view3d === 'plane') cube3d.snapCameraForPlane(cfg.planeAxis);
+              else cube3d.resetCamera(false);
+            }
+          }
+          applyConfigUI();
+          updateHeaderAndStatsBar();
+          loadScrambleState(ctx.seed, ctx.isPractice);
+          layoutActiveStage();
+        } else {
+          loadScrambleState(randomSeed32(), false);
+        }
       }
 
       /* =======================================================================
@@ -7062,7 +7823,7 @@
          KEYBOARD SHORTCUTS (ARROWS / WASD + Q/E 3D DEPTH + 1-4 PLANE + X/Y/Z + V PEEK)
          ======================================================================= */
       function anySheetOpen() {
-        return configSheet.classList.contains('open') || statsSheet.classList.contains('open');
+        return configSheet.classList.contains('open') || statsSheet.classList.contains('open') || replaysSheet.classList.contains('open');
       }
 
       window.addEventListener('keyup', (e) => {
@@ -7078,10 +7839,17 @@
           return;
         }
 
-        if (e.key === 'Escape' && anySheetOpen()) {
-          e.preventDefault();
-          closeSheets();
-          return;
+        if (e.key === 'Escape') {
+          if (anySheetOpen()) {
+            e.preventDefault();
+            closeSheets();
+            return;
+          }
+          if (phase === 'REPLAY') {
+            e.preventDefault();
+            exitReplayPlayback();
+            return;
+          }
         }
 
         if (anySheetOpen()) return;
@@ -7097,13 +7865,16 @@
 
         if (k === 'r' || k === 'R') {
           e.preventDefault();
-          startNewScramble();
+          if (phase === 'REPLAY') restartSavedReplay();
+          else startNewScramble();
           return;
         }
 
         if (k === ' ') {
           e.preventDefault();
-          if (phase === 'BLD_READY') {
+          if (phase === 'REPLAY') {
+            toggleReplayPause();
+          } else if (phase === 'BLD_READY') {
             revealBld();
           } else if (phase === 'BLD_MEMO') {
             startBldExecManual();
@@ -7143,7 +7914,7 @@
           }
         }
 
-        if (phase === 'BLD_READY' || phase === 'DONE') return;
+        if (phase === 'BLD_READY' || phase === 'DONE' || phase === 'REPLAY') return;
 
         const dir = cfg.kbDir === 'blank' ? -1 : 1;
 
@@ -7221,10 +7992,71 @@
         configSheet.setAttribute('aria-hidden', 'true');
         statsSheet.classList.remove('open');
         statsSheet.setAttribute('aria-hidden', 'true');
+        replaysSheet.classList.remove('open');
+        replaysSheet.setAttribute('aria-hidden', 'true');
         backupBox.classList.remove('open');
         backupMsg.textContent = '';
         resetClearConfirm();
+        resetClearReplaysConfirm();
       }
+
+      btnSaveReplay.addEventListener('click', () => {
+        savePendingReplay();
+        btnSaveReplay.blur();
+      });
+
+      btnOpenReplays.addEventListener('click', () => {
+        renderReplaysSheet();
+        openSheet(replaysSheet);
+        btnOpenReplays.blur();
+      });
+
+      replaysWrap.addEventListener('click', (e) => {
+        const delBtn = e.target.closest('[data-del-replay-id]');
+        if (delBtn) {
+          e.stopPropagation();
+          const id = delBtn.dataset.delReplayId;
+          const idx = savedReplays.findIndex((r) => r.id === id);
+          if (idx >= 0) {
+            savedReplays.splice(idx, 1);
+            saveReplaysToStorage();
+            if (pendingReplay && pendingReplay.id === id) {
+              pendingReplaySaved = false;
+              updateSaveReplayBtn();
+            }
+            updateReplaysPill();
+            renderReplaysSheet();
+          }
+          return;
+        }
+
+        const watchEl = e.target.closest('[data-watch-id]');
+        if (watchEl) {
+          const id = watchEl.dataset.watchId;
+          const rec = savedReplays.find((r) => r.id === id);
+          if (rec) startSavedReplay(rec);
+        }
+      });
+
+      btnClearReplays.addEventListener('click', () => {
+        if (savedReplays.length === 0) return;
+        if (!confirmingClearReplays) {
+          confirmingClearReplays = true;
+          btnClearReplays.classList.add('confirming');
+          btnClearReplays.textContent = 'Confirm Clear';
+          clearReplaysTimer = setTimeout(resetClearReplaysConfirm, 3500);
+        } else {
+          savedReplays = [];
+          saveReplaysToStorage();
+          if (pendingReplay) {
+            pendingReplaySaved = false;
+            updateSaveReplayBtn();
+          }
+          resetClearReplaysConfirm();
+          updateReplaysPill();
+          renderReplaysSheet();
+        }
+      });
 
       btnSessionTrigger.addEventListener('click', () => {
         setConfigTab('session');
@@ -7407,6 +8239,7 @@
           const rec = activeSolves[idx];
           if (rec) {
             closeSheets();
+            if (phase === 'REPLAY') exitReplayPlayback();
             loadScrambleState(rec.seed, true);
           }
           return;
@@ -7477,6 +8310,8 @@
       }
 
       loadActiveSession();
+      savedReplays = loadSavedReplays();
+      updateReplaysPill();
       rebuildBoardDOM(cfg.size);
       buildLayers3DDOM();
       applyConfigUI();
